@@ -218,19 +218,6 @@ export const offerings: Offering[] = [
 		ctaText: "Book IT support",
 		ctaUrl: "/services#booking",
 	},
-	{
-		id: "technical-consulting",
-		title: "Technical Consulting",
-		description:
-			"Advisory sessions to reduce technical risk and set a clear roadmap before development.",
-		features: [
-			"Architecture review",
-			"MVP planning",
-			"Delivery and hiring guidance",
-		],
-		ctaText: "Schedule consultation",
-		ctaUrl: "/services#booking",
-	},
 ];
 
 export const workflowStages: WorkflowStage[] = [

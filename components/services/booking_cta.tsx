@@ -1,11 +1,39 @@
-// Booking CTA (Call-to-Action) Content Spec
+import Link from "next/link";
+import { CalendarDays, MessageSquareText } from "lucide-react";
 
-// title "Booking CTA title — H2 on detail page"
-// description "Booking CTA description — displayed below title"
-// ctaText "Call-to-action text"
-// ctaUrl "Link for the call-to-action button"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { bookingCta } from "@/lib/placeholder-data";
 
-// Form
-// Name, Email, Offering (dropdown), Budget, Timeline (dropdown), Description — validated with Zod
-// Submission, admin message and email (nodemailer)
-// Calendly embed
+export function BookingCta() {
+	return (
+		<section id="booking">
+			<Card className="border-border/80 bg-muted/20">
+				<CardHeader className="space-y-2">
+					<CardTitle className="text-xl sm:text-2xl">{bookingCta.title}</CardTitle>
+					<p className="text-sm leading-6 text-muted-foreground">{bookingCta.description}</p>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+						<div className="inline-flex items-center gap-2">
+							<CalendarDays className="size-4 text-foreground" />
+							<span>30-minute discovery call</span>
+						</div>
+						<div className="inline-flex items-center gap-2">
+							<MessageSquareText className="size-4 text-foreground" />
+							<span>Clear scope, timeline, and next steps</span>
+						</div>
+					</div>
+					<div className="flex flex-col gap-2 sm:flex-row">
+						<Button asChild>
+							<Link href={bookingCta.ctaUrl}>{bookingCta.ctaText}</Link>
+						</Button>
+						<Button asChild variant="outline">
+							<Link href="/">Back to Home</Link>
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+		</section>
+	);
+}

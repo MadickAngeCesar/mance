@@ -1,13 +1,80 @@
-// Project Content Spec
+import Image from "next/image";
+import Link from "next/link";
+import { ExternalLink, Github } from "lucide-react";
 
-// title "Project name — displayed as H1 on detail page"
-// slug "Auto-generated from title — used in /lab/[slug]"
-// summary "One-liner for cards and SEO meta description"
-// content "Full MDX/HTML body — Tiptap editor — problem, solution, architecture, lessons"
-// stack "Tech tags: ["Next.js", "PostgreSQL", "Prisma"] — displayed as badges"
-// coverImageUrl "Hero image — UploadThing URL"
-// screenshotUrls "Gallery images (up to 6)"
-// demoUrl "Live demo link"
-// repoUrl "GitHub repository link"
-// featured "Pinned to top of /lab index"
-// views "Incremented on page load via Server Action"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { LabProject } from "@/lib/definitions";
+
+type ProjectSpecProps = {
+	project: LabProject;
+};
+
+export function ProjectSpec({ project }: ProjectSpecProps) {
+	return (
+		<article className="space-y-6">
+			<header className="space-y-4">
+				<div className="flex flex-wrap items-center gap-2">
+					<Badge variant="outline" className="rounded-full">
+						Project
+					</Badge>
+					{project.featured ? <Badge className="rounded-full">Featured</Badge> : null}
+				</div>
+				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.title}</h1>
+				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{project.summary}</p>
+				<div className="flex flex-wrap gap-1.5">
+					{project.stack.map((tech) => (
+						<Badge key={`${project.id}-${tech}`} variant="secondary" className="rounded-full">
+							{tech}
+						</Badge>
+					))}
+				</div>
+				<div className="flex flex-wrap gap-2">
+					{project.demoUrl ? (
+						<Button asChild>
+							<Link href={project.demoUrl} target="_blank" rel="noreferrer noopener">
+								Live Demo <ExternalLink className="size-3.5" />
+							</Link>
+						</Button>
+					) : null}
+					{project.repoUrl ? (
+						<Button asChild variant="outline">
+							<Link href={project.repoUrl} target="_blank" rel="noreferrer noopener">
+								Source Code <Github className="size-3.5" />
+							</Link>
+						</Button>
+					) : null}
+				</div>
+			</header>
+
+			<div className="relative h-64 w-full overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-96">
+				<Image src={project.coverImageUrl} alt={`${project.title} cover image`} fill className="object-cover" priority />
+			</div>
+
+			<Card className="border-border/80">
+				<CardContent className="pt-1">
+					<p className="text-sm leading-7 text-muted-foreground sm:text-base">{project.content}</p>
+				</CardContent>
+			</Card>
+
+			{project.screenshotUrls.length ? (
+				<section className="space-y-3">
+					<h2 className="text-xl font-semibold tracking-tight">Screenshots</h2>
+					<div className="grid gap-3 sm:grid-cols-2">
+						{project.screenshotUrls.map((screenshot) => (
+							<div key={screenshot} className="relative h-52 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-64">
+								<Image
+									src={screenshot}
+									alt={`${project.title} screenshot`}
+									fill
+									className="object-cover"
+								/>
+							</div>
+						))}
+					</div>
+				</section>
+			) : null}
+		</article>
+	);
+}

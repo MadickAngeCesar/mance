@@ -88,7 +88,7 @@ export function Contact() {
             <CardTitle>Send a Message</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-2">
+            <form className="flex flex-col justify-between gap-4 h-full" action="mailto:madickangecesar59@gmail.com" method="POST">
               <Input name="name" placeholder="Your name" required />
               <Input
                 name="email"
@@ -132,7 +132,7 @@ export function Contact() {
           </CardContent>
         </Card>
 
-        <div className="grid content-start gap-3 sm:grid-cols-2 xl:grid-cols-1">
+        <div className="grid content-start gap-3 sm:grid-cols-3 xl:grid-cols-1">
           <Card>
             <CardHeader>
               <CardTitle>Contact Details</CardTitle>

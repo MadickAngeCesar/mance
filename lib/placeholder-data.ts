@@ -348,7 +348,7 @@ export const labProjects: LabProject[] = [
 		content:
 			"This platform consolidates personal brand presentation, lead capture, and portfolio publishing in one modern stack.",
 		stack: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL"],
-		coverImageUrl: "/images/lab/portfolio-platform-cover.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		screenshotUrls: [
 			"/images/lab/portfolio-platform-1.jpg",
 			"/images/lab/portfolio-platform-2.jpg",
@@ -368,7 +368,7 @@ export const labProjects: LabProject[] = [
 		content:
 			"Built to help administrators track appointments, message flows, and daily operational indicators.",
 		stack: ["React", "Node.js", "Prisma", "PostgreSQL"],
-		coverImageUrl: "/images/lab/clinic-ops-cover.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		screenshotUrls: ["/images/lab/clinic-ops-1.jpg"],
 		featured: false,
 		views: 563,
@@ -384,7 +384,7 @@ export const labProjects: LabProject[] = [
 		content:
 			"A migration project covering data model redesign, role-based dashboards, validation-first forms, and reporting pipelines for operations leadership.",
 		stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL"],
-		coverImageUrl: "/images/lab/portfolio-platform-cover.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		screenshotUrls: ["/images/lab/portfolio-platform-1.jpg"],
 		demoUrl: "https://mance.dev",
 		repoUrl: "https://github.com/mance-dev/portfolio-platform",
@@ -402,7 +402,7 @@ export const labProjects: LabProject[] = [
 		content:
 			"This placeholder project demonstrates the expected structure for new portfolio entries: context, challenge, implementation summary, and technical outcomes.",
 		stack: ["Next.js", "TypeScript", "Tailwind CSS"],
-		coverImageUrl: "/images/lab/portfolio-platform-cover.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		screenshotUrls: ["/images/lab/portfolio-platform-2.jpg"],
 		demoUrl: "https://mance.dev",
 		repoUrl: "https://github.com/mance-dev/portfolio-platform",
@@ -423,7 +423,7 @@ export const labArticles: LabArticle[] = [
 			"Patterns for combining schema validation, server actions, and clean user feedback in modern web apps.",
 		content:
 			"This article walks through practical form architecture with Zod, robust error handling, and user-first UX patterns.",
-		coverImageUrl: "/images/lab/articles/reliable-forms.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		tags: ["nextjs", "zod", "forms"],
 		views: 412,
 		featured: true,
@@ -438,7 +438,7 @@ export const labArticles: LabArticle[] = [
 			"How to rename a technical brand, migrate domains, and keep SEO continuity.",
 		content:
 			"A behind-the-scenes review of naming strategy, domain changes from mac.dev to mance.dev, and content updates.",
-		coverImageUrl: "/images/lab/articles/brand-migration.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		tags: ["branding", "seo", "domain"],
 		views: 277,
 		featured: false,
@@ -453,7 +453,7 @@ export const labArticles: LabArticle[] = [
 			"A practical framework for incident response, escalation paths, and maintenance routines in small organizations.",
 		content:
 			"This reflection outlines how to design support workflows, define SLAs, and document repeatable troubleshooting checklists for long-term reliability.",
-		coverImageUrl: "/images/lab/articles/reliable-forms.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		tags: ["it-support", "operations", "documentation"],
 		views: 198,
 		featured: false,
@@ -468,7 +468,7 @@ export const labArticles: LabArticle[] = [
 			"Placeholder article entry to preview typography, cover media, and content structure on the lab slug page.",
 		content:
 			"Use this as a draft template for future technical writing. Replace this content with final sections, examples, and references once the article is ready.",
-		coverImageUrl: "/images/lab/articles/brand-migration.jpg",
+		coverImageUrl: "/images/mac_tech_logo.png",
 		tags: ["placeholder", "article", "preview"],
 		views: 94,
 		featured: false,

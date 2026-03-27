@@ -1,3 +1,152 @@
-// Form to create and edit testimonials in the dashboard services page
-// With fields for name, role, company, testimonial text, and image upload.
-// Validated with Zod and integrated with the backend API for submission and editing.
+"use client";
+
+import type { ReactNode } from "react";
+import { useMemo } from "react";
+import { Plus, Save } from "lucide-react";
+
+import { useLanguage } from "@/components/i18n/language-provider";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import type { TestimonialItem } from "@/lib/definitions";
+import { labProjects } from "@/lib/placeholder-data";
+
+type TestimonialFormProps = {
+	mode?: "create" | "edit";
+	initialTestimonial?: TestimonialItem;
+	trigger?: ReactNode;
+};
+
+export function TestimonialForm({ mode = "create", initialTestimonial, trigger }: TestimonialFormProps) {
+	const { language } = useLanguage();
+	const isEditMode = mode === "edit";
+	const copy = useMemo(() => {
+		if (language === "FR") {
+			return {
+				create: "Creer un temoignage",
+				title: isEditMode ? "Modifier le temoignage" : "Creer un temoignage",
+				description: "Ajoutez une preuve sociale avec contexte client et impact du projet.",
+				name: "Nom du client",
+				role: "Role et entreprise",
+				rating: "Evaluation",
+				avatar: "URL avatar",
+				project: "Projet client (optionnel)",
+				projectNone: "Aucun projet selectionne",
+				quote: "Citation",
+				save: isEditMode ? "Mettre a jour le temoignage" : "Enregistrer le temoignage",
+			};
+		}
+
+		return {
+			create: "Create Testimonial",
+			title: isEditMode ? "Edit Testimonial" : "Create Testimonial",
+			description: "Capture social proof with role/company context and delivery impact notes.",
+			name: "Client Name",
+			role: "Role and Company",
+			rating: "Rating",
+			avatar: "Avatar Image URL",
+			project: "Client Project (optional)",
+			projectNone: "No linked project",
+			quote: "Quote",
+			save: isEditMode ? "Update Testimonial" : "Save Testimonial",
+		};
+	}, [isEditMode, language]);
+
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				{trigger ?? (
+					<Button type="button">
+						<Plus className="size-4" />
+						{copy.create}
+					</Button>
+				)}
+			</DialogTrigger>
+			<DialogContent className="max-w-xl p-0">
+				<DialogHeader className="border-b border-border/70 px-4 pt-4 pb-3">
+					<DialogTitle className="text-base">{copy.title}</DialogTitle>
+					<DialogDescription>{copy.description}</DialogDescription>
+				</DialogHeader>
+				<div className="max-h-[70vh] space-y-3 overflow-y-auto px-4 pt-4">
+					<div className="grid gap-3 md:grid-cols-2">
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-name" className="text-xs font-medium text-muted-foreground">
+							{copy.name}
+						</label>
+						<Input id="testimonial-name" placeholder="Sarah Jean" defaultValue={initialTestimonial?.clientName} />
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-role" className="text-xs font-medium text-muted-foreground">
+							{copy.role}
+						</label>
+						<Input id="testimonial-role" placeholder="Founder, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompany} />
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-rating" className="text-xs font-medium text-muted-foreground">
+							{copy.rating}
+						</label>
+						<select id="testimonial-rating" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={String(initialTestimonial?.rating ?? 5)}>
+							<option value="5">{language === "FR" ? "5 etoiles" : "5 stars"}</option>
+							<option value="4">{language === "FR" ? "4 etoiles" : "4 stars"}</option>
+							<option value="3">{language === "FR" ? "3 etoiles" : "3 stars"}</option>
+						</select>
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-image" className="text-xs font-medium text-muted-foreground">
+							{copy.avatar}
+						</label>
+						<Input id="testimonial-image" placeholder="/images/clients/sarah-jean.jpg" defaultValue={initialTestimonial?.avatarUrl} />
+					</div>
+					<div className="space-y-1.5 md:col-span-2">
+						<label htmlFor="testimonial-project" className="text-xs font-medium text-muted-foreground">
+							{copy.project}
+						</label>
+						<select id="testimonial-project" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={initialTestimonial?.projectReference ?? ""}>
+							<option value="">{copy.projectNone}</option>
+							{labProjects.map((project) => (
+								<option key={project.id} value={project.title}>
+									{project.title}
+								</option>
+							))}
+						</select>
+					</div>
+					<div className="space-y-1.5 md:col-span-2">
+						<label htmlFor="testimonial-text" className="text-xs font-medium text-muted-foreground">
+							{copy.quote}
+						</label>
+						<Textarea id="testimonial-text" placeholder="MAC TECH translated our rough idea into a complete platform..." rows={4} defaultValue={initialTestimonial?.text} />
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-date" className="text-xs font-medium text-muted-foreground">
+							{language === "FR" ? "Date" : "Date"}
+						</label>
+						<Input id="testimonial-date" placeholder="January 2025" defaultValue={initialTestimonial?.date} />
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-project-reference" className="text-xs font-medium text-muted-foreground">
+							{language === "FR" ? "Reference projet" : "Project Reference"}
+						</label>
+						<Input id="testimonial-project-reference" placeholder="Project: Service Business Platform" defaultValue={initialTestimonial?.projectReference} />
+					</div>
+				</div>
+				</div>
+
+				<DialogFooter>
+					<Button type="button">
+						<Save className="size-4" />
+						{copy.save}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}

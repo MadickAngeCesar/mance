@@ -3,18 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { ChevronDown, Languages, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
+import { useLanguage } from "@/components/i18n/language-provider";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
 	Sheet,
 	SheetContent,
@@ -25,14 +20,14 @@ import {
 } from "@/components/ui/sheet";
 
 const navLinks = [
-	{ label: "Home", href: "/" },
-	{ label: "Services", href: "/services" },
-	{ label: "Lab", href: "/lab" },
-	{ label: "Contact", href: "/#contact" },
+	{ label: { EN: "Home", FR: "Accueil" }, href: "/" },
+	{ label: { EN: "Services", FR: "Services" }, href: "/services" },
+	{ label: { EN: "Lab", FR: "Lab" }, href: "/lab" },
+	{ label: { EN: "Contact", FR: "Contact" }, href: "/#contact" },
 ];
 
 export function Navbar() {
-	const [language, setLanguage] = useState<"EN" | "FR">("EN");
+	const { language } = useLanguage();
 	const pathname = usePathname();
 
 	const isActive = (href: string) => {
@@ -66,28 +61,16 @@ export function Navbar() {
 							)}
 							aria-current={isActive(link.href) ? "page" : undefined}
 						>
-							{link.label}
+							{link.label[language]}
 						</Link>
 					))}
 				</nav>
 
 				<div className="flex items-center gap-2">
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="sm" className="gap-1.5">
-								<Languages className="size-3.5" />
-								{language}
-								<ChevronDown className="size-3.5" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-36">
-							<DropdownMenuItem onSelect={() => setLanguage("EN")}>English</DropdownMenuItem>
-							<DropdownMenuItem onSelect={() => setLanguage("FR")}>Francais</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<LanguageSwitcher />
 
 					<Button asChild size="sm" className="hidden md:inline-flex">
-						<Link href="/#contact">Start a Project</Link>
+						<Link href="/#contact">{language === "FR" ? "Demarrer un projet" : "Start a Project"}</Link>
 					</Button>
 
 					<Sheet>
@@ -98,8 +81,8 @@ export function Navbar() {
 						</SheetTrigger>
 						<SheetContent side="right" className="w-72">
 							<SheetHeader>
-								<SheetTitle>Navigation</SheetTitle>
-								<SheetDescription>Quick links to the core sections of the portfolio.</SheetDescription>
+								<SheetTitle>{language === "FR" ? "Navigation" : "Navigation"}</SheetTitle>
+								<SheetDescription>{language === "FR" ? "Liens rapides vers les sections principales du portfolio." : "Quick links to the core sections of the portfolio."}</SheetDescription>
 							</SheetHeader>
 							<nav className="grid gap-2 px-4 pb-4">
 								{navLinks.map((link) => (
@@ -114,11 +97,11 @@ export function Navbar() {
 										)}
 										aria-current={isActive(link.href) ? "page" : undefined}
 									>
-										{link.label}
+										{link.label[language]}
 									</Link>
 								))}
 								<Button asChild className="mt-2">
-									<Link href="/#contact">Start a Project</Link>
+									<Link href="/#contact">{language === "FR" ? "Demarrer un projet" : "Start a Project"}</Link>
 								</Button>
 							</nav>
 						</SheetContent>

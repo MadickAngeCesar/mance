@@ -15,7 +15,7 @@ export function Footer() {
 	} as const;
 
 	return (
-		<footer className="mt-14 border-t border-border/70 bg-card/60">
+		<footer className="mt-16 border-t border-border/70 bg-card/60">
 			<div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:flex lg:items-start lg:justify-between lg:px-8">
 				<div className="space-y-3">
 					<div className="inline-flex items-center gap-2">
@@ -24,7 +24,7 @@ export function Footer() {
 							alt="MAC TECH logo"
 							width={28}
 							height={28}
-							className="rounded-md"
+							className="h-auto w-auto rounded-md"
 						/>
 						<p className="text-base font-semibold">MAC TECH</p>
 					</div>
@@ -54,12 +54,12 @@ export function Footer() {
 				<div className="space-y-2 lg:justify-self-end lg:text-right">
 					<p className="text-sm font-semibold">Resources</p>
 					<div className="grid gap-1 text-sm text-muted-foreground">
-						<Link href="/MadickAngeCesar_FullStack_Resume_EN.pdf" download>
+						<Link href="/MadickAngeCesar_FullStack_Resume_EN.pdf" download className="transition-colors hover:text-foreground">
 							Resume (PDF)
 						</Link>
-						<Link href="/sign-in">Dashboard</Link>
-						<Link href="/lab">Portfolio Lab</Link>
-						<Link href="/services">Service Details</Link>
+						<Link href="/sign-in" className="transition-colors hover:text-foreground">Dashboard</Link>
+						<Link href="/lab" className="transition-colors hover:text-foreground">Portfolio Lab</Link>
+						<Link href="/services" className="transition-colors hover:text-foreground">Service Details</Link>
 					</div>
 				</div>
 			</div>

@@ -5,21 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { offerings } from "@/lib/placeholder-data";
 
+const serviceCategoryById: Record<string, string> = {
+	"web-product-development": "Web Development",
+	"it-support-operations": "IT Support and Consulting",
+	"digital-transformation": "Digital Transformation",
+	"technical-writing": "Technical Writing",
+};
+
 export function OfferingsCards() {
 	return (
 		<section className="space-y-5" id="offerings">
-			<div>
+			<div className="text-center">
 				<h2 className="text-2xl font-semibold tracking-tight">Service Offerings</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Delivery models designed for business outcomes and reliability.</p>
+				<p className="mt-1 text-sm text-muted-foreground">
+					Web development, IT support and consulting, digital transformation, and technical writing.
+				</p>
 			</div>
 
-			<div className="grid gap-4 sm:grid-cols-2">
+			<div className="grid gap-4 sm:grid-cols-3">
 				{offerings.map((offering) => (
 					<Card key={offering.id} className="h-full border-border/80">
-						<CardHeader className="space-y-2">
-							<Badge variant="outline" className="w-fit rounded-full">
-								Service
-							</Badge>
+						<CardHeader className="space-y-2 text-center">
 							<CardTitle>{offering.title}</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">

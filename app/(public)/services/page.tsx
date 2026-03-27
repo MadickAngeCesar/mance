@@ -13,11 +13,12 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <section className="space-y-4">
+      <section className="space-y-4 text-center justify-center rounded-2xl border border-border/70 bg-card/40 p-6 sm:p-8">
+        <p className="text-xs font-medium uppercase tracking-wide text-primary">Professional Services</p>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Services</h1>
-        <p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
-          I help organizations ship dependable web products, improve technical operations, and make better delivery
-          decisions with clear execution plans.
+        <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+          I provide web development, IT support and consulting, digital transformation, and technical writing, with a
+          clear workflow from consultation to launch and support.
         </p>
       </section>
 

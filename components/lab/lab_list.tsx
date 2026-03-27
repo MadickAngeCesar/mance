@@ -1,80 +1,316 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
 import { LabCard } from "@/components/lab/lab_card";
+import { Input } from "@/components/ui/input";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { labArticles, labProjects } from "@/lib/placeholder-data";
 
+type LabFilter = "all" | "projects" | "articles" | "case-studies";
+type LabSort = "recent" | "views" | "alpha";
+
+type CombinedLabItem = {
+	id: string;
+	title: string;
+	summary: string;
+	href: string;
+	coverImageUrl: string;
+	tags: string[];
+	kind: "project" | "article";
+	featured: boolean;
+	views: number;
+	meta: string;
+	publishedAt?: string;
+	isCaseStudy: boolean;
+};
+
+const filterOptions: Array<{ value: LabFilter; label: string }> = [
+	{ value: "all", label: "All" },
+	{ value: "projects", label: "Projects" },
+	{ value: "articles", label: "Articles" },
+	{ value: "case-studies", label: "Case Studies" },
+];
+
 export function LabList() {
-	const featuredProjects = labProjects.filter((project) => project.featured);
+	const [query, setQuery] = useState("");
+	const [filter, setFilter] = useState<LabFilter>("all");
+	const [sortBy, setSortBy] = useState<LabSort>("recent");
+	const [page, setPage] = useState(1);
+	const [isDesktop, setIsDesktop] = useState(false);
+
+	useEffect(() => {
+		const mediaQuery = window.matchMedia("(min-width: 1024px)");
+		const handleViewportChange = () => setIsDesktop(mediaQuery.matches);
+
+		handleViewportChange();
+		mediaQuery.addEventListener("change", handleViewportChange);
+
+		return () => mediaQuery.removeEventListener("change", handleViewportChange);
+	}, []);
+
+	const itemsPerPage = isDesktop ? 6 : 4;
+
+	const featuredProjects = useMemo(
+		() => labProjects.filter((project) => project.featured),
+		[]
+	);
+
+	const featuredProject = useMemo(() => {
+		return [...featuredProjects].sort((a, b) => {
+			const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+			const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+			return bTime - aTime;
+		})[0];
+	}, [featuredProjects]);
+
+	const featuredArticle = useMemo(
+		() => labArticles.find((article) => article.featured),
+		[]
+	);
+
+	const allItems = useMemo<CombinedLabItem[]>(() => {
+		const projectItems = labProjects.map((project) => ({
+			id: project.id,
+			title: project.title,
+			summary: project.summary,
+			href: `/lab/${project.slug}`,
+			coverImageUrl: project.coverImageUrl,
+			tags: project.tags,
+			kind: "project" as const,
+			featured: project.featured,
+			views: project.views,
+			meta: "Project",
+			publishedAt: project.publishedAt,
+			isCaseStudy: project.tags.includes("case-study"),
+		}));
+
+		const articleItems = labArticles.map((article) => ({
+			id: article.id,
+			title: article.title,
+			summary: article.excerpt,
+			href: `/lab/${article.slug}`,
+			coverImageUrl: article.coverImageUrl,
+			tags: article.tags,
+			kind: "article" as const,
+			featured: Boolean(article.featured),
+			views: article.views,
+			meta: article.category,
+			publishedAt: article.publishedAt,
+			isCaseStudy: article.category.toLowerCase() === "case study",
+		}));
+
+		return [...projectItems, ...articleItems];
+	}, []);
+
+	const filteredItems = useMemo(() => {
+		const normalizedQuery = query.trim().toLowerCase();
+
+		const byFilter = allItems.filter((item) => {
+			if (filter === "projects") return item.kind === "project";
+			if (filter === "articles") return item.kind === "article";
+			if (filter === "case-studies") return item.isCaseStudy;
+			return true;
+		});
+
+		const bySearch = byFilter.filter((item) => {
+			if (!normalizedQuery) return true;
+			const haystack = `${item.title} ${item.summary} ${item.tags.join(" ")} ${item.meta}`.toLowerCase();
+			return haystack.includes(normalizedQuery);
+		});
+
+		return bySearch.sort((a, b) => {
+			if (sortBy === "views") return b.views - a.views;
+			if (sortBy === "alpha") return a.title.localeCompare(b.title);
+
+			const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+			const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+			return bTime - aTime;
+		});
+	}, [allItems, filter, query, sortBy]);
+
+	const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+	const safePage = Math.min(page, totalPages);
+	const paginatedItems = filteredItems.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
+
+	const changePage = (nextPage: number) => {
+		setPage(Math.min(Math.max(nextPage, 1), totalPages));
+	};
+
+	const onFilterChange = (nextFilter: LabFilter) => {
+		setFilter(nextFilter);
+		setPage(1);
+	};
+
+	const onSortChange = (nextSort: LabSort) => {
+		setSortBy(nextSort);
+		setPage(1);
+	};
+
+	const onQueryChange = (value: string) => {
+		setQuery(value);
+		setPage(1);
+	};
 
 	return (
 		<section className="space-y-8">
-			<div className="space-y-5">
-				<div>
-					<h2 className="text-2xl font-semibold tracking-tight">Featured Projects</h2>
-					<p className="mt-1 text-sm text-muted-foreground">A shortlist of projects with clear outcomes and production context.</p>
-				</div>
-				<div className="grid gap-4 md:grid-cols-2">
-					{featuredProjects.map((project) => (
+			<div className="grid items-start gap-6 sm:grid-cols-2">
+				{featuredProject ? (
+					<div className="space-y-3">
+						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Project</h3>
 						<LabCard
-							key={project.id}
-							title={project.title}
-							summary={project.summary}
-							href={`/lab/${project.slug}`}
-							coverImageUrl={project.coverImageUrl}
-							tags={project.tags}
+							title={featuredProject.title}
+							summary={featuredProject.summary}
+							href={`/lab/${featuredProject.slug}`}
+							coverImageUrl={featuredProject.coverImageUrl}
+							tags={featuredProject.tags}
 							kind="project"
-							featured={project.featured}
-							views={project.views}
+							featured={featuredProject.featured}
+							views={featuredProject.views}
 							meta="Project"
+							publishedAt={featuredProject.publishedAt}
 						/>
-					))}
-				</div>
+					</div>
+				) : null}
+
+				{featuredArticle ? (
+					<div className="space-y-3">
+						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Article</h3>
+						<LabCard
+							title={featuredArticle.title}
+							summary={featuredArticle.excerpt}
+							href={`/lab/${featuredArticle.slug}`}
+							coverImageUrl={featuredArticle.coverImageUrl}
+							tags={featuredArticle.tags}
+							kind="article"
+							featured={true}
+							views={featuredArticle.views}
+							meta={featuredArticle.category}
+							publishedAt={featuredArticle.publishedAt}
+						/>
+					</div>
+				) : null}
 			</div>
 
 			<Separator />
 
 			<div className="space-y-5">
-				<div>
-					<h2 className="text-2xl font-semibold tracking-tight">All Projects</h2>
-					<p className="mt-1 text-sm text-muted-foreground">Architecture, implementation decisions, and delivery notes.</p>
+				<div className="text-center">
+					<h2 className="text-2xl font-semibold tracking-tight">Browse Projects and Articles</h2>
+					<p className="mt-1 text-sm text-muted-foreground">
+						Use search, filters, and sorting to navigate case studies, projects, and technical writing.
+					</p>
 				</div>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{labProjects.map((project) => (
-						<LabCard
-							key={project.id}
-							title={project.title}
-							summary={project.summary}
-							href={`/lab/${project.slug}`}
-							coverImageUrl={project.coverImageUrl}
-							tags={project.tags}
-							kind="project"
-							featured={project.featured}
-							views={project.views}
-							meta="Project"
-						/>
-					))}
-				</div>
-			</div>
 
-			<div className="space-y-5">
-				<div>
-					<h2 className="text-2xl font-semibold tracking-tight">Articles</h2>
-					<p className="mt-1 text-sm text-muted-foreground">Engineering notes, case studies, and platform migration lessons.</p>
+				<div className="grid gap-3 rounded-xl border border-border/70 bg-card/40 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+					<Input
+						value={query}
+						onChange={(event) => onQueryChange(event.target.value)}
+						placeholder="Search title, tags, or excerpt"
+					/>
+					<select
+						value={sortBy}
+						onChange={(event) => onSortChange(event.target.value as LabSort)}
+						className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+					>
+						<option value="recent">Sort: Recent</option>
+						<option value="views">Sort: Most viewed</option>
+						<option value="alpha">Sort: Alphabetical</option>
+					</select>
 				</div>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{labArticles.map((article) => (
+
+				<div className="flex flex-wrap justify-center gap-2">
+					{filterOptions.map((option) => (
+						<button
+							key={option.value}
+							type="button"
+							onClick={() => onFilterChange(option.value)}
+							className={cn(
+								"rounded-full border px-3 py-1.5 text-sm transition-colors",
+								filter === option.value
+									? "border-primary/50 bg-primary/10 text-foreground"
+									: "border-border/70 text-muted-foreground hover:text-foreground"
+							)}
+						>
+							{option.label}
+						</button>
+					))}
+				</div>
+
+				<div className="grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+					{paginatedItems.map((item) => (
 						<LabCard
-							key={article.id}
-							title={article.title}
-							summary={article.excerpt}
-							href={`/lab/${article.slug}`}
-							coverImageUrl={article.coverImageUrl}
-							tags={article.tags}
-							kind="article"
-							views={article.views}
-							meta={article.category}
+							key={item.id}
+							title={item.title}
+							summary={item.summary}
+							href={item.href}
+							coverImageUrl={item.coverImageUrl}
+							tags={item.tags}
+							kind={item.kind}
+							featured={item.featured}
+							views={item.views}
+							meta={item.meta}
+							publishedAt={item.publishedAt}
 						/>
 					))}
 				</div>
+
+				{paginatedItems.length === 0 ? (
+					<p className="text-sm text-muted-foreground">No items match your current search and filters.</p>
+				) : null}
+
+				<Pagination>
+					<PaginationContent>
+						<PaginationItem>
+							<PaginationPrevious
+								href="#"
+								onClick={(event) => {
+									event.preventDefault();
+									changePage(safePage - 1);
+								}}
+								className={safePage === 1 ? "pointer-events-none opacity-50" : ""}
+							/>
+						</PaginationItem>
+
+						{Array.from({ length: totalPages }).map((_, index) => {
+							const pageNumber = index + 1;
+							return (
+								<PaginationItem key={pageNumber}>
+									<PaginationLink
+										href="#"
+										isActive={safePage === pageNumber}
+										onClick={(event) => {
+											event.preventDefault();
+											changePage(pageNumber);
+										}}
+									>
+										{pageNumber}
+									</PaginationLink>
+								</PaginationItem>
+							);
+						})}
+
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={(event) => {
+									event.preventDefault();
+									changePage(safePage + 1);
+								}}
+								className={safePage === totalPages ? "pointer-events-none opacity-50" : ""}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
 			</div>
 		</section>
 	);

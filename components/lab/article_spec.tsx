@@ -9,6 +9,8 @@ type ArticleSpecProps = {
 };
 
 export function ArticleSpec({ article }: ArticleSpecProps) {
+	const isPlaceholder = article.tags.includes("placeholder") || article.category.toLowerCase() === "placeholder";
+
 	return (
 		<article className="space-y-6">
 			<header className="space-y-4">
@@ -16,6 +18,7 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 					<Badge variant="outline" className="rounded-full">
 						Article
 					</Badge>
+					{isPlaceholder ? <Badge variant="secondary" className="rounded-full">Placeholder Preview</Badge> : null}
 					<Badge variant="secondary" className="rounded-full">
 						{article.category}
 					</Badge>
@@ -33,7 +36,14 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 			</header>
 
 			<div className="relative h-64 w-full overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-96">
-				<Image src={article.coverImageUrl} alt={`${article.title} cover image`} fill className="object-cover" priority />
+				<Image
+					src={article.coverImageUrl}
+					alt={`${article.title} cover image`}
+					fill
+					sizes="(min-width: 1024px) 960px, 100vw"
+					className="object-cover"
+					priority
+				/>
 			</div>
 
 			<Card className="border-border/80">

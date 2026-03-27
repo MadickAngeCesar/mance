@@ -9,20 +9,21 @@ import { clientWork } from "@/lib/placeholder-data";
 export function ClientWork() {
 	return (
 		<section className="space-y-5" id="client-work">
-			<div>
+			<div className="text-center">
 				<h2 className="text-2xl font-semibold tracking-tight">Selected Client Work</h2>
 				<p className="mt-1 text-sm text-muted-foreground">Recent builds and internal platforms delivered for teams.</p>
 			</div>
 
-			<div className="grid gap-4  sm:grid-cols-2 md:grid-cols-3">
+			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
 				{clientWork.map((item) => (
-					<Card key={item.id} className="h-full border-border/80">
+					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
 						<div className="relative h-44 w-full border-b border-border/60 bg-muted/40">
 							<Image
 								src={item.imageUrl}
 								alt={`${item.title} preview image`}
 								fill
-								className="object-cover"
+								sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+								className="object-cover transition-transform duration-300 group-hover/card:scale-[1.02]"
 							/>
 						</div>
 						<CardHeader className="space-y-2">

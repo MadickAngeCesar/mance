@@ -5,7 +5,7 @@ import { workflowStages } from "@/lib/placeholder-data";
 export function Workflow() {
 	return (
 		<section className="space-y-5" id="workflow">
-			<div>
+			<div className="text-center">
 				<h2 className="text-2xl font-semibold tracking-tight">Delivery Workflow</h2>
 				<p className="mt-1 text-sm text-muted-foreground">A practical 5-step process from discovery to long-term support.</p>
 			</div>

@@ -218,6 +218,18 @@ export const offerings: Offering[] = [
 		ctaText: "Book IT support",
 		ctaUrl: "/services#booking",
 	},
+	{
+		id: "digital-transformation",
+		title: "Digital Transformation",
+		description:
+			"Business automation and platform modernization for teams moving from manual workflows to scalable systems.",
+		features: [
+			"Business process mapping and automation",
+			"Custom software planning and implementation",
+		],
+		ctaText: "Plan digital transformation",
+		ctaUrl: "/services#booking",
+	},
 ];
 
 export const workflowStages: WorkflowStage[] = [
@@ -259,25 +271,33 @@ export const clientWork: ClientWorkItem[] = [
 		title: "Portfolio Platform",
 		description:
 			"A modular platform to present services, portfolio, and client inquiries in one place.",
-		imageUrl: "/images/client-work/portfolio-platform.jpg",
+		imageUrl: "/images/mac_tech_logo.png",
 		projectUrl: "/lab/portfolio-platform",
 		stack: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL"],
+		publishedAt: "2025-11-20",
 	},
 	{
-		id: "cw-learning-hub",
-		title: "Learning Hub Dashboard",
+		id: "cw-finance-crm",
+		title: "Finance CRM Modernization",
 		description:
-			"Admin interface for course publishing, user messaging, and content analytics.",
-		imageUrl: "/images/client-work/learning-hub.jpg",
-		stack: ["React", "Node.js", "Prisma", "PostgreSQL"],
+			"Client migration from spreadsheet workflows to a role-based CRM with reporting dashboards.",
+		imageUrl: "/images/mac_tech_logo.png",
+		projectUrl: "/lab/finance-crm-modernization",
+		stack: ["Next.js", "Prisma", "PostgreSQL", "Zod"],
+		publishedAt: "2026-01-18",
 	},
 	{
-		id: "cw-ops-monitor",
-		title: "Operations Monitor",
+		id: "cw-placeholder-service-ops",
+		title: "Placeholder Service Operations Portal",
 		description:
-			"Internal monitoring panel for IT incidents and service uptime.",
-		imageUrl: "/images/client-work/operations-monitor.jpg",
-		stack: ["Next.js", "Zod", "Redis", "Docker"],
+			"Preview entry for testing client-work presentation and navigation in the lab detail route.",
+		imageUrl: "/images/mac_tech_logo.png",
+		projectUrl: "/lab/placeholder-client-work-portal",
+		stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL"],
+		publishedAt: "2026-03-01",
+		slug: "placeholder-client-work-portal",
+		content:
+			"This placeholder represents a client operations portal with service requests, ticket statuses, and admin reporting. Replace with real client context and screenshots later.",
 	},
 ];
 
@@ -338,6 +358,7 @@ export const labProjects: LabProject[] = [
 		featured: true,
 		views: 842,
 		tags: ["portfolio", "branding", "nextjs"],
+		publishedAt: "2025-12-01",
 	},
 	{
 		id: "p-clinic-ops",
@@ -352,6 +373,43 @@ export const labProjects: LabProject[] = [
 		featured: false,
 		views: 563,
 		tags: ["healthcare", "dashboard", "saas"],
+		publishedAt: "2025-09-07",
+	},
+	{
+		id: "p-finance-crm-modernization",
+		title: "Finance CRM Modernization",
+		slug: "finance-crm-modernization",
+		summary:
+			"CRM modernization focused on replacing manual spreadsheets with reliable workflows.",
+		content:
+			"A migration project covering data model redesign, role-based dashboards, validation-first forms, and reporting pipelines for operations leadership.",
+		stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL"],
+		coverImageUrl: "/images/lab/portfolio-platform-cover.jpg",
+		screenshotUrls: ["/images/lab/portfolio-platform-1.jpg"],
+		demoUrl: "https://mance.dev",
+		repoUrl: "https://github.com/mance-dev/portfolio-platform",
+		featured: false,
+		views: 301,
+		tags: ["crm", "case-study", "operations"],
+		publishedAt: "2026-01-18",
+	},
+	{
+		id: "p-placeholder-project-showcase",
+		title: "Placeholder Project Showcase",
+		slug: "placeholder-project-showcase",
+		summary:
+			"Placeholder project entry to preview project detail presentation on the lab slug page.",
+		content:
+			"This placeholder project demonstrates the expected structure for new portfolio entries: context, challenge, implementation summary, and technical outcomes.",
+		stack: ["Next.js", "TypeScript", "Tailwind CSS"],
+		coverImageUrl: "/images/lab/portfolio-platform-cover.jpg",
+		screenshotUrls: ["/images/lab/portfolio-platform-2.jpg"],
+		demoUrl: "https://mance.dev",
+		repoUrl: "https://github.com/mance-dev/portfolio-platform",
+		featured: false,
+		views: 120,
+		tags: ["placeholder", "project", "preview"],
+		publishedAt: "2026-03-03",
 	},
 ];
 
@@ -368,6 +426,8 @@ export const labArticles: LabArticle[] = [
 		coverImageUrl: "/images/lab/articles/reliable-forms.jpg",
 		tags: ["nextjs", "zod", "forms"],
 		views: 412,
+		featured: true,
+		publishedAt: "2026-02-10",
 	},
 	{
 		id: "a-brand-architecture",
@@ -381,6 +441,38 @@ export const labArticles: LabArticle[] = [
 		coverImageUrl: "/images/lab/articles/brand-migration.jpg",
 		tags: ["branding", "seo", "domain"],
 		views: 277,
+		featured: false,
+		publishedAt: "2025-08-22",
+	},
+	{
+		id: "a-it-support-runbook",
+		title: "Building an IT Support Runbook for Small Teams",
+		slug: "building-it-support-runbook-small-teams",
+		category: "IT Support",
+		excerpt:
+			"A practical framework for incident response, escalation paths, and maintenance routines in small organizations.",
+		content:
+			"This reflection outlines how to design support workflows, define SLAs, and document repeatable troubleshooting checklists for long-term reliability.",
+		coverImageUrl: "/images/lab/articles/reliable-forms.jpg",
+		tags: ["it-support", "operations", "documentation"],
+		views: 198,
+		featured: false,
+		publishedAt: "2026-01-05",
+	},
+	{
+		id: "a-placeholder-article-preview",
+		title: "Placeholder Technical Article Preview",
+		slug: "placeholder-technical-article-preview",
+		category: "Placeholder",
+		excerpt:
+			"Placeholder article entry to preview typography, cover media, and content structure on the lab slug page.",
+		content:
+			"Use this as a draft template for future technical writing. Replace this content with final sections, examples, and references once the article is ready.",
+		coverImageUrl: "/images/lab/articles/brand-migration.jpg",
+		tags: ["placeholder", "article", "preview"],
+		views: 94,
+		featured: false,
+		publishedAt: "2026-03-02",
 	},
 ];
 

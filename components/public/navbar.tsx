@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, Languages, Menu } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +18,7 @@ import {
 import {
 	Sheet,
 	SheetContent,
+	SheetDescription,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -29,12 +33,20 @@ const navLinks = [
 
 export function Navbar() {
 	const [language, setLanguage] = useState<"EN" | "FR">("EN");
+	const pathname = usePathname();
+
+	const isActive = (href: string) => {
+		if (href.startsWith("/#")) {
+			return pathname === "/";
+		}
+		return pathname === href;
+	};
 
 	return (
-		<header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
+		<header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 shadow-[0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur">
 			<div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 				<Link href="/" className="inline-flex items-center gap-2">
-					<Image src="/images/mac_tech_logo.png" alt="MAC TECH logo" width={28} height={28} className="rounded-md" />
+					<Image src="/images/mac_tech_logo.png" alt="MAC TECH logo" width={28} height={28} className="h-auto w-auto rounded-md" />
 					<div className="leading-none">
 						<p className="text-sm font-semibold tracking-wide">MAC TECH</p>
 						<p className="text-[11px] text-muted-foreground">mance.dev</p>
@@ -46,7 +58,13 @@ export function Navbar() {
 						<Link
 							key={link.href}
 							href={link.href}
-							className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+							className={cn(
+								"border-b border-transparent pb-0.5 text-sm transition-colors hover:text-foreground",
+								isActive(link.href)
+									? "border-primary/60 font-medium text-foreground"
+									: "text-muted-foreground"
+							)}
+							aria-current={isActive(link.href) ? "page" : undefined}
 						>
 							{link.label}
 						</Link>
@@ -81,13 +99,20 @@ export function Navbar() {
 						<SheetContent side="right" className="w-72">
 							<SheetHeader>
 								<SheetTitle>Navigation</SheetTitle>
+								<SheetDescription>Quick links to the core sections of the portfolio.</SheetDescription>
 							</SheetHeader>
 							<nav className="grid gap-2 px-4 pb-4">
 								{navLinks.map((link) => (
 									<Link
 										key={link.href}
 										href={link.href}
-										className="rounded-md border border-border/70 px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+										className={cn(
+											"rounded-md border border-border/70 px-3 py-2 text-sm transition-colors hover:text-foreground",
+											isActive(link.href)
+												? "bg-primary/10 text-foreground"
+												: "text-muted-foreground"
+										)}
+										aria-current={isActive(link.href) ? "page" : undefined}
 									>
 										{link.label}
 									</Link>

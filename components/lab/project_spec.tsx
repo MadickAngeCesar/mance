@@ -12,6 +12,8 @@ type ProjectSpecProps = {
 };
 
 export function ProjectSpec({ project }: ProjectSpecProps) {
+	const isPlaceholder = project.tags.includes("placeholder");
+
 	return (
 		<article className="space-y-6">
 			<header className="space-y-4">
@@ -19,6 +21,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<Badge variant="outline" className="rounded-full">
 						Project
 					</Badge>
+					{isPlaceholder ? <Badge variant="secondary" className="rounded-full">Placeholder Preview</Badge> : null}
 					{project.featured ? <Badge className="rounded-full">Featured</Badge> : null}
 				</div>
 				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.title}</h1>
@@ -49,7 +52,14 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 			</header>
 
 			<div className="relative h-64 w-full overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-96">
-				<Image src={project.coverImageUrl} alt={`${project.title} cover image`} fill className="object-cover" priority />
+				<Image
+					src={project.coverImageUrl}
+					alt={`${project.title} cover image`}
+					fill
+					sizes="(min-width: 1024px) 960px, 100vw"
+					className="object-cover"
+					priority
+				/>
 			</div>
 
 			<Card className="border-border/80">
@@ -57,6 +67,25 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<p className="text-sm leading-7 text-muted-foreground sm:text-base">{project.content}</p>
 				</CardContent>
 			</Card>
+
+			<section className="grid gap-3 sm:grid-cols-2">
+				<Card className="border-border/80">
+					<CardContent className="space-y-2 pt-1">
+						<h2 className="text-base font-semibold tracking-tight">Problem</h2>
+						<p className="text-sm leading-6 text-muted-foreground">
+							{project.summary}
+						</p>
+					</CardContent>
+				</Card>
+				<Card className="border-border/80">
+					<CardContent className="space-y-2 pt-1">
+						<h2 className="text-base font-semibold tracking-tight">Solution</h2>
+						<p className="text-sm leading-6 text-muted-foreground">
+							{project.content}
+						</p>
+					</CardContent>
+				</Card>
+			</section>
 
 			{project.screenshotUrls.length ? (
 				<section className="space-y-3">
@@ -68,6 +97,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 									src={screenshot}
 									alt={`${project.title} screenshot`}
 									fill
+									sizes="(min-width: 640px) 50vw, 100vw"
 									className="object-cover"
 								/>
 							</div>

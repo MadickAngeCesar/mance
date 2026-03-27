@@ -94,6 +94,9 @@ export type ClientWorkItem = {
 	imageUrl: string;
 	projectUrl?: string;
 	stack: string[];
+	publishedAt?: string;
+	slug?: string;
+	content?: string;
 };
 
 export type TestimonialItem = {
@@ -128,6 +131,7 @@ export type LabProject = {
 	featured: boolean;
 	views: number;
 	tags: string[];
+	publishedAt?: string;
 };
 
 export type LabArticle = {
@@ -140,6 +144,8 @@ export type LabArticle = {
 	coverImageUrl: string;
 	tags: string[];
 	views: number;
+	featured?: boolean;
+	publishedAt?: string;
 };
 
 export type MessagePreview = {

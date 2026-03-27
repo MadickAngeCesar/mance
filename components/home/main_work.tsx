@@ -17,14 +17,15 @@ export function MainWork() {
 				{mainWorkHighlights.map((item, index) => (
 					<Card
 						key={item.id}
-						className={`overflow-hidden border-border/80 ${index >= 3 ? "hidden lg:flex" : "flex"}`}
+						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 ${index >= 3 ? "hidden lg:flex" : "flex"}`}
 					>
 						<div className="relative h-40 w-full border-b border-border/60 bg-muted/40">
 							<Image
 								src={item.imageUrl}
 								alt={`${item.title} preview image`}
 								fill
-								className="object-contain p-4"
+								sizes="(min-width: 768px) 33vw, 100vw"
+								className="object-contain p-4 transition-transform duration-300 group-hover/card:scale-[1.02]"
 							/>
 						</div>
 						<CardHeader>

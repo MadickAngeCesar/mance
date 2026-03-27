@@ -9,12 +9,12 @@ export function BookingCta() {
 	return (
 		<section id="booking">
 			<Card className="border-border/80 bg-muted/20">
-				<CardHeader className="space-y-2">
+				<CardHeader className="text-center space-y-2">
 					<CardTitle className="text-xl sm:text-2xl">{bookingCta.title}</CardTitle>
 					<p className="text-sm leading-6 text-muted-foreground">{bookingCta.description}</p>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+					<div className="flex flex-col text-center gap-2 text-sm items-center sm:justify-between text-muted-foreground sm:flex-row">
 						<div className="inline-flex items-center gap-2">
 							<CalendarDays className="size-4 text-foreground" />
 							<span>30-minute discovery call</span>
@@ -24,7 +24,7 @@ export function BookingCta() {
 							<span>Clear scope, timeline, and next steps</span>
 						</div>
 					</div>
-					<div className="flex flex-col gap-2 sm:flex-row">
+					<div className="flex flex-col sm:justify-center gap-2 sm:flex-row">
 						<Button asChild>
 							<Link href={bookingCta.ctaUrl}>{bookingCta.ctaText}</Link>
 						</Button>

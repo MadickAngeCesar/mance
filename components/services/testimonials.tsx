@@ -6,7 +6,7 @@ import { testimonials } from "@/lib/placeholder-data";
 export function Testimonials() {
 	return (
 		<section className="space-y-5" id="testimonials">
-			<div>
+			<div className="text-center">
 				<h2 className="text-2xl font-semibold tracking-tight">Client Testimonials</h2>
 				<p className="mt-1 text-sm text-muted-foreground">Feedback from founders, operations teams, and product leaders.</p>
 			</div>

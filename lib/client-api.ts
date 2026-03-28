@@ -104,15 +104,23 @@ export async function apiRequest<T>(
   const { auth = false, headers, ...rest } = options;
   let authToken = auth ? getStoredToken() : null;
 
-  const doRequest = (tokenOverride?: string) =>
-    fetch(input, {
+  const doRequest = (tokenOverride?: string) => {
+    const isFormDataBody =
+      typeof FormData !== "undefined" && rest.body instanceof FormData;
+    const requestHeaders: Record<string, string> = {
+      ...(headers as Record<string, string> | undefined),
+      ...(tokenOverride ? { Authorization: `Bearer ${tokenOverride}` } : {}),
+    };
+
+    if (!isFormDataBody && !requestHeaders["Content-Type"]) {
+      requestHeaders["Content-Type"] = "application/json";
+    }
+
+    return fetch(input, {
       ...rest,
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers ?? {}),
-        ...(tokenOverride ? { Authorization: `Bearer ${tokenOverride}` } : {}),
-      },
+      headers: requestHeaders,
     });
+  };
 
   let response = await doRequest(authToken ?? undefined);
   let payload = await parseApiEnvelope<T>(response);

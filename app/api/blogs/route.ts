@@ -17,7 +17,7 @@ import { labArticles as fallbackLabArticles } from "@/lib/placeholder-data";
  */
 async function handleGet(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const query = LabArticleQuerySchema.parse({
+  const parsedQuery = LabArticleQuerySchema.safeParse({
     page: searchParams.get("page"),
     limit: searchParams.get("limit"),
     category: searchParams.get("category"),
@@ -25,6 +25,15 @@ async function handleGet(request: NextRequest) {
     sort: searchParams.get("sort"),
     published: searchParams.get("published"),
   });
+  const query = parsedQuery.success
+    ? parsedQuery.data
+    : LabArticleQuerySchema.parse({
+        page: 1,
+        limit: 10,
+        featured: "all",
+        sort: "newest",
+        published: "published",
+      });
 
   // Build filter
   let where: any = {};

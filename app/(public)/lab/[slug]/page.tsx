@@ -5,13 +5,17 @@ import { notFound } from "next/navigation";
 import { ArticleSpec } from "@/components/lab/article_spec";
 import { ClientWorkSpec } from "@/components/lab/client_work_spec";
 import { ProjectSpec } from "@/components/lab/project_spec";
+import { prisma } from "@/lib/prisma";
 import { clientWork, labArticles, labProjects } from "@/lib/placeholder-data";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 
 type LabDetailPageProps = {
   params: {
     slug: string;
   };
 };
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return [
@@ -23,25 +27,113 @@ export function generateStaticParams() {
   ];
 }
 
-export function generateMetadata({ params }: LabDetailPageProps): Metadata {
-  const project = labProjects.find((item) => item.slug === params.slug);
-  if (project) {
+async function getLabEntryBySlug(slug: string) {
+  try {
+    const [project, article] = await Promise.all([
+      prisma.labProject.findUnique({ where: { slug } }),
+      prisma.labArticle.findUnique({ where: { slug } }),
+    ]);
+
+    if (project && project.publishedAt) {
+      return { kind: "project" as const, data: project };
+    }
+
+    if (article && article.publishedAt) {
+      return { kind: "article" as const, data: article };
+    }
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      throw error;
+    }
+  }
+
+  const fallbackProject = labProjects.find((item) => item.slug === slug);
+  if (fallbackProject) {
+    return { kind: "project" as const, data: fallbackProject };
+  }
+
+  const fallbackArticle = labArticles.find((item) => item.slug === slug);
+  if (fallbackArticle) {
+    return { kind: "article" as const, data: fallbackArticle };
+  }
+
+  const fallbackClientWork = clientWork.find((item) => item.slug === slug);
+  if (fallbackClientWork) {
+    return { kind: "client-work" as const, data: fallbackClientWork };
+  }
+
+  return null;
+}
+
+async function getLabNavigation(slug: string) {
+  try {
+    const [projects, articles] = await Promise.all([
+      prisma.labProject.findMany({
+        where: { publishedAt: { not: null } },
+        select: { slug: true, title: true, publishedAt: true },
+      }),
+      prisma.labArticle.findMany({
+        where: { publishedAt: { not: null } },
+        select: { slug: true, title: true, publishedAt: true },
+      }),
+    ]);
+
+    const entries = [...projects, ...articles].sort(
+      (a, b) => getPublishedTime(b.publishedAt?.toISOString()) - getPublishedTime(a.publishedAt?.toISOString())
+    );
+    const index = entries.findIndex((entry) => entry.slug === slug);
+    if (index >= 0) {
+      return {
+        previous: entries[index - 1] ?? null,
+        next: entries[index + 1] ?? null,
+      };
+    }
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      throw error;
+    }
+  }
+
+  const fallbackEntries = [
+    ...labProjects.map((project) => ({ slug: project.slug, title: project.title, publishedAt: project.publishedAt })),
+    ...labArticles.map((article) => ({ slug: article.slug, title: article.title, publishedAt: article.publishedAt })),
+    ...clientWork
+      .filter((item) => Boolean(item.slug))
+      .map((item) => ({ slug: item.slug as string, title: item.title, publishedAt: item.publishedAt })),
+  ].sort((a, b) => getPublishedTime(b.publishedAt) - getPublishedTime(a.publishedAt));
+
+  const fallbackIndex = fallbackEntries.findIndex((entry) => entry.slug === slug);
+  if (fallbackIndex < 0) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: fallbackEntries[fallbackIndex - 1] ?? null,
+    next: fallbackEntries[fallbackIndex + 1] ?? null,
+  };
+}
+
+export async function generateMetadata({ params }: LabDetailPageProps): Promise<Metadata> {
+  const entry = await getLabEntryBySlug(params.slug);
+
+  if (entry?.kind === "project") {
+    const project = entry.data;
     return {
       title: `${project.title} | Lab | MAC TECH`,
       description: project.summary,
     };
   }
 
-  const article = labArticles.find((item) => item.slug === params.slug);
-  if (article) {
+  if (entry?.kind === "article") {
+    const article = entry.data;
     return {
       title: `${article.title} | Lab | MAC TECH`,
       description: article.excerpt,
     };
   }
 
-  const clientWorkItem = clientWork.find((item) => item.slug === params.slug);
-  if (clientWorkItem) {
+  if (entry?.kind === "client-work") {
+    const clientWorkItem = entry.data;
     return {
       title: `${clientWorkItem.title} | Lab | MAC TECH`,
       description: clientWorkItem.description,
@@ -57,34 +149,18 @@ function getPublishedTime(publishedAt?: string) {
   return publishedAt ? new Date(publishedAt).getTime() : 0;
 }
 
-function getLabNavigation(slug: string) {
-  const entries = [
-    ...labProjects.map((project) => ({ slug: project.slug, title: project.title, publishedAt: project.publishedAt })),
-    ...labArticles.map((article) => ({ slug: article.slug, title: article.title, publishedAt: article.publishedAt })),
-    ...clientWork
-      .filter((item) => Boolean(item.slug))
-      .map((item) => ({
-        slug: item.slug as string,
-        title: item.title,
-        publishedAt: item.publishedAt,
-      })),
-  ].sort((a, b) => getPublishedTime(b.publishedAt) - getPublishedTime(a.publishedAt));
+export default async function LabDetailPage({ params }: LabDetailPageProps) {
+  const entry = await getLabEntryBySlug(params.slug);
+  const navigation = await getLabNavigation(params.slug);
 
-  const index = entries.findIndex((entry) => entry.slug === slug);
-  if (index < 0) {
-    return { previous: null, next: null };
-  }
+  if (entry?.kind === "project") {
+    const project = {
+      ...entry.data,
+      demoUrl: entry.data.demoUrl ?? undefined,
+      repoUrl: entry.data.repoUrl ?? undefined,
+      publishedAt: entry.data.publishedAt ? entry.data.publishedAt.toISOString() : undefined,
+    };
 
-  return {
-    previous: entries[index - 1] ?? null,
-    next: entries[index + 1] ?? null,
-  };
-}
-
-export default function LabDetailPage({ params }: LabDetailPageProps) {
-  const project = labProjects.find((item) => item.slug === params.slug);
-  const navigation = getLabNavigation(params.slug);
-  if (project) {
     return (
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <ProjectSpec project={project} />
@@ -106,8 +182,12 @@ export default function LabDetailPage({ params }: LabDetailPageProps) {
     );
   }
 
-  const article = labArticles.find((item) => item.slug === params.slug);
-  if (article) {
+  if (entry?.kind === "article") {
+    const article = {
+      ...entry.data,
+      publishedAt: entry.data.publishedAt ? entry.data.publishedAt.toISOString() : undefined,
+    };
+
     return (
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <ArticleSpec article={article} />
@@ -129,11 +209,10 @@ export default function LabDetailPage({ params }: LabDetailPageProps) {
     );
   }
 
-  const clientWorkItem = clientWork.find((item) => item.slug === params.slug);
-  if (clientWorkItem) {
+  if (entry?.kind === "client-work") {
     return (
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <ClientWorkSpec clientWorkItem={clientWorkItem} />
+        <ClientWorkSpec clientWorkItem={entry.data} />
         <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
           {navigation.previous ? (
             <Link href={`/lab/${navigation.previous.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40">

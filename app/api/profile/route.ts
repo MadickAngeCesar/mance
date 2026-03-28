@@ -9,6 +9,7 @@ import {
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 import { brandProfile, aboutSummary, contactDetails } from "@/lib/placeholder-data";
+import { ensureBrandProfile, ensureBrandProfileRelations } from "@/lib/brand-profile";
 
 function buildFallbackProfile() {
   return {
@@ -110,11 +111,8 @@ async function handlePatch(request: NextRequest) {
 
   const body = await request.json();
 
-  // Get the brand profile
-  const profile = await prisma.brandProfile.findFirst();
-  if (!profile) {
-    throw ApiError.notFound("Brand profile not found");
-  }
+  const profile = await ensureBrandProfile();
+  await ensureBrandProfileRelations(profile.id);
 
   // Update brand profile
   if (body.brandProfile) {
@@ -128,24 +126,33 @@ async function handlePatch(request: NextRequest) {
   // Update about summary
   if (body.aboutSummary) {
     const aboutData = AboutSummaryUpdateSchema.parse(body.aboutSummary);
-    await prisma.aboutSummary.update({
+    await prisma.aboutSummary.upsert({
       where: { brandProfileId: profile.id },
-      data: aboutData,
+      create: {
+        brandProfileId: profile.id,
+        biography: aboutData.biography ?? aboutSummary.biography,
+        cvDownloadUrl: aboutData.cvDownloadUrl ?? aboutSummary.cvDownloadUrl,
+        linkedinResumeSource:
+          aboutData.linkedinResumeSource ?? aboutSummary.linkedinResumeSource,
+        interests: aboutData.interests ?? aboutSummary.interests,
+      },
+      update: aboutData,
     });
   }
 
   // Update contact details
   if (body.contactDetails) {
     const contactData = ContactDetailsUpdateSchema.parse(body.contactDetails);
-    const contact = await prisma.contactDetails.findUnique({
+    await prisma.contactDetails.upsert({
       where: { brandProfileId: profile.id },
+      create: {
+        brandProfileId: profile.id,
+        email: contactData.email ?? contactDetails.email,
+        phone: contactData.phone ?? contactDetails.phone,
+        location: contactData.location ?? contactDetails.location,
+      },
+      update: contactData,
     });
-    if (contact) {
-      await prisma.contactDetails.update({
-        where: { id: contact.id },
-        data: contactData,
-      });
-    }
   }
 
   // Fetch updated profile

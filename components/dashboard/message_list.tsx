@@ -116,6 +116,27 @@ export function MessageList() {
 		}
 	};
 
+	const handleReply = async (id: string, payload: { subject?: string; body: string }) => {
+		setPending(id, true);
+		setError(null);
+
+		try {
+			await apiRequest(`/api/messages/${id}/reply`, {
+				method: "POST",
+				auth: true,
+				body: JSON.stringify(payload),
+			});
+
+			setMessages((current) =>
+				current.map((item) => (item.id === id ? { ...item, isRead: true } : item))
+			);
+		} catch (replyError) {
+			setError(replyError instanceof Error ? replyError.message : "Unable to send reply.");
+		} finally {
+			setPending(id, false);
+		}
+	};
+
 	const filtered = useMemo(() => {
 		return messages.filter((message) => {
 			const matchesQuery =
@@ -173,6 +194,7 @@ export function MessageList() {
 							key={message.id}
 							message={message}
 							onToggleRead={handleToggleRead}
+							onReply={handleReply}
 							onDelete={handleDelete}
 							isPending={pendingIds.has(message.id)}
 						/>

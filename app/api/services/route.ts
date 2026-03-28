@@ -7,6 +7,22 @@ import {
 } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
+import { ensureBrandProfile } from "@/lib/brand-profile";
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function buildOfferingCtaUrl(input: { title: string; ctaText: string }) {
+  const source = input.ctaText || input.title;
+  const offering = slugify(source || "service");
+  return `/services?offering=${encodeURIComponent(offering)}#booking`;
+}
 
 /**
  * GET /api/services
@@ -55,16 +71,16 @@ async function handlePost(request: NextRequest) {
   const body = await request.json();
   const data = ServiceCreateSchema.parse(body);
 
-  // Get brand profile (there should be only one)
-  const brand = await prisma.brandProfile.findFirst();
-  if (!brand) {
-    throw ApiError.notFound("Brand profile not found");
-  }
+  const brand = await ensureBrandProfile();
 
   const service = await prisma.offering.create({
     data: {
       externalId: `service-${Date.now()}`,
       ...data,
+      ctaUrl: buildOfferingCtaUrl({
+        title: data.title,
+        ctaText: data.ctaText,
+      }),
       brandProfileId: brand.id,
     },
   });

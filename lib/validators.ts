@@ -11,6 +11,49 @@ const queryValue = <T extends z.ZodTypeAny>(schema: T) =>
     schema
   );
 
+const isAbsoluteHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const urlOrRootPath = z
+  .string()
+  .min(1)
+  .refine(
+    (value) => value.startsWith("/") || isAbsoluteHttpUrl(value),
+    "Expected an absolute http(s) URL or a root-relative path"
+  );
+
+const optionalUrlOrRootPath = z.preprocess(
+  (value) => {
+    if (value === null || value === "") {
+      return undefined;
+    }
+    return value;
+  },
+  z
+    .string()
+    .refine(
+      (value) => value.startsWith("/") || isAbsoluteHttpUrl(value),
+      "Expected an absolute http(s) URL or a root-relative path"
+    )
+    .optional()
+);
+
+const optionalDate = z.preprocess(
+  (value) => {
+    if (value === null || value === "") {
+      return undefined;
+    }
+    return value;
+  },
+  z.coerce.date().optional()
+);
+
 /**
  * Generic API Response wrapper
  */
@@ -89,10 +132,10 @@ export const LabArticleCreateSchema = z.object({
   category: z.string().min(1, "Category is required."),
   excerpt: z.string().max(500),
   content: z.string(),
-  coverImageUrl: z.string().url(),
+  coverImageUrl: urlOrRootPath,
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
-  publishedAt: z.date().optional(),
+  publishedAt: optionalDate,
 });
 
 export type LabArticleCreate = z.infer<typeof LabArticleCreateSchema>;
@@ -123,13 +166,13 @@ export const LabProjectCreateSchema = z.object({
   summary: z.string().max(500),
   content: z.string(),
   stack: z.array(z.string()).default([]),
-  coverImageUrl: z.string().url(),
-  screenshotUrls: z.array(z.string().url()).default([]),
-  demoUrl: z.string().url().optional(),
-  repoUrl: z.string().url().optional(),
+  coverImageUrl: urlOrRootPath,
+  screenshotUrls: z.array(urlOrRootPath).default([]),
+  demoUrl: optionalUrlOrRootPath,
+  repoUrl: optionalUrlOrRootPath,
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
-  publishedAt: z.date().optional(),
+  publishedAt: optionalDate,
 });
 
 export type LabProjectCreate = z.infer<typeof LabProjectCreateSchema>;
@@ -158,11 +201,11 @@ export const ClientWorkCreateSchema = z.object({
   title: z.string().min(1, "Title is required.").max(200),
   slug: z.string().min(1, "Slug is required.").max(200),
   description: z.string().max(1000),
-  imageUrl: z.string().url(),
-  projectUrl: z.string().url().optional(),
+  imageUrl: urlOrRootPath,
+  projectUrl: optionalUrlOrRootPath,
   stack: z.array(z.string()).default([]),
   content: z.string().optional(),
-  publishedAt: z.date().optional(),
+  publishedAt: optionalDate,
 });
 
 export type ClientWorkCreate = z.infer<typeof ClientWorkCreateSchema>;
@@ -202,7 +245,7 @@ export const ServiceCreateSchema = z.object({
   description: z.string().max(1000),
   features: z.array(z.string()).default([]),
   ctaText: z.string().max(100),
-  ctaUrl: z.string().url(),
+  ctaUrl: optionalUrlOrRootPath,
 });
 
 export type ServiceCreate = z.infer<typeof ServiceCreateSchema>;
@@ -236,7 +279,7 @@ export type BrandProfileUpdate = z.infer<typeof BrandProfileUpdateSchema>;
 
 export const AboutSummaryUpdateSchema = z.object({
   biography: z.string().optional(),
-  cvDownloadUrl: z.string().url().optional(),
+  cvDownloadUrl: optionalUrlOrRootPath,
   linkedinResumeSource: z.string().optional(),
   interests: z.array(z.string()).optional(),
 });

@@ -36,6 +36,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownContent, setMarkdownContent] = useState(initialArticle?.content ?? "");
+  const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 
 	const toAbsoluteUrl = (value: string) => {
 		if (!value.startsWith("/")) {
@@ -53,10 +54,27 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 		setIsSubmitting(true);
 		setError(null);
 
+		let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
+		const coverImageFile = formData.get("coverImageFile");
+		if (coverImageFile instanceof File && coverImageFile.size > 0) {
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", coverImageFile);
+			uploadFormData.append("kind", "article-cover");
+
+			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+				method: "POST",
+				auth: true,
+				body: uploadFormData,
+			});
+
+			coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+			setUploadedCoverUrl(coverImageUrl);
+		}
+
 		const payload = {
 			title: String(formData.get("title") ?? ""),
 			excerpt: String(formData.get("excerpt") ?? ""),
-			coverImageUrl: toAbsoluteUrl(String(formData.get("coverImageUrl") ?? "")),
+			coverImageUrl,
 			slug: String(formData.get("slug") ?? ""),
 			category: String(formData.get("category") ?? ""),
 			tags: String(formData.get("tags") ?? "")
@@ -100,6 +118,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				labelTitle: "Titre",
 				labelDescription: "Description courte",
 				labelImage: "URL de l'image de couverture",
+				labelImageUpload: "Televerser l'image de couverture",
 				labelSlug: "URL / Slug",
 				labelCategory: "Categorie",
 				labelTags: "Tags",
@@ -119,6 +138,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 			labelTitle: "Title",
 			labelDescription: "Short Description",
 			labelImage: "Cover Image URL",
+			labelImageUpload: "Upload Cover Image",
 			labelSlug: "Article URL / Slug",
 			labelCategory: "Category",
 			labelTags: "Tags",
@@ -176,6 +196,13 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 							{copy.labelImage}
 						</label>
 						<Input id="article-image" name="coverImageUrl" placeholder="https://mance.dev/images/lab/your-article-cover.jpg" defaultValue={initialArticle?.coverImageUrl} />
+						<label htmlFor="article-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">
+							{copy.labelImageUpload}
+						</label>
+						<Input id="article-image-file" name="coverImageFile" type="file" accept="image/*" />
+						{uploadedCoverUrl ? (
+							<p className="text-xs text-muted-foreground">Uploaded: {uploadedCoverUrl}</p>
+						) : null}
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="article-url" className="text-xs font-medium text-muted-foreground">

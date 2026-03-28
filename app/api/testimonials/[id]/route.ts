@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+const TestimonialUpdateSchema = z.object({
+  clientName: z.string().min(1).max(200).optional(),
+  clientRoleCompany: z.string().min(1).max(200).optional(),
+  text: z.string().min(1).max(3000).optional(),
+  avatarUrl: z
+    .string()
+    .refine((value) => value.startsWith("/") || /^https?:\/\//.test(value), "Invalid avatar URL")
+    .optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  projectReference: z.string().max(300).optional(),
+  date: z.string().max(100).optional(),
+  dateLabel: z.string().max(100).optional(),
+});
 
 async function handleGet(
   request: NextRequest,
@@ -28,7 +43,7 @@ async function handlePatch(
 ) {
   await requireRole(request, "admin");
 
-  const body = await request.json();
+  const body = TestimonialUpdateSchema.parse(await request.json());
 
   const updated = await prisma.testimonial.update({
     where: { id: params.id },
@@ -36,7 +51,7 @@ async function handlePatch(
       clientName: body.clientName,
       clientRoleCompany: body.clientRoleCompany,
       text: body.text,
-      avatarUrl: body.avatarUrl,
+      avatarUrl: body.avatarUrl ?? null,
       rating: body.rating,
       projectReference: body.projectReference,
       dateLabel: body.date ?? body.dateLabel,

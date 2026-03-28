@@ -49,8 +49,40 @@ export function ProfileForm() {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isUploadingImage, setIsUploadingImage] = useState(false);
+	const [profileImageUrl, setProfileImageUrl] = useState("/images/Profile.jpg");
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+
+	const handleProfileImageUpload = async (file: File | null) => {
+		if (!file) {
+			return;
+		}
+
+		setIsUploadingImage(true);
+		setError(null);
+		setSuccess(null);
+
+		try {
+			const uploadData = new FormData();
+			uploadData.append("file", file);
+			uploadData.append("kind", "profile");
+
+			const response = await apiRequest<{ url: string }>("/api/uploads", {
+				method: "POST",
+				auth: true,
+				body: uploadData,
+			});
+
+			const nextUrl = response.data?.url ?? "/images/Profile.jpg";
+			setProfileImageUrl(nextUrl);
+			setSuccess("Profile image uploaded successfully.");
+		} catch (uploadError) {
+			setError(uploadError instanceof Error ? uploadError.message : "Unable to upload profile image.");
+		} finally {
+			setIsUploadingImage(false);
+		}
+	};
 
 	useEffect(() => {
 		let isMounted = true;
@@ -238,7 +270,19 @@ export function ProfileForm() {
 								<label htmlFor="avatar" className="text-xs font-medium text-muted-foreground">
 									Profile Image URL
 								</label>
-								<Input id="avatar" placeholder="/images/profile/headshot.jpg" />
+								<Input id="avatar" value={profileImageUrl} readOnly />
+								<Input
+									id="avatar-file"
+									type="file"
+									accept="image/*"
+									onChange={(event) => {
+										const file = event.target.files?.[0] ?? null;
+										void handleProfileImageUpload(file);
+									}}
+								/>
+								<p className="text-xs text-muted-foreground">
+									{isUploadingImage ? "Uploading image..." : "Uploaded image is served from /images/Profile.jpg"}
+								</p>
 							</div>
 						</div>
 					</TabsContent>

@@ -17,7 +17,7 @@ import { labProjects as fallbackLabProjects } from "@/lib/placeholder-data";
  */
 async function handleGet(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const query = LabProjectQuerySchema.parse({
+  const parsedQuery = LabProjectQuerySchema.safeParse({
     page: searchParams.get("page"),
     limit: searchParams.get("limit"),
     featured: searchParams.get("featured"),
@@ -25,6 +25,15 @@ async function handleGet(request: NextRequest) {
     published: searchParams.get("published"),
     tag: searchParams.get("tag"),
   });
+  const query = parsedQuery.success
+    ? parsedQuery.data
+    : LabProjectQuerySchema.parse({
+        page: 1,
+        limit: 10,
+        featured: "all",
+        sort: "newest",
+        published: "published",
+      });
 
   // Build filter
   let where: any = {};

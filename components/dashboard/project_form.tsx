@@ -36,6 +36,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
+  const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 
 	const toAbsoluteUrl = (value: string) => {
 		if (!value.startsWith("/")) {
@@ -53,20 +54,44 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 		setIsSubmitting(true);
 		setError(null);
 
+		let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
+		const coverImageFile = formData.get("coverImageFile");
+		if (coverImageFile instanceof File && coverImageFile.size > 0) {
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", coverImageFile);
+			uploadFormData.append("kind", "project-cover");
+
+			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+				method: "POST",
+				auth: true,
+				body: uploadFormData,
+			});
+
+			coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+			setUploadedCoverUrl(coverImageUrl);
+		}
+
+		const toOptionalAbsoluteUrl = (value: string) => {
+			if (!value.trim()) {
+				return undefined;
+			}
+			return toAbsoluteUrl(value);
+		};
+
 		const payload = {
 			title: String(formData.get("title") ?? ""),
 			slug: String(formData.get("slug") ?? ""),
 			summary: String(formData.get("summary") ?? ""),
 			content: markdownDetails,
-			coverImageUrl: toAbsoluteUrl(String(formData.get("coverImageUrl") ?? "")),
+			coverImageUrl,
 			stack: String(formData.get("stack") ?? "")
 				.split(",")
 				.map((item) => item.trim())
 				.filter(Boolean),
-			demoUrl: String(formData.get("demoUrl") ?? "") || undefined,
-			repoUrl: String(formData.get("repoUrl") ?? "") || undefined,
+			demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
+			repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
 			tags: initialProject?.tags ?? [],
-			screenshotUrls: initialProject?.screenshotUrls ?? [],
+			screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
 		};
 
 		try {
@@ -103,6 +128,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelSummary: "Resume",
 				labelDetails: "Contenu detaille (Markdown)",
 				labelImage: "URL image de couverture",
+				labelImageUpload: "Televerser l'image de couverture",
 				labelStack: "Stack technique",
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
@@ -120,6 +146,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelSummary: "Summary",
 			labelDetails: "Detailed Content (Markdown)",
 			labelImage: "Cover Image URL",
+			labelImageUpload: "Upload Cover Image",
 			labelStack: "Tech Stack",
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
@@ -190,6 +217,11 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 									{copy.labelImage}
 								</label>
 								<Input id="project-image" name="coverImageUrl" placeholder="https://mance.dev/images/lab/portfolio-platform-1.jpg" defaultValue={initialProject?.coverImageUrl} />
+								<label htmlFor="project-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">
+									{copy.labelImageUpload}
+								</label>
+								<Input id="project-image-file" name="coverImageFile" type="file" accept="image/*" />
+								{uploadedCoverUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedCoverUrl}</p> : null}
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="project-stack" className="text-xs font-medium text-muted-foreground">

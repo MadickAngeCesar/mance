@@ -46,6 +46,11 @@ async function handlePatch(
   const body = await request.json();
   const data = MessageUpdateSchema.omit({ id: true }).partial().parse(body);
 
+  const existing = await prisma.message.findUnique({ where: { id } });
+  if (!existing) {
+    throw ApiError.notFound("Message not found");
+  }
+
   const message = await prisma.message.update({
     where: { id },
     data,

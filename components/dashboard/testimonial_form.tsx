@@ -34,6 +34,7 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 	const [projects, setProjects] = useState<Array<{ id: string; title: string }>>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -64,11 +65,28 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 		setIsSubmitting(true);
 		setError(null);
 
+		let avatarUrl = String(formData.get("avatarUrl") ?? "") || undefined;
+		const avatarFile = formData.get("avatarFile");
+		if (avatarFile instanceof File && avatarFile.size > 0) {
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", avatarFile);
+			uploadFormData.append("kind", "testimonial-avatar");
+
+			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+				method: "POST",
+				auth: true,
+				body: uploadFormData,
+			});
+
+			avatarUrl = uploadResponse.data?.url ?? avatarUrl;
+			setUploadedAvatarUrl(avatarUrl ?? null);
+		}
+
 		const payload = {
 			clientName: String(formData.get("clientName") ?? ""),
 			clientRoleCompany: String(formData.get("clientRoleCompany") ?? ""),
 			rating: Number(formData.get("rating") ?? 5),
-			avatarUrl: String(formData.get("avatarUrl") ?? "") || undefined,
+			avatarUrl,
 			projectReference: String(formData.get("projectReference") ?? ""),
 			text: String(formData.get("text") ?? ""),
 			date: String(formData.get("date") ?? ""),
@@ -108,6 +126,7 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 				role: "Role et entreprise",
 				rating: "Evaluation",
 				avatar: "URL avatar",
+				avatarUpload: "Televerser l'avatar",
 				project: "Projet client (optionnel)",
 				projectNone: "Aucun projet selectionne",
 				quote: "Citation",
@@ -123,6 +142,7 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 			role: "Role and Company",
 			rating: "Rating",
 			avatar: "Avatar Image URL",
+			avatarUpload: "Upload Avatar Image",
 			project: "Client Project (optional)",
 			projectNone: "No linked project",
 			quote: "Quote",
@@ -175,6 +195,11 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 							{copy.avatar}
 						</label>
 						<Input id="testimonial-image" name="avatarUrl" placeholder="https://mance.dev/images/clients/sarah-jean.jpg" defaultValue={initialTestimonial?.avatarUrl} />
+						<label htmlFor="testimonial-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">
+							{copy.avatarUpload}
+						</label>
+						<Input id="testimonial-image-file" name="avatarFile" type="file" accept="image/*" />
+						{uploadedAvatarUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedAvatarUrl}</p> : null}
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="testimonial-project" className="text-xs font-medium text-muted-foreground">

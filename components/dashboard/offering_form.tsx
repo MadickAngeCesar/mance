@@ -34,15 +34,18 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const toAbsoluteUrl = (value: string) => {
-		if (!value.startsWith("/")) {
-			return value;
-		}
-		if (typeof window === "undefined") {
-			return value;
-		}
-		return new URL(value, window.location.origin).toString();
-	};
+	const slugify = (value: string) =>
+		value
+			.toLowerCase()
+			.trim()
+			.replace(/[^a-z0-9\s-]/g, "")
+			.replace(/\s+/g, "-")
+			.replace(/-+/g, "-");
+
+	const inferredCtaUrl = (() => {
+		const source = initialOffering?.ctaText || initialOffering?.title || "service";
+		return `/services?offering=${encodeURIComponent(slugify(source))}#booking`;
+	})();
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -50,15 +53,19 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 		setIsSubmitting(true);
 		setError(null);
 
+		const title = String(formData.get("title") ?? "");
+		const ctaText = String(formData.get("ctaText") ?? "");
+		const inferredFromForm = `/services?offering=${encodeURIComponent(slugify(ctaText || title || "service"))}#booking`;
+
 		const payload = {
-			title: String(formData.get("title") ?? ""),
+			title,
 			description: String(formData.get("description") ?? ""),
 			features: String(formData.get("features") ?? "")
 				.split("\n")
 				.map((value) => value.trim())
 				.filter(Boolean),
-			ctaText: String(formData.get("ctaText") ?? ""),
-			ctaUrl: toAbsoluteUrl(String(formData.get("ctaUrl") ?? "")),
+			ctaText,
+			ctaUrl: inferredFromForm,
 		};
 
 		try {
@@ -94,7 +101,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 				labelDescription: "Description",
 				labelFeatures: "Fonctionnalites (une par ligne)",
 				labelCtaText: "Texte du CTA",
-				labelCtaUrl: "URL du CTA",
+				labelCtaUrl: "URL du CTA (automatique)",
 				save: isEditMode ? "Mettre a jour l'offre" : "Enregistrer l'offre",
 			};
 		}
@@ -107,7 +114,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 			labelDescription: "Description",
 			labelFeatures: "Features (one per line)",
 			labelCtaText: "CTA Text",
-			labelCtaUrl: "CTA URL",
+			labelCtaUrl: "CTA URL (auto)",
 			save: isEditMode ? "Update Offering" : "Save Offering",
 		};
 	}, [isEditMode, language]);
@@ -158,7 +165,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 						<label htmlFor="offering-cta-url" className="text-xs font-medium text-muted-foreground">
 							{copy.labelCtaUrl}
 						</label>
-						<Input id="offering-cta-url" name="ctaUrl" placeholder="https://mance.dev/services#booking" defaultValue={initialOffering?.ctaUrl} />
+						<Input id="offering-cta-url" name="ctaUrl" value={inferredCtaUrl} readOnly />
 					</div>
 					</div>
 				</div>

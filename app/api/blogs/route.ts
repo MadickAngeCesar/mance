@@ -7,7 +7,7 @@ import {
 } from "@/lib/validators";
 import { createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
-import { WorkKind } from "@prisma/client";
+import { WorkKind } from "@/lib/generated/prisma/client";
 import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workflows";
 
 /**

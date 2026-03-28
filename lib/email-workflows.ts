@@ -1,4 +1,4 @@
-import { CampaignStatus, DeliveryStatus, WorkKind } from "@prisma/client";
+import { CampaignStatus, DeliveryStatus, WorkKind } from "@/lib/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/mail";

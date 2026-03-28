@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { LabProjectUpdateSchema, ApiResponse } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
-import { WorkKind } from "@prisma/client";
+import { WorkKind } from "@/lib/generated/prisma/client";
 import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workflows";
 
 /**

@@ -7,10 +7,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 
 export async function ClientWork() {
-	const clientWork = await prisma.clientWork.findMany({
-		where: { publishedAt: { not: null } },
-		orderBy: { publishedAt: "desc" },
-	});
+	const [clientWork, fallbackProjects] = await Promise.all([
+		prisma.clientWork.findMany({
+			where: { publishedAt: { not: null } },
+			orderBy: { publishedAt: "desc" },
+		}),
+		prisma.labProject.findMany({
+			where: { publishedAt: { not: null } },
+			orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+			take: 6,
+		}),
+	]);
+
+	const items =
+		clientWork.length > 0
+			? clientWork.map((item) => ({
+				id: item.id,
+				title: item.title,
+				description: item.description,
+				imageUrl: item.imageUrl,
+				stack: item.stack,
+				projectUrl: item.projectUrl ?? (item.slug ? `/lab/${item.slug}` : undefined),
+			}))
+			: fallbackProjects.map((item) => ({
+				id: item.id,
+				title: item.title,
+				description: item.summary,
+				imageUrl: item.coverImageUrl,
+				stack: item.stack,
+				projectUrl: `/lab/${item.slug}`,
+			}));
 
 	return (
 		<section className="space-y-5" id="client-work">
@@ -20,10 +46,10 @@ export async function ClientWork() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-				{clientWork.length === 0 ? (
+				{items.length === 0 ? (
 					<p className="text-sm text-muted-foreground md:col-span-3">No client work has been published yet.</p>
 				) : null}
-				{clientWork.map((item) => (
+				{items.map((item) => (
 					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
 						<div className="relative h-44 w-full border-b border-border/60 bg-muted/40">
 							<Image

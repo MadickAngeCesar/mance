@@ -338,6 +338,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="current-name"
+									placeholder="MAC TECH"
 									value={form.brandProfile.currentName}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -353,6 +354,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="domain"
+									placeholder="mance.dev"
 									value={form.brandProfile.currentDomain}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -368,6 +370,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="headline"
+									placeholder="Building practical digital products"
 									value={form.brandProfile.headline}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -383,6 +386,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="tagline"
+									placeholder="Technology and digital solutions"
 									value={form.brandProfile.roleTagline}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -398,6 +402,7 @@ export function ProfileForm() {
 								</label>
 								<Textarea
 									id="bio"
+									placeholder="Write a short professional biography..."
 									rows={6}
 									value={form.aboutSummary.biography}
 									onChange={(event) =>
@@ -414,6 +419,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="resume"
+									placeholder="/MadickAngeCesar_FullStack_Resume_EN.pdf"
 									value={form.aboutSummary.cvDownloadUrl}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -457,6 +463,7 @@ export function ProfileForm() {
 								<div key={`${entry.company}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
 									<div className="grid gap-2 md:grid-cols-2">
 										<Input
+											placeholder="Full Stack Developer"
 											value={entry.role}
 											onChange={(event) =>
 												setExperience((current) =>
@@ -468,6 +475,7 @@ export function ProfileForm() {
 											aria-label="Role"
 										/>
 										<Input
+											placeholder="Acme Inc"
 											value={entry.company}
 											onChange={(event) =>
 												setExperience((current) =>
@@ -479,6 +487,7 @@ export function ProfileForm() {
 											aria-label="Company"
 										/>
 										<Input
+											placeholder="2022 - Present"
 											value={entry.period}
 											onChange={(event) =>
 												setExperience((current) =>
@@ -501,6 +510,7 @@ export function ProfileForm() {
 										</Button>
 									</div>
 									<Textarea
+										placeholder="Describe responsibilities and impact..."
 										value={entry.summary}
 										onChange={(event) =>
 											setExperience((current) =>
@@ -530,6 +540,7 @@ export function ProfileForm() {
 								<div key={`${entry.title}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
 									<div className="grid gap-2 md:grid-cols-2">
 										<Input
+											placeholder="BSc Computer Science"
 											value={entry.title}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -541,6 +552,7 @@ export function ProfileForm() {
 											aria-label="Title"
 										/>
 										<Input
+											placeholder="State University"
 											value={entry.institution}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -552,6 +564,7 @@ export function ProfileForm() {
 											aria-label="Institution"
 										/>
 										<Input
+											placeholder="2018 - 2022"
 											value={entry.period}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -563,6 +576,7 @@ export function ProfileForm() {
 											aria-label="Period"
 										/>
 										<Input
+											placeholder="Montreal, QC"
 											value={entry.location ?? ""}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -601,6 +615,7 @@ export function ProfileForm() {
 							{skills.map((skill, index) => (
 								<div key={skill.name} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[1fr_150px_80px_auto]">
 									<Input
+										placeholder="Next.js"
 										value={skill.name}
 										onChange={(event) =>
 											setSkills((current) =>
@@ -633,6 +648,7 @@ export function ProfileForm() {
 									</select>
 									<Input
 										type="number"
+										placeholder="3"
 										min={1}
 										max={5}
 										value={String(skill.proficiency)}
@@ -670,6 +686,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="contact-email"
+									placeholder="hello@mance.dev"
 									value={form.contactDetails.email}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -685,6 +702,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="contact-phone"
+									placeholder="+1 555 123 4567"
 									value={form.contactDetails.phone}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -700,6 +718,7 @@ export function ProfileForm() {
 								</label>
 								<Input
 									id="contact-location"
+									placeholder="Montreal, Canada"
 									value={form.contactDetails.location}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -742,6 +761,7 @@ export function ProfileForm() {
 										))}
 									</select>
 									<Input
+										placeholder="GitHub Profile"
 										value={link.label}
 										onChange={(event) =>
 											setSocialLinks((current) =>
@@ -753,6 +773,7 @@ export function ProfileForm() {
 										aria-label="Label"
 									/>
 									<Input
+										placeholder="https://github.com/username"
 										value={link.url}
 										onChange={(event) =>
 											setSocialLinks((current) =>
@@ -805,6 +826,7 @@ export function ProfileForm() {
 										))}
 									</select>
 									<Input
+										placeholder="https://www.upwork.com/freelancers/~example"
 										value={platform.url}
 										onChange={(event) =>
 											setFreelancePlatforms((current) =>
@@ -816,6 +838,7 @@ export function ProfileForm() {
 										aria-label="Platform URL"
 									/>
 									<Input
+										placeholder="@username"
 										value={platform.handle ?? ""}
 										onChange={(event) =>
 											setFreelancePlatforms((current) =>

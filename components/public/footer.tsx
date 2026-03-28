@@ -53,9 +53,9 @@ export function Footer() {
 				<div className="space-y-2 lg:justify-self-end lg:text-right">
 					<p className="text-sm font-semibold">Resources</p>
 					<div className="grid gap-1 text-sm text-muted-foreground">
-						<Link href="/MadickAngeCesar_FullStack_Resume_EN.pdf" download className="transition-colors hover:text-foreground">
+						<a href="/MadickAngeCesar_FullStack_Resume_EN.pdf" download className="transition-colors hover:text-foreground">
 							Resume (PDF)
-						</Link>
+						</a>
 						<Link href="/sign-in" className="transition-colors hover:text-foreground">Dashboard</Link>
 						<Link href="/lab" className="transition-colors hover:text-foreground">Portfolio Lab</Link>
 						<Link href="/services" className="transition-colors hover:text-foreground">Service Details</Link>

@@ -8,31 +8,89 @@ import {
 } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
+import { brandProfile, aboutSummary, contactDetails } from "@/lib/placeholder-data";
+
+function buildFallbackProfile() {
+  return {
+    id: "placeholder-brand-profile",
+    ...brandProfile,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+    aboutSummary: {
+      id: "placeholder-about-summary",
+      biography: aboutSummary.biography,
+      cvDownloadUrl: aboutSummary.cvDownloadUrl,
+      linkedinResumeSource: aboutSummary.linkedinResumeSource,
+      interests: aboutSummary.interests,
+      brandProfileId: "placeholder-brand-profile",
+      createdAt: new Date(0),
+      updatedAt: new Date(0),
+    },
+    contactDetails: {
+      id: "placeholder-contact-details",
+      email: contactDetails.email,
+      phone: contactDetails.phone,
+      location: contactDetails.location,
+      brandProfileId: "placeholder-brand-profile",
+      createdAt: new Date(0),
+      updatedAt: new Date(0),
+      socialLinks: contactDetails.socialLinks.map((item, index) => ({
+        id: `placeholder-social-${index + 1}`,
+        platform: item.platform.toUpperCase(),
+        label: item.label,
+        url: item.url,
+        displayOrder: index + 1,
+        contactDetailsId: "placeholder-contact-details",
+        createdAt: new Date(0),
+        updatedAt: new Date(0),
+      })),
+      freelancePlatforms: contactDetails.freelancePlatforms.map((item, index) => ({
+        id: `placeholder-freelance-${index + 1}`,
+        name: item.name.toUpperCase(),
+        url: item.url,
+        handle: item.handle ?? null,
+        displayOrder: index + 1,
+        contactDetailsId: "placeholder-contact-details",
+        createdAt: new Date(0),
+        updatedAt: new Date(0),
+      })),
+    },
+    mainWorkHighlights: [],
+    offerings: [],
+    workflowStages: [],
+  };
+}
 
 /**
  * GET /api/profile
  * Get the brand profile and related data
  */
 async function handleGet(request: NextRequest) {
-  const profile = await prisma.brandProfile.findFirst({
-    include: {
-      aboutSummary: true,
-      contactDetails: {
-        include: {
-          socialLinks: true,
-          freelancePlatforms: true,
+  let profile;
+
+  try {
+    profile = await prisma.brandProfile.findFirst({
+      include: {
+        aboutSummary: true,
+        contactDetails: {
+          include: {
+            socialLinks: true,
+            freelancePlatforms: true,
+          },
+        },
+        mainWorkHighlights: true,
+        offerings: true,
+        workflowStages: {
+          orderBy: { step: "asc" },
         },
       },
-      mainWorkHighlights: true,
-      offerings: true,
-      workflowStages: {
-        orderBy: { step: "asc" },
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("GET /api/profile database query failed, using fallback profile.", error);
+  }
 
   if (!profile) {
-    throw ApiError.notFound("Brand profile not found");
+    profile = buildFallbackProfile();
   }
 
   const response: ApiResponse = {

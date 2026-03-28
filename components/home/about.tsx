@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +12,9 @@ export function About() {
 					<p className="mt-1 text-sm text-muted-foreground">Professional summary, education, and experience.</p>
 				</div>
 				<Button asChild variant="outline">
-					<Link href={aboutSummary.cvDownloadUrl} download>
+					<a href={aboutSummary.cvDownloadUrl} download>
 						Download CV
-					</Link>
+					</a>
 				</Button>
 			</div>
 

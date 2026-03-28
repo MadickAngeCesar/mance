@@ -1,4 +1,5 @@
 import "dotenv/config";
+import bcrypt from "bcryptjs";
 import {
   SkillCategory,
   SocialPlatform,
@@ -36,6 +37,11 @@ interface SeedOptions {
   onlyCore?: boolean;
   reset?: boolean;
 }
+
+const ADMIN_EMAIL = "admin@mance.dev";
+const ADMIN_DISPLAY_NAME = "MAC TECH Admin";
+const ADMIN_DEFAULT_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "MacTech@2026";
+const ADMIN_BCRYPT_ROUNDS = 10;
 
 function mapSocialPlatform(value: string): SocialPlatform {
   switch (value) {
@@ -247,24 +253,25 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Booking CTA created");
 
-  // Create or upsert auth user
-  const existingUser = await prisma.authUser.findUnique({
-    where: { email: "admin@mance.dev" },
+  // Always upsert admin credentials so sign-in works after any reseed.
+  const passwordHash = await bcrypt.hash(ADMIN_DEFAULT_PASSWORD, ADMIN_BCRYPT_ROUNDS);
+  await prisma.authUser.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: {
+      displayName: ADMIN_DISPLAY_NAME,
+      role: "admin",
+      isActive: true,
+      passwordHash,
+    },
+    create: {
+      email: ADMIN_EMAIL,
+      displayName: ADMIN_DISPLAY_NAME,
+      role: "admin",
+      isActive: true,
+      passwordHash,
+    },
   });
-
-  if (!existingUser) {
-    await prisma.authUser.create({
-      data: {
-        email: "admin@mance.dev",
-        displayName: "MAC TECH Admin",
-        role: "admin",
-        isActive: true,
-      },
-    });
-    console.log("✓ Auth user created");
-  } else {
-    console.log("✓ Auth user already exists");
-  }
+  console.log(`✓ Auth user upserted (${ADMIN_EMAIL}) with seeded password`);
 
   return brandProfileId;
 }

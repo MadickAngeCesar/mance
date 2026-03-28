@@ -11,3 +11,363 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum WorkKind {
+  PROJECT
+  CLIENT_WORK
+  ARTICLE
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  DEVOPS
+  IT_SUPPORT
+  TOOLS
+  LANGUAGES
+}
+
+enum SocialPlatform {
+  GITHUB
+  LINKEDIN
+  WHATSAPP
+  FACEBOOK
+}
+
+enum FreelancePlatformName {
+  UPWORK
+  FREELANCER
+  FIVERR
+}
+
+enum CampaignStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+  BOUNCED
+}
+
+model BrandProfile {
+  id                        String              @id @default(cuid())
+  currentName               String
+  previousName              String
+  currentDomain             String
+  previousDomain            String
+  ownerName                 String
+  roleTagline               String
+  headline                  String
+  subTagline                String
+  freelanceAvailabilityLabel String
+  jobAvailabilityLabel      String
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+
+  aboutSummary              AboutSummary?
+  contactDetails            ContactDetails?
+  mainWorkHighlights        MainWorkHighlight[]
+  offerings                 Offering[]
+  workflowStages            WorkflowStage[]
+}
+
+model AboutSummary {
+  id                    String      @id @default(cuid())
+  biography             String
+  cvDownloadUrl         String
+  linkedinResumeSource  String
+  interests             String[]
+  brandProfileId        String      @unique
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  brandProfile          BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  title       String
+  institution String
+  period      String
+  location    String?
+  displayOrder Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Experience {
+  id          String   @id @default(cuid())
+  role        String
+  company     String
+  period      String
+  summary     String
+  displayOrder Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id          String       @id @default(cuid())
+  name        String
+  category    SkillCategory
+  proficiency Int
+  iconSlug    String
+  displayOrder Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ContactDetails {
+  id            String             @id @default(cuid())
+  email         String
+  phone         String
+  location      String
+  brandProfileId String            @unique
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  brandProfile  BrandProfile       @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  socialLinks   SocialLink[]
+  freelancePlatforms FreelancePlatform[]
+}
+
+model SocialLink {
+  id               String         @id @default(cuid())
+  platform         SocialPlatform
+  label            String
+  url              String
+  displayOrder     Int
+  contactDetailsId String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  contactDetails   ContactDetails @relation(fields: [contactDetailsId], references: [id], onDelete: Cascade)
+}
+
+model FreelancePlatform {
+  id               String               @id @default(cuid())
+  name             FreelancePlatformName
+  url              String
+  handle           String
+  displayOrder     Int
+  contactDetailsId String
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  contactDetails   ContactDetails       @relation(fields: [contactDetailsId], references: [id], onDelete: Cascade)
+}
+
+model MainWorkHighlight {
+  id             String      @id @default(cuid())
+  externalId     String      @unique
+  title          String
+  kind           WorkKind
+  summary        String
+  href           String
+  featured       Boolean     @default(false)
+  imageUrl       String
+  brandProfileId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+}
+
+model Offering {
+  id             String      @id @default(cuid())
+  externalId     String      @unique
+  title          String
+  description    String
+  features       String[]
+  ctaText        String
+  ctaUrl         String
+  brandProfileId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowStage {
+  id             String      @id @default(cuid())
+  step           Int         @unique
+  title          String
+  subtitle       String
+  details        String
+  brandProfileId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+}
+
+model ClientWork {
+  id           String   @id @default(cuid())
+  externalId   String   @unique
+  slug         String?  @unique
+  title        String
+  description  String
+  imageUrl     String
+  projectUrl   String?
+  stack        String[]
+  content      String?
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  testimonials Testimonial[]
+}
+
+model Testimonial {
+  id                String    @id @default(cuid())
+  externalId        String    @unique
+  clientName        String
+  clientRoleCompany String
+  text              String
+  avatarUrl         String?
+  rating            Int
+  projectReference  String
+  dateLabel         String
+  clientWorkId      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  clientWork        ClientWork? @relation(fields: [clientWorkId], references: [id], onDelete: SetNull)
+}
+
+model BookingCta {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  ctaText     String
+  ctaUrl      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LabProject {
+  id             String   @id @default(cuid())
+  externalId     String   @unique
+  title          String
+  slug           String   @unique
+  summary        String
+  content        String
+  stack          String[]
+  coverImageUrl  String
+  screenshotUrls String[]
+  demoUrl        String?
+  repoUrl        String?
+  featured       Boolean  @default(false)
+  views          Int      @default(0)
+  tags           String[]
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model LabArticle {
+  id            String   @id @default(cuid())
+  externalId    String   @unique
+  title         String
+  slug          String   @unique
+  category      String
+  excerpt       String
+  content       String
+  coverImageUrl String
+  tags          String[]
+  views         Int      @default(0)
+  featured      Boolean  @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  externalId String   @unique
+  name       String
+  email      String
+  subject    String
+  message    String
+  receivedAt DateTime
+  isRead     Boolean  @default(false)
+  source     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Subscriber {
+  id           String   @id @default(cuid())
+  externalId   String   @unique
+  email        String   @unique
+  source       String
+  subscribedAt DateTime
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  deliveries   SubscriberCampaignDelivery[]
+}
+
+model SubscriberCampaign {
+  id          String         @id @default(cuid())
+  title       String
+  slug        String
+  contentType WorkKind
+  contentId   String
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  deliveries  SubscriberCampaignDelivery[]
+}
+
+model SubscriberCampaignDelivery {
+  id            String         @id @default(cuid())
+  campaignId    String
+  subscriberId  String
+  status        DeliveryStatus @default(QUEUED)
+  provider      String?
+  providerMsgId String?
+  error         String?
+  sentAt        DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  campaign      SubscriberCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber         @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, subscriberId])
+}
+
+model AuthUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  displayName  String?
+  role         String    @default("admin")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  authEvents   AuthEvent[]
+}
+
+model AuthEvent {
+  id         String    @id @default(cuid())
+  userId     String?
+  eventType  String
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  user       AuthUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

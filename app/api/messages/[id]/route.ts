@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ApiResponse } from "@/lib/validators";
+import { MessageUpdateSchema, ApiResponse } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 
@@ -44,10 +44,11 @@ async function handlePatch(
 
   const { id } = params;
   const body = await request.json();
+  const data = MessageUpdateSchema.omit({ id: true }).partial().parse(body);
 
   const message = await prisma.message.update({
     where: { id },
-    data: body,
+    data,
   });
 
   const response: ApiResponse = {

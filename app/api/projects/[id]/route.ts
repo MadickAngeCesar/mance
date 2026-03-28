@@ -9,13 +9,12 @@ import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workfl
 /**
  * GET /api/projects/[id]
  * Get a single lab project by ID (or slug)
+ * Public can view published projects, only admin can view drafts
  */
 async function handleGet(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await requireRole(request, "admin");
-
   const { id } = params;
 
   // Try to find by ID first, then by slug
@@ -31,6 +30,11 @@ async function handleGet(
 
   if (!project) {
     throw ApiError.notFound("Project not found");
+  }
+
+  // Only admins can view draft projects
+  if (!project.publishedAt) {
+    await requireRole(request, "admin");
   }
 
   // Increment view count

@@ -136,7 +136,7 @@ export function LoginForm() {
 								id="email"
 								type="email"
 								autoComplete="email"
-								placeholder="hello@mance.dev"
+								placeholder="madickangecesar59@gmail.com"
 								className="h-10 pl-8"
 								aria-invalid={Boolean(errors.email)}
 								{...register("email", {
@@ -197,7 +197,7 @@ export function LoginForm() {
 							/>
 							{language === "FR" ? "Se souvenir de cet appareil" : "Remember this device"}
 						</label>
-						<Link href="mailto:hello@mance.dev" className="text-primary hover:underline">
+						<Link href="mailto:madickangecesar59@gmail.com" className="text-primary hover:underline">
 							{language === "FR" ? "Mot de passe oublie ?" : "Forgot password?"}
 						</Link>
 					</div>

@@ -84,7 +84,7 @@ type ContactInfo = {
 };
 
 const fallbackContact: ContactInfo = {
-  email: "hello@mance.dev",
+  email: "madickangecesar59@gmail.com",
   phone: "+509 0000 0000",
   location: "Port-au-Prince, Haiti",
   socialLinks: [],

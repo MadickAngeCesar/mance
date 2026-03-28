@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+const queryValue = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess(
+    (value) => {
+      if (value === null || value === "") {
+        return undefined;
+      }
+      return value;
+    },
+    schema
+  );
+
 /**
  * Generic API Response wrapper
  */
@@ -35,10 +46,10 @@ export const MessageUpdateSchema = MessageCreateSchema.partial().extend({
 export type MessageUpdate = z.infer<typeof MessageUpdateSchema>;
 
 export const MessageQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
-  sort: z.enum(["newest", "oldest", "unread"]).default("newest"),
-  isRead: z.enum(["all", "read", "unread"]).default("all"),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  sort: queryValue(z.enum(["newest", "oldest", "unread"]).default("newest")),
+  isRead: queryValue(z.enum(["all", "read", "unread"]).default("all")),
 });
 
 export type MessageQuery = z.infer<typeof MessageQuerySchema>;
@@ -61,10 +72,10 @@ export const SubscriberUpdateSchema = SubscriberCreateSchema.partial().extend({
 export type SubscriberUpdate = z.infer<typeof SubscriberUpdateSchema>;
 
 export const SubscriberQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
-  active: z.enum(["all", "active", "inactive"]).default("all"),
-  sort: z.enum(["newest", "oldest"]).default("newest"),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  active: queryValue(z.enum(["all", "active", "inactive"]).default("all")),
+  sort: queryValue(z.enum(["newest", "oldest"]).default("newest")),
 });
 
 export type SubscriberQuery = z.infer<typeof SubscriberQuerySchema>;
@@ -93,12 +104,12 @@ export const LabArticleUpdateSchema = LabArticleCreateSchema.partial().extend({
 export type LabArticleUpdate = z.infer<typeof LabArticleUpdateSchema>;
 
 export const LabArticleQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
-  category: z.string().optional(),
-  featured: z.enum(["all", "featured", "unfeatured"]).default("all"),
-  sort: z.enum(["newest", "oldest", "views"]).default("newest"),
-  published: z.enum(["all", "published", "draft"]).default("published"),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  category: queryValue(z.string().optional()),
+  featured: queryValue(z.enum(["all", "featured", "unfeatured"]).default("all")),
+  sort: queryValue(z.enum(["newest", "oldest", "views"]).default("newest")),
+  published: queryValue(z.enum(["all", "published", "draft"]).default("published")),
 });
 
 export type LabArticleQuery = z.infer<typeof LabArticleQuerySchema>;
@@ -130,12 +141,12 @@ export const LabProjectUpdateSchema = LabProjectCreateSchema.partial().extend({
 export type LabProjectUpdate = z.infer<typeof LabProjectUpdateSchema>;
 
 export const LabProjectQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
-  featured: z.enum(["all", "featured", "unfeatured"]).default("all"),
-  sort: z.enum(["newest", "oldest", "views"]).default("newest"),
-  published: z.enum(["all", "published", "draft"]).default("published"),
-  tag: z.string().optional(),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  featured: queryValue(z.enum(["all", "featured", "unfeatured"]).default("all")),
+  sort: queryValue(z.enum(["newest", "oldest", "views"]).default("newest")),
+  published: queryValue(z.enum(["all", "published", "draft"]).default("published")),
+  tag: queryValue(z.string().optional()),
 });
 
 export type LabProjectQuery = z.infer<typeof LabProjectQuerySchema>;
@@ -163,10 +174,10 @@ export const ClientWorkUpdateSchema = ClientWorkCreateSchema.partial().extend({
 export type ClientWorkUpdate = z.infer<typeof ClientWorkUpdateSchema>;
 
 export const ClientWorkQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
-  sort: z.enum(["newest", "oldest"]).default("newest"),
-  published: z.enum(["all", "published", "draft"]).default("published"),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  sort: queryValue(z.enum(["newest", "oldest"]).default("newest")),
+  published: queryValue(z.enum(["all", "published", "draft"]).default("published")),
 });
 
 export type ClientWorkQuery = z.infer<typeof ClientWorkQuerySchema>;
@@ -203,8 +214,8 @@ export const ServiceUpdateSchema = ServiceCreateSchema.partial().extend({
 export type ServiceUpdate = z.infer<typeof ServiceUpdateSchema>;
 
 export const ServiceQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
 });
 
 export type ServiceQuery = z.infer<typeof ServiceQuerySchema>;

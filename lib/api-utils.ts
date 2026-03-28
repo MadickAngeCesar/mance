@@ -4,7 +4,18 @@ type ErrorWithCode = {
   code?: string;
   message?: string;
   cause?: unknown;
+  issues?: unknown;
+  name?: string;
 };
+
+function isValidationError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as ErrorWithCode;
+  return candidate.name === "ZodError" || Array.isArray(candidate.issues);
+}
 
 export function isDatabaseUnavailableError(error: unknown) {
   if (!error || typeof error !== "object") {
@@ -14,6 +25,7 @@ export function isDatabaseUnavailableError(error: unknown) {
   const candidate = error as ErrorWithCode;
 
   const knownCodes = new Set([
+    "DB_CONFIG_MISMATCH",
     "ECONNREFUSED",
     "ETIMEDOUT",
     "ECONNRESET",
@@ -82,7 +94,13 @@ export function createApiHandler<T = any>(
       return response;
     } catch (error) {
       const duration = Date.now() - startTime;
-      const status = error instanceof ApiError ? error.statusCode : isDatabaseUnavailableError(error) ? 503 : 500;
+      const status = error instanceof ApiError
+        ? error.statusCode
+        : isValidationError(error)
+          ? 400
+          : isDatabaseUnavailableError(error)
+            ? 503
+            : 500;
 
       logRequest(req, status, duration);
 
@@ -93,6 +111,17 @@ export function createApiHandler<T = any>(
             error: error.message,
           },
           { status: error.statusCode }
+        );
+      }
+
+      if (isValidationError(error)) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Invalid request parameters.",
+            details: (error as ErrorWithCode).issues,
+          },
+          { status: 400 }
         );
       }
 

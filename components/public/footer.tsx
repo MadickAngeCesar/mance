@@ -2,22 +2,51 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Github, Linkedin, MessageCircle } from "lucide-react";
 
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
+
+function isValidHref(value: string | null | undefined) {
+	if (!value) {
+		return false;
+	}
+
+	if (value.startsWith("/")) {
+		return true;
+	}
+
+	try {
+		const parsed = new URL(value);
+		return parsed.protocol === "http:" || parsed.protocol === "https:";
+	} catch {
+		return false;
+	}
+}
 
 export async function Footer() {
 	const year = new Date().getFullYear();
-	const [contact, about] = await Promise.all([
-		prisma.contactDetails.findFirst({
-			include: {
-				socialLinks: {
-					orderBy: { displayOrder: "asc" },
+	let contact: {
+		socialLinks: Array<{ id: string; platform: string; label: string; url: string }>;
+	} | null = null;
+	let about: { cvDownloadUrl: string } | null = null;
+
+	try {
+		[contact, about] = await Promise.all([
+			prisma.contactDetails.findFirst({
+				include: {
+					socialLinks: {
+						orderBy: { displayOrder: "asc" },
+					},
 				},
-			},
-		}),
-		prisma.aboutSummary.findFirst({
-			select: { cvDownloadUrl: true },
-		}),
-	]);
+			}),
+			prisma.aboutSummary.findFirst({
+				select: { cvDownloadUrl: true },
+			}),
+		]);
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	const socialIcons = {
 		GITHUB: Github,
@@ -45,11 +74,11 @@ export async function Footer() {
 						<div className="flex items-center gap-2">
 							{(contact?.socialLinks ?? []).map((link) => {
 								const Icon = socialIcons[link.platform as keyof typeof socialIcons];
-								if (!Icon) {
+								if (!Icon || !isValidHref(link.url)) {
 									return null;
 								}
 								return (
-									<Link
+									<a
 										key={link.id}
 										href={link.url}
 										target="_blank"
@@ -58,7 +87,7 @@ export async function Footer() {
 										aria-label={link.label || link.platform}
 									>
 										<Icon className="size-4" />
-									</Link>
+									</a>
 								);
 							})}
 						</div>

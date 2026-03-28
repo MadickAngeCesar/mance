@@ -119,12 +119,22 @@ export function LabList() {
 
 				const loadedProjects =
 					projectsResult.status === "fulfilled"
-						? projectsResult.value.filter((item) => Boolean(item.slug && item.coverImageUrl))
+						? projectsResult.value
+								.filter((item) => Boolean(item.slug))
+								.map((item) => ({
+									...item,
+									coverImageUrl: item.coverImageUrl || "/images/Profile.jpg",
+								}))
 						: [];
 
 				const loadedArticles =
 					articlesResult.status === "fulfilled"
-						? articlesResult.value.filter((item) => Boolean(item.slug && item.coverImageUrl))
+						? articlesResult.value
+								.filter((item) => Boolean(item.slug))
+								.map((item) => ({
+									...item,
+									coverImageUrl: item.coverImageUrl || "/images/Profile.jpg",
+								}))
 						: [];
 
 				setProjects(loadedProjects);

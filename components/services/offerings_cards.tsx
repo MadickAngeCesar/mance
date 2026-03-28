@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 const serviceCategoryById: Record<string, string> = {
@@ -13,9 +14,24 @@ const serviceCategoryById: Record<string, string> = {
 };
 
 export async function OfferingsCards() {
-	const offerings = await prisma.offering.findMany({
-		orderBy: { createdAt: "desc" },
-	});
+	let offerings: Array<{
+		id: string;
+		title: string;
+		description: string;
+		features: string[];
+		ctaUrl: string;
+		ctaText: string;
+	}> = [];
+
+	try {
+		offerings = await prisma.offering.findMany({
+			orderBy: { createdAt: "desc" },
+		});
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	return (
 		<section className="space-y-5" id="offerings">
@@ -48,7 +64,7 @@ export async function OfferingsCards() {
 						</CardContent>
 						<CardFooter>
 							<Button asChild className="w-full">
-								<Link href={offering.ctaUrl || "/#contact"}>{offering.ctaText}</Link>
+								<Link href={offering.ctaUrl?.startsWith("/") ? offering.ctaUrl : "/#contact"}>{offering.ctaText}</Link>
 							</Button>
 						</CardFooter>
 					</Card>

@@ -1,11 +1,20 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function Workflow() {
-	const workflowStages = await prisma.workflowStage.findMany({
-		orderBy: { step: "asc" },
-	});
+	let workflowStages: Array<{ step: number; title: string; subtitle: string; details: string }> = [];
+
+	try {
+		workflowStages = await prisma.workflowStage.findMany({
+			orderBy: { step: "asc" },
+		});
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	return (
 		<section className="space-y-5" id="workflow">

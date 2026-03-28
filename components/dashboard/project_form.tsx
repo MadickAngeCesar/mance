@@ -34,6 +34,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const { language } = useLanguage();
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitIntent, setSubmitIntent] = useState<"publish" | "draft">("publish");
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
@@ -93,6 +94,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
 				tags: initialProject?.tags ?? [],
 				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
+				publishedAt:
+					submitIntent === "publish"
+						? initialProject?.publishedAt ?? new Date().toISOString()
+						: null,
 			};
 
 			if (isEditMode && initialProject) {
@@ -246,8 +251,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 
 					<DialogFooter>
 						{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
-						<Button variant="outline" type="button">{copy.saveDraft}</Button>
-						<Button type="submit" disabled={isSubmitting}>
+						<Button variant="outline" type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("draft")}>
+							{copy.saveDraft}
+						</Button>
+						<Button type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("publish")}>
 							<Rocket className="size-4" />
 							{isSubmitting ? "Saving..." : copy.publish}
 						</Button>

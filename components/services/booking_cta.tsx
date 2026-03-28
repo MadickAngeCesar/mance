@@ -3,12 +3,26 @@ import { CalendarDays, MessageSquareText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function BookingCta() {
-	const bookingCta = await prisma.bookingCta.findFirst({
-		orderBy: { updatedAt: "desc" },
-	});
+	let bookingCta: {
+		title: string;
+		description: string;
+		ctaText: string;
+		ctaUrl: string;
+	} | null = null;
+
+	try {
+		bookingCta = await prisma.bookingCta.findFirst({
+			orderBy: { updatedAt: "desc" },
+		});
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	return (
 		<section id="booking">
@@ -30,7 +44,7 @@ export async function BookingCta() {
 					</div>
 					<div className="flex flex-col sm:justify-center gap-2 sm:flex-row">
 						<Button asChild>
-							<Link href={bookingCta?.ctaUrl ?? "/#contact"}>{bookingCta?.ctaText ?? "Start a project"}</Link>
+							<Link href={bookingCta?.ctaUrl?.startsWith("/") ? bookingCta.ctaUrl : "/#contact"}>{bookingCta?.ctaText ?? "Start a project"}</Link>
 						</Button>
 						<Button asChild variant="outline">
 							<Link href="/">Back to Home</Link>

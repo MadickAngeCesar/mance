@@ -1,12 +1,29 @@
 import { Star } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function Testimonials() {
-	const testimonials = await prisma.testimonial.findMany({
-		orderBy: { createdAt: "desc" },
-	});
+	let testimonials: Array<{
+		id: string;
+		rating: number;
+		clientName: string;
+		clientRoleCompany: string;
+		text: string;
+		projectReference: string;
+		dateLabel: string;
+	}> = [];
+
+	try {
+		testimonials = await prisma.testimonial.findMany({
+			orderBy: { createdAt: "desc" },
+		});
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	return (
 		<section className="space-y-5" id="testimonials">

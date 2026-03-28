@@ -21,6 +21,18 @@ const ALLOWED_TYPES = new Set([
   "image/svg+xml",
 ]);
 
+const ALLOWED_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".avif",
+  ".heic",
+  ".heif",
+  ".webp",
+  ".gif",
+  ".svg",
+]);
+
 type UploadedFile = {
   name: string;
   type: string;
@@ -82,9 +94,13 @@ async function handlePost(request: NextRequest) {
     throw ApiError.badRequest("Missing file field.");
   }
 
-  if (!ALLOWED_TYPES.has(file.type)) {
+  const extension = path.extname(file.name || "").toLowerCase();
+  const hasAllowedMime = Boolean(file.type) && ALLOWED_TYPES.has(file.type);
+  const hasAllowedExtension = ALLOWED_EXTENSIONS.has(extension);
+
+  if (!hasAllowedMime && !hasAllowedExtension) {
     throw ApiError.badRequest(
-      `Unsupported image type \"${file.type || "unknown"}\". Allowed: ${Array.from(ALLOWED_TYPES).join(", ")}.`
+      `Unsupported image file \"${file.name || "unknown"}\" (${file.type || "unknown"}). Allowed types: ${Array.from(ALLOWED_TYPES).join(", ")}.`
     );
   }
 

@@ -4,20 +4,45 @@ import { ArrowUpRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function ClientWork() {
-	const [clientWork, fallbackProjects] = await Promise.all([
-		prisma.clientWork.findMany({
-			where: { publishedAt: { not: null } },
-			orderBy: { publishedAt: "desc" },
-		}),
-		prisma.labProject.findMany({
-			where: { publishedAt: { not: null } },
-			orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-			take: 6,
-		}),
-	]);
+	let clientWork: Array<{
+		id: string;
+		title: string;
+		description: string;
+		imageUrl: string;
+		stack: string[];
+		projectUrl: string | null;
+		slug: string | null;
+	}> = [];
+	let fallbackProjects: Array<{
+		id: string;
+		title: string;
+		summary: string;
+		coverImageUrl: string;
+		stack: string[];
+		slug: string;
+	}> = [];
+
+	try {
+		[clientWork, fallbackProjects] = await Promise.all([
+			prisma.clientWork.findMany({
+				where: { publishedAt: { not: null } },
+				orderBy: { publishedAt: "desc" },
+			}),
+			prisma.labProject.findMany({
+				where: { publishedAt: { not: null } },
+				orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+				take: 6,
+			}),
+		]);
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			throw error;
+		}
+	}
 
 	const items =
 		clientWork.length > 0
@@ -25,7 +50,7 @@ export async function ClientWork() {
 				id: item.id,
 				title: item.title,
 				description: item.description,
-				imageUrl: item.imageUrl,
+				imageUrl: item.imageUrl || "/images/Profile.jpg",
 				stack: item.stack,
 				projectUrl: item.projectUrl ?? (item.slug ? `/lab/${item.slug}` : undefined),
 			}))
@@ -33,7 +58,7 @@ export async function ClientWork() {
 				id: item.id,
 				title: item.title,
 				description: item.summary,
-				imageUrl: item.coverImageUrl,
+				imageUrl: item.coverImageUrl || "/images/Profile.jpg",
 				stack: item.stack,
 				projectUrl: `/lab/${item.slug}`,
 			}));

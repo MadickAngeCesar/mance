@@ -34,6 +34,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	const { language } = useLanguage();
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitIntent, setSubmitIntent] = useState<"publish" | "draft">("publish");
 	const [error, setError] = useState<string | null>(null);
 	const [markdownContent, setMarkdownContent] = useState(initialArticle?.content ?? "");
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
@@ -83,6 +84,10 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 					.map((tag) => tag.trim())
 					.filter(Boolean),
 				content: markdownContent,
+				publishedAt:
+					submitIntent === "publish"
+						? initialArticle?.publishedAt ?? new Date().toISOString()
+						: null,
 			};
 
 			if (isEditMode && initialArticle) {
@@ -257,8 +262,10 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 
 				<DialogFooter>
 					{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
-					<Button variant="outline" type="button">{copy.saveDraft}</Button>
-					<Button type="submit" disabled={isSubmitting}>
+					<Button variant="outline" type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("draft")}>
+						{copy.saveDraft}
+					</Button>
+					<Button type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("publish")}>
 						<WandSparkles className="size-4" />
 						{isSubmitting ? "Saving..." : copy.publish}
 					</Button>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { LabList } from "@/components/lab/lab_list";
+import { NewsLetter } from "@/components/lab/news_letter";
 
 export const metadata: Metadata = {
   title: "Lab | MAC TECH",
@@ -18,6 +19,7 @@ export default function LabPage() {
         </p>
       </section>
       <LabList />
+      <NewsLetter />
     </main>
   );
 }

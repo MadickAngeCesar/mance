@@ -1,0 +1,27 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant ServicesPage as Services Page UI
+    participant BookingCta as Booking CTA Component
+    participant ContactForm as Contact Form UI
+    participant MsgAPI as POST /api/messages
+    participant DB as PostgreSQL (Prisma)
+    participant Dashboard as Dashboard Messages
+
+    Visitor->>ServicesPage: Open /services
+    ServicesPage->>BookingCta: Render CTA actions
+    Visitor->>BookingCta: Click "Book a discovery call"
+    BookingCta->>ContactForm: Navigate to contact intake flow
+
+    Visitor->>ContactForm: Submit project requirements
+    ContactForm->>MsgAPI: Create intake message
+    MsgAPI->>DB: Insert MESSAGE with source=services-booking
+    DB-->>MsgAPI: Created row
+    MsgAPI-->>ContactForm: 201 Created
+    ContactForm-->>Visitor: Booking request confirmation
+
+    Dashboard->>MsgAPI: GET /api/messages?source=services-booking
+    MsgAPI->>DB: Query booking-origin leads
+    DB-->>MsgAPI: Booking lead queue
+    MsgAPI-->>Dashboard: Render prioritized intake list

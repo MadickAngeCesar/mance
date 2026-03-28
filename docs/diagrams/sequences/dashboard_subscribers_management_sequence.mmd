@@ -1,0 +1,20 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant SubscribersUI as Subscribers Dashboard
+    participant SubsAPI as /api/subscribers endpoints
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>SubscribersUI: Open /dashboard/subscribers
+    SubscribersUI->>SubsAPI: GET /api/subscribers?q=&page=1
+    SubsAPI->>DB: Query subscribers with filters
+    DB-->>SubsAPI: Paginated subscriber rows
+    SubsAPI-->>SubscribersUI: List payload
+    SubscribersUI-->>Admin: Render table
+
+    Admin->>SubscribersUI: Delete subscriber row
+    SubscribersUI->>SubsAPI: DELETE /api/subscribers/:id
+    SubsAPI->>DB: Delete subscriber by id
+    DB-->>SubsAPI: Delete result
+    SubsAPI-->>SubscribersUI: Success + updated list

@@ -1,0 +1,26 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant MessagesUI as Messages Dashboard + MessageList
+    participant MsgAPI as /api/messages endpoints
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>MessagesUI: Open /dashboard/messages
+    MessagesUI->>MsgAPI: GET /api/messages?page=1&status=all
+    MsgAPI->>DB: Query messages with pagination
+    DB-->>MsgAPI: Message rows
+    MsgAPI-->>MessagesUI: List payload
+    MessagesUI-->>Admin: Render inbox cards
+
+    Admin->>MessagesUI: Filter by new/read and search
+    MessagesUI->>MsgAPI: GET /api/messages?q=&status=new
+    MsgAPI->>DB: Query filtered rows
+    DB-->>MsgAPI: Filtered messages
+    MsgAPI-->>MessagesUI: Updated list
+
+    Admin->>MessagesUI: Mark message as read
+    MessagesUI->>MsgAPI: PATCH /api/messages/:id { isRead: true }
+    MsgAPI->>DB: Update message status
+    DB-->>MsgAPI: Updated row
+    MsgAPI-->>MessagesUI: Success

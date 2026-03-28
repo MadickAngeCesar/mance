@@ -1,0 +1,47 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+architecture-beta
+    group client(cloud)[Client Layer]
+    service browser(internet)[Visitor Browser] in client
+    service admin(internet)[Admin Browser] in client
+
+    group edge(cloud)[Edge and Rendering]
+    service web(server)[Nextjs App Router] in edge
+
+    group app(cloud)[Application Services]
+    service publicui(server)[Public Routes] in app
+    service dashui(server)[Dashboard Routes] in app
+    service api(server)[Api Routes and Server Actions] in app
+    service auth(server)[Auth Session Guard] in app
+
+    group jobs(cloud)[Background Processing]
+    service queue(server)[Campaign Job Queue] in jobs
+    service worker(server)[Email Worker] in jobs
+
+    group data(cloud)[Data Layer]
+    service prisma(server)[Prisma Client] in data
+    service postgres(database)[PostgreSQL] in data
+
+    group ext(cloud)[External Integrations]
+    service smtp(internet)[Gmail SMTP]
+    service mailer(server)[Nodemailer Transport]
+    service analytics(internet)[Analytics Provider]
+
+    browser:R --> L:web
+    admin:R --> L:web
+
+    web:B --> T:publicui
+    web:B --> T:dashui
+    publicui:R --> L:api
+    dashui:R --> L:api
+    dashui:B --> T:auth
+
+    api:B --> T:prisma
+    prisma:R --> L:postgres
+
+    api:R --> L:queue
+    queue:R --> L:worker
+    worker:B --> T:mailer
+    mailer:R --> L:smtp
+
+    publicui:R --> L:analytics
+    dashui:R --> L:analytics

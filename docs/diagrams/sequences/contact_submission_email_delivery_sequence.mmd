@@ -1,0 +1,31 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant ContactUI as Home Contact Form
+    participant MsgAPI as POST /api/messages
+    participant DB as PostgreSQL (Prisma)
+    participant MailService as Mail Service (Nodemailer)
+    participant GmailSMTP as Gmail SMTP
+    participant Inbox as Admin Inbox (hello@mance.dev)
+
+    Visitor->>ContactUI: Submit contact form
+    ContactUI->>MsgAPI: Send name, email, subject, message
+    MsgAPI->>DB: Persist MESSAGE row
+    DB-->>MsgAPI: Message created
+
+    par Notify admin
+        MsgAPI->>MailService: Compose admin notification
+        MailService->>GmailSMTP: sendMail(admin template)
+        GmailSMTP-->>MailService: 250 accepted
+        MailService-->>MsgAPI: Delivery result + messageId
+        MsgAPI-->>Inbox: New inquiry email delivered
+    and Send visitor acknowledgment
+        MsgAPI->>MailService: Compose visitor acknowledgment
+        MailService->>GmailSMTP: sendMail(visitor receipt)
+        GmailSMTP-->>MailService: 250 accepted
+        MailService-->>MsgAPI: Delivery result + messageId
+    end
+
+    MsgAPI-->>ContactUI: 201 Created + success state
+    ContactUI-->>Visitor: Confirmation message shown

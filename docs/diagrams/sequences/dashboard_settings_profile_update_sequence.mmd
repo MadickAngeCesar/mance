@@ -1,0 +1,27 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant SettingsUI as Settings Page + ProfileForm
+    participant ProfileAPI as PATCH /api/profile
+    participant SettingsAPI as PATCH /api/settings
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>SettingsUI: Open /dashboard/settings
+    SettingsUI->>ProfileAPI: GET /api/profile
+    ProfileAPI->>DB: Read brand profile and related sections
+    DB-->>ProfileAPI: Profile payload
+    ProfileAPI-->>SettingsUI: Populate form tabs
+
+    Admin->>SettingsUI: Save profile and contact updates
+    SettingsUI->>ProfileAPI: PATCH profile fields
+    ProfileAPI->>DB: Update BRAND_PROFILE and related tables
+    DB-->>ProfileAPI: Updated profile
+    ProfileAPI-->>SettingsUI: Success toast
+
+    opt Update site-level options
+        SettingsUI->>SettingsAPI: PATCH settings values
+        SettingsAPI->>DB: Persist settings
+        DB-->>SettingsAPI: Updated settings
+        SettingsAPI-->>SettingsUI: Success
+    end

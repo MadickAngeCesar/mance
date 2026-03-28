@@ -1,0 +1,34 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant NewsletterUI as Lab Newsletter Component
+    participant Validation as Zod Email Schema
+    participant SubsAPI as POST /api/subscribers
+    participant DB as PostgreSQL (Prisma)
+    participant Dashboard as Subscribers Dashboard
+
+    Visitor->>NewsletterUI: Enter email and submit
+    NewsletterUI->>Validation: Validate email format
+
+    alt Invalid email
+        Validation-->>NewsletterUI: Error
+        NewsletterUI-->>Visitor: Show validation message
+    else Valid email
+        NewsletterUI->>SubsAPI: Submit email + source
+        SubsAPI->>DB: Upsert SUBSCRIBER by email
+
+        alt Existing subscriber
+            DB-->>SubsAPI: Existing row updated
+            SubsAPI-->>NewsletterUI: 200 OK (already subscribed)
+        else New subscriber
+            DB-->>SubsAPI: New row created
+            SubsAPI-->>NewsletterUI: 201 Created
+        end
+
+        NewsletterUI-->>Visitor: Show subscription confirmation
+        Dashboard->>SubsAPI: GET /api/subscribers
+        SubsAPI->>DB: Read subscriber table
+        DB-->>SubsAPI: Subscriber rows
+        SubsAPI-->>Dashboard: Render subscribers list
+    end

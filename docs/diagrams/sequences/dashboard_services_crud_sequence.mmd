@@ -1,0 +1,32 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant ServicesUI as Services Dashboard
+    participant ServiceAPI as /api/services endpoints
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>ServicesUI: Open /dashboard/services
+    ServicesUI->>ServiceAPI: GET /api/services
+    ServiceAPI->>DB: Query OFFERING and TESTIMONIAL
+    DB-->>ServiceAPI: Offerings and testimonials
+    ServiceAPI-->>ServicesUI: Composite response
+    ServicesUI-->>Admin: Render offerings and testimonials lists
+
+    Admin->>ServicesUI: Create or update offering
+    ServicesUI->>ServiceAPI: POST or PATCH /api/services/offerings
+    ServiceAPI->>DB: Persist offering data
+    DB-->>ServiceAPI: Persisted offering
+    ServiceAPI-->>ServicesUI: Success
+
+    Admin->>ServicesUI: Create or update testimonial
+    ServicesUI->>ServiceAPI: POST or PATCH /api/services/testimonials
+    ServiceAPI->>DB: Persist testimonial data
+    DB-->>ServiceAPI: Persisted testimonial
+    ServiceAPI-->>ServicesUI: Success
+
+    Admin->>ServicesUI: Delete offering or testimonial
+    ServicesUI->>ServiceAPI: DELETE endpoint call
+    ServiceAPI->>DB: Delete target record
+    DB-->>ServiceAPI: Delete result
+    ServiceAPI-->>ServicesUI: Success

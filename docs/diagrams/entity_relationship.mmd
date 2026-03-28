@@ -1,0 +1,99 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+erDiagram
+	BRAND_PROFILE {
+		string id PK
+		string currentName
+		string previousName
+		string currentDomain
+		string previousDomain
+		string ownerName
+		string roleTagline
+		string headline
+		string subTagline
+	}
+
+	OFFERING {
+		string id PK
+		string title
+		string description
+		string ctaText
+		string ctaUrl
+	}
+
+	WORKFLOW_STAGE {
+		int step PK
+		string title
+		string subtitle
+		string details
+	}
+
+	CLIENT_WORK {
+		string id PK
+		string slug UK
+		string title
+		string description
+		string imageUrl
+		string projectUrl
+		date publishedAt
+	}
+
+	LAB_PROJECT {
+		string id PK
+		string slug UK
+		string title
+		string summary
+		string content
+		string coverImageUrl
+		bool featured
+		int views
+		date publishedAt
+	}
+
+	LAB_ARTICLE {
+		string id PK
+		string slug UK
+		string title
+		string category
+		string excerpt
+		string content
+		string coverImageUrl
+		int views
+		bool featured
+		date publishedAt
+	}
+
+	TESTIMONIAL {
+		string id PK
+		string clientName
+		string clientRoleCompany
+		string text
+		int rating
+		string projectReference
+		string dateLabel
+	}
+
+	MESSAGE {
+		string id PK
+		string name
+		string email
+		string subject
+		string message
+		datetime receivedAt
+		bool isRead
+	}
+
+	SUBSCRIBER {
+		string id PK
+		string email UK
+		string source
+		datetime subscribedAt
+	}
+
+	BRAND_PROFILE ||--o{ OFFERING : provides
+	BRAND_PROFILE ||--o{ WORKFLOW_STAGE : defines
+	BRAND_PROFILE ||--o{ CLIENT_WORK : showcases
+	BRAND_PROFILE ||--o{ LAB_PROJECT : publishes
+	BRAND_PROFILE ||--o{ LAB_ARTICLE : writes
+	CLIENT_WORK ||--o{ TESTIMONIAL : receives
+	LAB_PROJECT ||--o{ TESTIMONIAL : may_generate
+	MESSAGE }o--|| SUBSCRIBER : may_convert_to

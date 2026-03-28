@@ -1,0 +1,35 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant PublishUI as Dashboard Blogs or Projects UI
+    participant ContentAPI as POST or PATCH /api/blogs or /api/projects
+    participant DB as PostgreSQL (Prisma)
+    participant CampaignAPI as POST /api/subscribers/campaigns
+    participant Queue as Job Queue or Batch Worker
+    participant MailService as Mail Service (Nodemailer)
+    participant GmailSMTP as Gmail SMTP
+    participant Subscriber as Subscriber Inbox
+
+    Admin->>PublishUI: Publish article/blog/project
+    PublishUI->>ContentAPI: Save content with status=published
+    ContentAPI->>DB: Upsert content row and publishedAt
+    DB-->>ContentAPI: Persisted content
+    ContentAPI->>CampaignAPI: Trigger newsletter campaign
+
+    CampaignAPI->>DB: Read active subscribers
+    DB-->>CampaignAPI: Subscriber batch
+    CampaignAPI->>Queue: Enqueue send jobs (batched)
+
+    loop For each batch
+        Queue->>MailService: Build campaign template with content link
+        MailService->>GmailSMTP: sendMail(batch recipients)
+        GmailSMTP-->>MailService: Accepted or rejected per recipient
+        MailService->>DB: Record delivery status and retries
+        DB-->>MailService: Status persisted
+    end
+
+    Queue-->>CampaignAPI: Campaign completed summary
+    CampaignAPI-->>PublishUI: Delivery metrics (sent, failed, retried)
+    PublishUI-->>Admin: Show publish + email campaign result
+    GmailSMTP-->>Subscriber: Newsletter arrives with new content link

@@ -1,0 +1,42 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant Browser as Public Site UI
+    participant App as Next.js App Router
+    participant Validation as Zod Validation
+    participant API as API Route / Server Action
+    participant DB as PostgreSQL (Prisma)
+    participant Admin as Dashboard User
+
+    Visitor->>Browser: Fill contact form (name, email, subject, message)
+    Browser->>App: Submit form payload
+    App->>Validation: Validate payload schema
+
+    alt Invalid payload
+        Validation-->>App: Validation errors
+        App-->>Browser: Return field errors
+        Browser-->>Visitor: Show inline validation feedback
+    else Valid payload
+        Validation-->>App: Sanitized input
+        App->>API: Create message
+        API->>DB: INSERT into MESSAGE
+        DB-->>API: Message ID + timestamps
+
+        opt User checks newsletter opt-in
+            App->>API: Upsert subscriber(email, source)
+            API->>DB: INSERT/UPDATE SUBSCRIBER
+            DB-->>API: Subscriber status
+        end
+
+        API-->>App: Success response
+        App-->>Browser: Confirmation state
+        Browser-->>Visitor: "Message sent" feedback
+
+        Admin->>App: Open dashboard messages
+        App->>API: Fetch unread list
+        API->>DB: SELECT * FROM MESSAGE WHERE isRead=false
+        DB-->>API: Message rows
+        API-->>App: Message previews
+        App-->>Admin: Render inbox cards
+    end

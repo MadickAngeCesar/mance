@@ -1,0 +1,24 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant DetailPage as Lab Detail Route /lab/[slug]
+    participant ContentAPI as GET /api/blogs/:slug or /api/projects/:slug
+    participant MetricsAPI as POST /api/overview/views
+    participant DB as PostgreSQL (Prisma)
+
+    Visitor->>DetailPage: Open /lab/{slug}
+    DetailPage->>ContentAPI: Request content by slug
+    ContentAPI->>DB: Find article or project by slug
+    DB-->>ContentAPI: Content record
+    ContentAPI-->>DetailPage: Renderable payload
+    DetailPage-->>Visitor: Display full article/project
+
+    par Track engagement
+        DetailPage->>MetricsAPI: Send view event with slug and kind
+        MetricsAPI->>DB: Increment views counter
+        DB-->>MetricsAPI: Updated metric
+        MetricsAPI-->>DetailPage: Ack
+    and Keep page interactive
+        Visitor->>DetailPage: Scroll and interact with links
+    end

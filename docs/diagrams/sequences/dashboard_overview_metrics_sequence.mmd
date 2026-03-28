@@ -1,0 +1,15 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant OverviewUI as Dashboard Overview Page
+    participant OverviewAPI as GET /api/overview
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>OverviewUI: Open /dashboard
+    OverviewUI->>OverviewAPI: Request aggregate metrics
+    OverviewAPI->>DB: Count blogs, projects, messages, subscribers
+    OverviewAPI->>DB: Read top viewed entries and recent inbox items
+    DB-->>OverviewAPI: Aggregate datasets
+    OverviewAPI-->>OverviewUI: KPI payload and widgets data
+    OverviewUI-->>Admin: Render cards, top content, inbox snapshot

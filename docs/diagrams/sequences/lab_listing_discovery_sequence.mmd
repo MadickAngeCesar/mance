@@ -1,0 +1,23 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant LabPage as Lab Page UI
+    participant LabList as LabList Component
+    participant LabAPI as GET /api/blogs and GET /api/projects
+    participant DB as PostgreSQL (Prisma)
+
+    Visitor->>LabPage: Open /lab
+    LabPage->>LabList: Mount list and controls
+    LabList->>LabAPI: Fetch projects and articles (page=1)
+    LabAPI->>DB: Query LAB_PROJECT and LAB_ARTICLE
+    DB-->>LabAPI: Content rows
+    LabAPI-->>LabList: Combined payload
+    LabList-->>Visitor: Render cards, filters, and pagination
+
+    Visitor->>LabList: Search and change filter/sort
+    LabList->>LabAPI: Refetch with query params
+    LabAPI->>DB: Filter, sort, paginate query
+    DB-->>LabAPI: Result page + total count
+    LabAPI-->>LabList: Updated result set
+    LabList-->>Visitor: Render updated catalog

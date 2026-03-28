@@ -1,0 +1,38 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant SignInPage as SignIn Page UI
+    participant LoginForm as LoginForm (react-hook-form + zod)
+    participant AuthAPI as POST /api/auth/sign-in
+    participant Crypto as bcrypt compare
+    participant Token as JWT service
+    participant DB as PostgreSQL (Prisma)
+    participant Dashboard as /dashboard route
+
+    Admin->>SignInPage: Open /sign-in
+    SignInPage->>LoginForm: Render form and client validation rules
+    Admin->>LoginForm: Enter email and password
+    LoginForm->>LoginForm: Validate fields with zod schema
+
+    alt Invalid form payload
+        LoginForm-->>Admin: Show inline validation errors
+    else Valid payload
+        LoginForm->>AuthAPI: Submit credentials
+        AuthAPI->>DB: Find user by email
+        DB-->>AuthAPI: User record + passwordHash
+        AuthAPI->>Crypto: Compare password vs hash
+
+        alt Invalid credentials
+            Crypto-->>AuthAPI: comparison=false
+            AuthAPI-->>LoginForm: 401 Unauthorized
+            LoginForm-->>Admin: Show invalid credential message
+        else Valid credentials
+            Crypto-->>AuthAPI: comparison=true
+            AuthAPI->>Token: Create JWT access and refresh tokens
+            Token-->>AuthAPI: Signed tokens
+            AuthAPI-->>LoginForm: 200 OK + secure cookie/session
+            LoginForm->>Dashboard: Navigate to /dashboard
+            Dashboard-->>Admin: Show portal overview
+        end
+    end

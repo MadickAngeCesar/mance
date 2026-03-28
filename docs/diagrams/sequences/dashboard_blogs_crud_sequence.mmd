@@ -1,0 +1,32 @@
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1976d2','actorTextColor':'#000','actorLineColor':'#666','signalColor':'#333','signalTextColor':'#000','labelBoxBkgColor':'#e8f5e9','labelBoxBorderColor':'#388e3c','labelTextColor':'#000','loopTextColor':'#000','noteBkgColor':'#fff9c4','noteBorderColor':'#f57f17','noteTextColor':'#000','activationBkgColor':'#fff3e0','activationBorderColor':'#f57c00','sequenceNumberColor':'#fff'}}}%%
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant BlogsUI as Blogs Dashboard + ArticleForm
+    participant BlogAPI as /api/blogs endpoints
+    participant DB as PostgreSQL (Prisma)
+
+    Admin->>BlogsUI: Open /dashboard/blogs
+    BlogsUI->>BlogAPI: GET /api/blogs?page=1
+    BlogAPI->>DB: Query LAB_ARTICLE records
+    DB-->>BlogAPI: Articles list
+    BlogAPI-->>BlogsUI: List payload
+    BlogsUI-->>Admin: Render article table/cards
+
+    Admin->>BlogsUI: Create or edit article
+    BlogsUI->>BlogAPI: POST or PATCH /api/blogs
+    BlogAPI->>DB: Insert or update article row
+    DB-->>BlogAPI: Persisted row
+    opt status=published
+        BlogAPI->>BlogAPI: Trigger subscriber campaign workflow
+        Note over BlogAPI,DB: Full mail broadcast flow in publish_newsletter_broadcast_sequence.mmd
+    end
+    BlogAPI-->>BlogsUI: Success response
+    BlogsUI->>BlogAPI: GET /api/blogs (refresh)
+    BlogAPI-->>BlogsUI: Updated list
+
+    Admin->>BlogsUI: Delete article
+    BlogsUI->>BlogAPI: DELETE /api/blogs/:id
+    BlogAPI->>DB: Soft delete or hard delete row
+    DB-->>BlogAPI: Delete result
+    BlogAPI-->>BlogsUI: Success

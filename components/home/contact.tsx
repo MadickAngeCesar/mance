@@ -84,9 +84,9 @@ type ContactInfo = {
 };
 
 const fallbackContact: ContactInfo = {
-  email: "madickangecesar59@gmail.com",
-  phone: "+509 0000 0000",
-  location: "Port-au-Prince, Haiti",
+  email: "",
+  phone: "",
+  location: "",
   socialLinks: [],
   freelancePlatforms: [],
 };
@@ -285,15 +285,15 @@ export function Contact() {
               {loadError ? <p className="text-destructive">{loadError}</p> : null}
               <p>
                 <span className="font-medium">Email:</span>{" "} <br/>
-                {contact.email}
+                {contact.email || "Not configured"}
               </p>
               <p>
                 <span className="font-medium">Phone:</span>{" "} <br/>
-                {contact.phone}
+                {contact.phone || "Not configured"}
               </p>
               <p>
                 <span className="font-medium">Location:</span>{" "} <br/>
-                {contact.location}
+                {contact.location || "Not configured"}
               </p>
             </CardContent>
           </Card>

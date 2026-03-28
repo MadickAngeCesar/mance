@@ -263,6 +263,28 @@ export const ServiceQuerySchema = z.object({
 
 export type ServiceQuery = z.infer<typeof ServiceQuerySchema>;
 
+export const WorkflowStageCreateSchema = z.object({
+  step: z.coerce.number().int().positive(),
+  title: z.string().min(1, "Title is required.").max(200),
+  subtitle: z.string().min(1, "Subtitle is required.").max(200),
+  details: z.string().min(1, "Details are required.").max(2000),
+});
+
+export type WorkflowStageCreate = z.infer<typeof WorkflowStageCreateSchema>;
+
+export const WorkflowStageUpdateSchema = WorkflowStageCreateSchema.partial().extend({
+  id: z.string(),
+});
+
+export type WorkflowStageUpdate = z.infer<typeof WorkflowStageUpdateSchema>;
+
+export const WorkflowStageQuerySchema = z.object({
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+});
+
+export type WorkflowStageQuery = z.infer<typeof WorkflowStageQuerySchema>;
+
 /**
  * Profile / Brand Settings
  */

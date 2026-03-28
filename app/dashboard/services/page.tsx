@@ -5,6 +5,8 @@ import { OfferingForm } from "@/components/dashboard/offering_form";
 import { OfferingList } from "@/components/dashboard/offering_list";
 import { TestimonialForm } from "@/components/dashboard/testimonial_form";
 import { TestimonialsList } from "@/components/dashboard/testimonials_list";
+import { WorkflowStageForm } from "@/components/dashboard/workflow_stage_form";
+import { WorkflowStageList } from "@/components/dashboard/workflow_stage_list";
 
 export const metadata: Metadata = {
   title: "Services | Dashboard",
@@ -24,6 +26,18 @@ export default function ServicesDashboardPage() {
 			</div>
 
 			<OfferingList />
+
+			<div className="flex flex-wrap items-end justify-between gap-3">
+				<div className="space-y-1">
+					<h2 className="text-xl font-semibold tracking-tight"><Tx en="Delivery Workflow" fr="Workflow de delivery" /></h2>
+					<p className="text-sm text-muted-foreground">
+						<Tx en="Create, edit, and order workflow stages displayed in Services." fr="Creez, modifiez et ordonnez les etapes du workflow affichees sur Services." />
+					</p>
+				</div>
+				<WorkflowStageForm />
+			</div>
+
+			<WorkflowStageList />
 
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div className="space-y-1">

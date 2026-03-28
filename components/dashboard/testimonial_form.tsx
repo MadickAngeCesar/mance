@@ -36,14 +36,39 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 	const [error, setError] = useState<string | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
 
+	type ProjectListMeta = { pages?: number };
+
+	const fetchAllProjects = async () => {
+		const basePath = "/api/projects?published=all&featured=all&sort=newest";
+		const first = await apiRequest<any[]>(`${basePath}&page=1&limit=50`, { auth: true });
+		const firstData = first.data ?? [];
+		const pages = Number((first.meta as ProjectListMeta | undefined)?.pages ?? 1);
+
+		if (!Number.isFinite(pages) || pages <= 1) {
+			return firstData;
+		}
+
+		const requests: Array<ReturnType<typeof apiRequest<any[]>>> = [];
+		for (let page = 2; page <= pages; page += 1) {
+			requests.push(apiRequest<any[]>(`${basePath}&page=${page}&limit=50`, { auth: true }));
+		}
+
+		const rest = await Promise.all(requests);
+		return [...firstData, ...rest.flatMap((result) => result.data ?? [])];
+	};
+
 	useEffect(() => {
 		let isMounted = true;
 
 		async function loadProjects() {
 			try {
-				const response = await apiRequest<any[]>("/api/projects?limit=100", { auth: true });
+				const data = await fetchAllProjects();
 				if (isMounted) {
-					setProjects((response.data ?? []).map((project) => ({ id: project.id, title: project.title })));
+					setProjects(
+						data
+							.filter((project) => Boolean(project?.id && project?.title))
+							.map((project) => ({ id: project.id, title: project.title }))
+					);
 				}
 			} catch {
 				if (isMounted) {

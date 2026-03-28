@@ -33,6 +33,8 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [title, setTitle] = useState(initialOffering?.title ?? "");
+	const [ctaText, setCtaText] = useState(initialOffering?.ctaText ?? "");
 
 	const slugify = (value: string) =>
 		value
@@ -42,10 +44,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 			.replace(/\s+/g, "-")
 			.replace(/-+/g, "-");
 
-	const inferredCtaUrl = (() => {
-		const source = initialOffering?.ctaText || initialOffering?.title || "service";
-		return `/services?offering=${encodeURIComponent(slugify(source))}#booking`;
-	})();
+	const inferredCtaUrl = `/services?offering=${encodeURIComponent(slugify(ctaText || title || "service"))}#booking`;
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -53,18 +52,26 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 		setIsSubmitting(true);
 		setError(null);
 
-		const title = String(formData.get("title") ?? "");
-		const ctaText = String(formData.get("ctaText") ?? "");
+		const title = String(formData.get("title") ?? "").trim();
+		const ctaText = String(formData.get("ctaText") ?? "").trim();
+		const description = String(formData.get("description") ?? "").trim();
+
+		if (!title || !description) {
+			setError("Title and description are required.");
+			setIsSubmitting(false);
+			return;
+		}
+
 		const inferredFromForm = `/services?offering=${encodeURIComponent(slugify(ctaText || title || "service"))}#booking`;
 
 		const payload = {
 			title,
-			description: String(formData.get("description") ?? ""),
+			description,
 			features: String(formData.get("features") ?? "")
 				.split("\n")
 				.map((value) => value.trim())
 				.filter(Boolean),
-			ctaText,
+			ctaText: ctaText || "Start a project",
 			ctaUrl: inferredFromForm,
 		};
 
@@ -85,6 +92,10 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 
 			emitDashboardDataChanged("services");
 			setOpen(false);
+			if (!isEditMode) {
+				setTitle("");
+				setCtaText("");
+			}
 		} catch (submitError) {
 			setError(submitError instanceof Error ? submitError.message : "Unable to save offering.");
 		} finally {
@@ -141,13 +152,20 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 						<label htmlFor="offering-title" className="text-xs font-medium text-muted-foreground">
 							{copy.labelTitle}
 						</label>
-						<Input id="offering-title" name="title" placeholder="Web Product Development" defaultValue={initialOffering?.title} />
+						<Input
+							id="offering-title"
+							name="title"
+							placeholder="Web Product Development"
+							value={title}
+							onChange={(event) => setTitle(event.target.value)}
+							required
+						/>
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="offering-description" className="text-xs font-medium text-muted-foreground">
 							{copy.labelDescription}
 						</label>
-						<Textarea id="offering-description" name="description" placeholder="Summarize expected outcomes and delivery scope." rows={3} defaultValue={initialOffering?.description} />
+						<Textarea id="offering-description" name="description" placeholder="Summarize expected outcomes and delivery scope." rows={3} defaultValue={initialOffering?.description} required />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="offering-features" className="text-xs font-medium text-muted-foreground">
@@ -159,7 +177,13 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 						<label htmlFor="offering-cta-text" className="text-xs font-medium text-muted-foreground">
 							{copy.labelCtaText}
 						</label>
-						<Input id="offering-cta-text" name="ctaText" placeholder="Start a web project" defaultValue={initialOffering?.ctaText} />
+						<Input
+							id="offering-cta-text"
+							name="ctaText"
+							placeholder="Start a web project"
+							value={ctaText}
+							onChange={(event) => setCtaText(event.target.value)}
+						/>
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="offering-cta-url" className="text-xs font-medium text-muted-foreground">

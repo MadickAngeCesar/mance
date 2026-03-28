@@ -8,90 +8,44 @@ import {
 } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
-import { brandProfile, aboutSummary, contactDetails } from "@/lib/placeholder-data";
 import { ensureBrandProfile, ensureBrandProfileRelations } from "@/lib/brand-profile";
-
-function buildFallbackProfile() {
-  return {
-    id: "placeholder-brand-profile",
-    ...brandProfile,
-    createdAt: new Date(0),
-    updatedAt: new Date(0),
-    aboutSummary: {
-      id: "placeholder-about-summary",
-      biography: aboutSummary.biography,
-      cvDownloadUrl: aboutSummary.cvDownloadUrl,
-      linkedinResumeSource: aboutSummary.linkedinResumeSource,
-      interests: aboutSummary.interests,
-      brandProfileId: "placeholder-brand-profile",
-      createdAt: new Date(0),
-      updatedAt: new Date(0),
-    },
-    contactDetails: {
-      id: "placeholder-contact-details",
-      email: contactDetails.email,
-      phone: contactDetails.phone,
-      location: contactDetails.location,
-      brandProfileId: "placeholder-brand-profile",
-      createdAt: new Date(0),
-      updatedAt: new Date(0),
-      socialLinks: contactDetails.socialLinks.map((item, index) => ({
-        id: `placeholder-social-${index + 1}`,
-        platform: item.platform.toUpperCase(),
-        label: item.label,
-        url: item.url,
-        displayOrder: index + 1,
-        contactDetailsId: "placeholder-contact-details",
-        createdAt: new Date(0),
-        updatedAt: new Date(0),
-      })),
-      freelancePlatforms: contactDetails.freelancePlatforms.map((item, index) => ({
-        id: `placeholder-freelance-${index + 1}`,
-        name: item.name.toUpperCase(),
-        url: item.url,
-        handle: item.handle ?? null,
-        displayOrder: index + 1,
-        contactDetailsId: "placeholder-contact-details",
-        createdAt: new Date(0),
-        updatedAt: new Date(0),
-      })),
-    },
-    mainWorkHighlights: [],
-    offerings: [],
-    workflowStages: [],
-  };
-}
 
 /**
  * GET /api/profile
  * Get the brand profile and related data
  */
 async function handleGet(request: NextRequest) {
-  let profile;
+  const profileRecord = await ensureBrandProfile();
+  await ensureBrandProfileRelations(profileRecord.id);
 
-  try {
-    profile = await prisma.brandProfile.findFirst({
-      include: {
-        aboutSummary: true,
-        contactDetails: {
-          include: {
-            socialLinks: true,
-            freelancePlatforms: true,
+  const profile = await prisma.brandProfile.findUnique({
+    where: { id: profileRecord.id },
+    include: {
+      aboutSummary: true,
+      contactDetails: {
+        include: {
+          socialLinks: {
+            orderBy: { displayOrder: "asc" },
+          },
+          freelancePlatforms: {
+            orderBy: { displayOrder: "asc" },
           },
         },
-        mainWorkHighlights: true,
-        offerings: true,
-        workflowStages: {
-          orderBy: { step: "asc" },
-        },
       },
-    });
-  } catch (error) {
-    console.error("GET /api/profile database query failed, using fallback profile.", error);
-  }
+      mainWorkHighlights: {
+        orderBy: { createdAt: "desc" },
+      },
+      offerings: {
+        orderBy: { createdAt: "desc" },
+      },
+      workflowStages: {
+        orderBy: { step: "asc" },
+      },
+    },
+  });
 
   if (!profile) {
-    profile = buildFallbackProfile();
+    throw new ApiError("Profile unavailable", 500);
   }
 
   const response: ApiResponse = {
@@ -126,52 +80,51 @@ async function handlePatch(request: NextRequest) {
   // Update about summary
   if (body.aboutSummary) {
     const aboutData = AboutSummaryUpdateSchema.parse(body.aboutSummary);
-    await prisma.aboutSummary.upsert({
+    await prisma.aboutSummary.update({
       where: { brandProfileId: profile.id },
-      create: {
-        brandProfileId: profile.id,
-        biography: aboutData.biography ?? aboutSummary.biography,
-        cvDownloadUrl: aboutData.cvDownloadUrl ?? aboutSummary.cvDownloadUrl,
-        linkedinResumeSource:
-          aboutData.linkedinResumeSource ?? aboutSummary.linkedinResumeSource,
-        interests: aboutData.interests ?? aboutSummary.interests,
-      },
-      update: aboutData,
+      data: aboutData,
     });
   }
 
   // Update contact details
   if (body.contactDetails) {
     const contactData = ContactDetailsUpdateSchema.parse(body.contactDetails);
-    await prisma.contactDetails.upsert({
+    await prisma.contactDetails.update({
       where: { brandProfileId: profile.id },
-      create: {
-        brandProfileId: profile.id,
-        email: contactData.email ?? contactDetails.email,
-        phone: contactData.phone ?? contactDetails.phone,
-        location: contactData.location ?? contactDetails.location,
-      },
-      update: contactData,
+      data: contactData,
     });
   }
 
   // Fetch updated profile
-  const updated = await prisma.brandProfile.findFirst({
+  const updated = await prisma.brandProfile.findUnique({
+    where: { id: profile.id },
     include: {
       aboutSummary: true,
       contactDetails: {
         include: {
-          socialLinks: true,
-          freelancePlatforms: true,
+          socialLinks: {
+            orderBy: { displayOrder: "asc" },
+          },
+          freelancePlatforms: {
+            orderBy: { displayOrder: "asc" },
+          },
         },
       },
-      mainWorkHighlights: true,
-      offerings: true,
+      mainWorkHighlights: {
+        orderBy: { createdAt: "desc" },
+      },
+      offerings: {
+        orderBy: { createdAt: "desc" },
+      },
       workflowStages: {
         orderBy: { step: "asc" },
       },
     },
   });
+
+  if (!updated) {
+    throw new ApiError("Profile unavailable", 500);
+  }
 
   const response: ApiResponse = {
     ok: true,

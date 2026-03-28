@@ -5,11 +5,10 @@ import {
   LabProjectQuerySchema,
   ApiResponse,
 } from "@/lib/validators";
-import { createApiHandler, isDatabaseUnavailableError } from "@/lib/api-utils";
+import { createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 import { WorkKind } from "@/lib/generated/prisma/client";
 import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workflows";
-import { labProjects as fallbackLabProjects } from "@/lib/placeholder-data";
 
 /**
  * GET /api/projects
@@ -65,77 +64,15 @@ async function handleGet(request: NextRequest) {
     orderBy = { views: "desc" };
   }
 
-  let projects;
-  let total;
-
-  try {
-    [projects, total] = await Promise.all([
-      prisma.labProject.findMany({
-        where,
-        orderBy,
-        skip,
-        take: query.limit,
-      }),
-      prisma.labProject.count({ where }),
-    ]);
-  } catch (error) {
-    if (!isDatabaseUnavailableError(error)) {
-      throw error;
-    }
-
-    const filtered = fallbackLabProjects.filter((item) => {
-      if (query.featured === "featured" && !item.featured) {
-        return false;
-      }
-      if (query.featured === "unfeatured" && item.featured) {
-        return false;
-      }
-      if (query.published === "published" && !item.publishedAt) {
-        return false;
-      }
-      if (query.published === "draft" && item.publishedAt) {
-        return false;
-      }
-      if (query.tag && !item.tags.includes(query.tag)) {
-        return false;
-      }
-      return true;
-    });
-
-    filtered.sort((a, b) => {
-      if (query.sort === "views") {
-        return b.views - a.views;
-      }
-
-      const aTs = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-      const bTs = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-      if (query.sort === "oldest") {
-        return aTs - bTs;
-      }
-      return bTs - aTs;
-    });
-
-    total = filtered.length;
-    projects = filtered.slice(skip, skip + query.limit).map((item) => ({
-      id: item.id,
-      externalId: item.id,
-      title: item.title,
-      slug: item.slug,
-      summary: item.summary,
-      content: item.content,
-      stack: item.stack,
-      coverImageUrl: item.coverImageUrl,
-      screenshotUrls: item.screenshotUrls,
-      demoUrl: item.demoUrl ?? null,
-      repoUrl: item.repoUrl ?? null,
-      featured: item.featured,
-      views: item.views,
-      tags: item.tags,
-      publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
-      createdAt: item.publishedAt ? new Date(item.publishedAt) : new Date(0),
-      updatedAt: item.publishedAt ? new Date(item.publishedAt) : new Date(0),
-    }));
-  }
+  const [projects, total] = await Promise.all([
+    prisma.labProject.findMany({
+      where,
+      orderBy,
+      skip,
+      take: query.limit,
+    }),
+    prisma.labProject.count({ where }),
+  ]);
 
   const response: ApiResponse = {
     ok: true,

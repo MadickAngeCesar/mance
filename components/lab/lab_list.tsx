@@ -34,6 +34,55 @@ type CombinedLabItem = {
 	isCaseStudy: boolean;
 };
 
+type ProjectItem = {
+	id: string;
+	title: string;
+	summary: string;
+	slug: string;
+	coverImageUrl: string;
+	tags: string[];
+	featured: boolean;
+	views: number;
+	publishedAt?: string;
+};
+
+type ArticleItem = {
+	id: string;
+	title: string;
+	excerpt: string;
+	slug: string;
+	coverImageUrl: string;
+	tags: string[];
+	featured: boolean;
+	views: number;
+	category: string;
+	publishedAt?: string;
+};
+
+type PaginatedMeta = {
+	pages?: number;
+};
+
+async function fetchAllPages<T>(basePath: string) {
+	const first = await apiRequest<T[]>(`${basePath}${basePath.includes("?") ? "&" : "?"}page=1&limit=50`);
+	const firstData = first.data ?? [];
+	const firstPages = Number((first.meta as PaginatedMeta | undefined)?.pages ?? 1);
+
+	if (!Number.isFinite(firstPages) || firstPages <= 1) {
+		return firstData;
+	}
+
+	const pageRequests: Array<ReturnType<typeof apiRequest<T[]>>> = [];
+	for (let page = 2; page <= firstPages; page += 1) {
+		pageRequests.push(apiRequest<T[]>(`${basePath}${basePath.includes("?") ? "&" : "?"}page=${page}&limit=50`));
+	}
+
+	const pageResults = await Promise.all(pageRequests);
+	const pageData = pageResults.flatMap((result) => result.data ?? []);
+
+	return [...firstData, ...pageData];
+}
+
 const filterOptions: Array<{ value: LabFilter; label: string }> = [
 	{ value: "all", label: "All" },
 	{ value: "projects", label: "Projects" },
@@ -42,8 +91,8 @@ const filterOptions: Array<{ value: LabFilter; label: string }> = [
 ];
 
 export function LabList() {
-	const [projects, setProjects] = useState<any[]>([]);
-	const [articles, setArticles] = useState<any[]>([]);
+	const [projects, setProjects] = useState<ProjectItem[]>([]);
+	const [articles, setArticles] = useState<ArticleItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
@@ -59,17 +108,39 @@ export function LabList() {
 			setIsLoading(true);
 			setLoadError(null);
 			try {
-				const [projectsResponse, articlesResponse] = await Promise.all([
-					apiRequest<any[]>("/api/projects?limit=100"),
-					apiRequest<any[]>("/api/blogs?limit=100"),
+				const [projectsResult, articlesResult] = await Promise.allSettled([
+					fetchAllPages<ProjectItem>("/api/projects?published=published&sort=newest&featured=all"),
+					fetchAllPages<ArticleItem>("/api/blogs?published=published&sort=newest&featured=all"),
 				]);
 
 				if (!isMounted) {
 					return;
 				}
 
-				setProjects(projectsResponse.data ?? []);
-				setArticles(articlesResponse.data ?? []);
+				const loadedProjects =
+					projectsResult.status === "fulfilled"
+						? projectsResult.value.filter((item) => Boolean(item.slug && item.coverImageUrl))
+						: [];
+
+				const loadedArticles =
+					articlesResult.status === "fulfilled"
+						? articlesResult.value.filter((item) => Boolean(item.slug && item.coverImageUrl))
+						: [];
+
+				setProjects(loadedProjects);
+				setArticles(loadedArticles);
+
+				if (projectsResult.status === "rejected" && articlesResult.status === "rejected") {
+					throw new Error("Unable to load projects and articles for lab page.");
+				}
+
+				if (projectsResult.status === "rejected") {
+					setLoadError("Projects could not be loaded. Showing available articles.");
+				}
+
+				if (articlesResult.status === "rejected") {
+					setLoadError("Articles could not be loaded. Showing available projects.");
+				}
 			} catch (error) {
 				if (!isMounted) {
 					return;
@@ -115,7 +186,14 @@ export function LabList() {
 	}, [featuredProjects]);
 
 	const featuredArticle = useMemo(
-		() => articles.find((article) => Boolean(article.featured)),
+		() =>
+			[...articles]
+				.filter((article) => Boolean(article.featured))
+				.sort((a, b) => {
+					const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+					const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+					return bTime - aTime;
+				})[0],
 		[articles]
 	);
 
@@ -132,7 +210,7 @@ export function LabList() {
 			views: project.views,
 			meta: "Project",
 			publishedAt: project.publishedAt,
-			isCaseStudy: project.tags.includes("case-study"),
+			isCaseStudy: project.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
 		}));
 
 		const articleItems = articles.map((article) => ({
@@ -147,7 +225,9 @@ export function LabList() {
 			views: article.views,
 			meta: article.category,
 			publishedAt: article.publishedAt,
-			isCaseStudy: article.category.toLowerCase() === "case study",
+			isCaseStudy:
+				article.category.toLowerCase() === "case study" ||
+				article.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
 		}));
 
 		return [...projectItems, ...articleItems];

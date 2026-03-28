@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,93 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { subscriberPreviews } from "@/lib/placeholder-data";
+import { DASHBOARD_DATA_EVENT } from "@/components/dashboard/data-events";
+import { apiRequest } from "@/lib/client-api";
+
+type SubscriberItem = {
+	id: string;
+	email: string;
+	source: string;
+	subscribedAt: string;
+	active: boolean;
+};
 
 export function SubscribersList() {
+	const [subscribers, setSubscribers] = useState<SubscriberItem[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 	const [query, setQuery] = useState("");
 
+	const loadSubscribers = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		try {
+			const response = await apiRequest<SubscriberItem[]>("/api/subscribers?limit=100", {
+				auth: true,
+			});
+			setSubscribers(response.data ?? []);
+		} catch (loadError) {
+			setError(loadError instanceof Error ? loadError.message : "Unable to load subscribers.");
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		void loadSubscribers();
+	}, [loadSubscribers]);
+
+	useEffect(() => {
+		const handler = (event: Event) => {
+			const custom = event as CustomEvent<{ domain?: string }>;
+			if (custom.detail?.domain === "subscribers") {
+				void loadSubscribers();
+			}
+		};
+
+		window.addEventListener(DASHBOARD_DATA_EVENT, handler);
+		return () => window.removeEventListener(DASHBOARD_DATA_EVENT, handler);
+	}, [loadSubscribers]);
+
+	const setPending = (id: string, active: boolean) => {
+		setPendingIds((current) => {
+			const next = new Set(current);
+			if (active) {
+				next.add(id);
+			} else {
+				next.delete(id);
+			}
+			return next;
+		});
+	};
+
+	const handleDelete = async (id: string) => {
+		const previous = subscribers;
+		setPending(id, true);
+		setSubscribers((current) => current.filter((item) => item.id !== id));
+
+		try {
+			await apiRequest(`/api/subscribers/${id}`, {
+				method: "DELETE",
+				auth: true,
+			});
+		} catch (deleteError) {
+			setSubscribers(previous);
+			setError(deleteError instanceof Error ? deleteError.message : "Unable to delete subscriber.");
+		} finally {
+			setPending(id, false);
+		}
+	};
+
 	const filtered = useMemo(() => {
-		return subscriberPreviews.filter((subscriber) => {
+		return subscribers.filter((subscriber) => {
 			return (
 				subscriber.email.toLowerCase().includes(query.toLowerCase()) ||
 				subscriber.source.toLowerCase().includes(query.toLowerCase())
 			);
 		});
-	}, [query]);
+	}, [query, subscribers]);
 
 	return (
 		<Card>
@@ -43,6 +117,8 @@ export function SubscribersList() {
 				</div>
 			</CardHeader>
 			<CardContent className="pt-4">
+				{isLoading ? <p className="pb-3 text-sm text-muted-foreground">Loading subscribers...</p> : null}
+				{error ? <p className="pb-3 text-sm text-destructive">{error}</p> : null}
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -59,7 +135,14 @@ export function SubscribersList() {
 								<TableCell>{subscriber.source}</TableCell>
 								<TableCell>{new Date(subscriber.subscribedAt).toLocaleDateString()}</TableCell>
 								<TableCell>
-									<Button variant="ghost" size="icon-sm" type="button" aria-label="Delete subscriber">
+									<Button
+										variant="ghost"
+										size="icon-sm"
+										type="button"
+										aria-label="Delete subscriber"
+										onClick={() => void handleDelete(subscriber.id)}
+										disabled={pendingIds.has(subscriber.id)}
+									>
 										<Trash2 className="size-4" />
 									</Button>
 								</TableCell>
@@ -67,6 +150,9 @@ export function SubscribersList() {
 						))}
 					</TableBody>
 				</Table>
+				{!isLoading && filtered.length === 0 ? (
+					<p className="pt-3 text-sm text-muted-foreground">No subscribers found for this search.</p>
+				) : null}
 			</CardContent>
 		</Card>
 	);

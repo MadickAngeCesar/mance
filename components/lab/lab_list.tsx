@@ -13,8 +13,8 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
+import { apiRequest } from "@/lib/client-api";
 import { cn } from "@/lib/utils";
-import { labArticles, labProjects } from "@/lib/placeholder-data";
 
 type LabFilter = "all" | "projects" | "articles" | "case-studies";
 type LabSort = "recent" | "views" | "alpha";
@@ -42,11 +42,52 @@ const filterOptions: Array<{ value: LabFilter; label: string }> = [
 ];
 
 export function LabList() {
+	const [projects, setProjects] = useState<any[]>([]);
+	const [articles, setArticles] = useState<any[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 	const [filter, setFilter] = useState<LabFilter>("all");
 	const [sortBy, setSortBy] = useState<LabSort>("recent");
 	const [page, setPage] = useState(1);
 	const [isDesktop, setIsDesktop] = useState(false);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		async function loadData() {
+			setIsLoading(true);
+			setLoadError(null);
+			try {
+				const [projectsResponse, articlesResponse] = await Promise.all([
+					apiRequest<any[]>("/api/projects?limit=100"),
+					apiRequest<any[]>("/api/blogs?limit=100"),
+				]);
+
+				if (!isMounted) {
+					return;
+				}
+
+				setProjects(projectsResponse.data ?? []);
+				setArticles(articlesResponse.data ?? []);
+			} catch (error) {
+				if (!isMounted) {
+					return;
+				}
+				setLoadError(error instanceof Error ? error.message : "Unable to load lab content.");
+			} finally {
+				if (isMounted) {
+					setIsLoading(false);
+				}
+			}
+		}
+
+		void loadData();
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
 
 	useEffect(() => {
 		const mediaQuery = window.matchMedia("(min-width: 1024px)");
@@ -61,8 +102,8 @@ export function LabList() {
 	const itemsPerPage = isDesktop ? 6 : 4;
 
 	const featuredProjects = useMemo(
-		() => labProjects.filter((project) => project.featured),
-		[]
+		() => projects.filter((project) => Boolean(project.featured)),
+		[projects]
 	);
 
 	const featuredProject = useMemo(() => {
@@ -74,12 +115,12 @@ export function LabList() {
 	}, [featuredProjects]);
 
 	const featuredArticle = useMemo(
-		() => labArticles.find((article) => article.featured),
-		[]
+		() => articles.find((article) => Boolean(article.featured)),
+		[articles]
 	);
 
 	const allItems = useMemo<CombinedLabItem[]>(() => {
-		const projectItems = labProjects.map((project) => ({
+		const projectItems = projects.map((project) => ({
 			id: project.id,
 			title: project.title,
 			summary: project.summary,
@@ -94,7 +135,7 @@ export function LabList() {
 			isCaseStudy: project.tags.includes("case-study"),
 		}));
 
-		const articleItems = labArticles.map((article) => ({
+		const articleItems = articles.map((article) => ({
 			id: article.id,
 			title: article.title,
 			summary: article.excerpt,
@@ -110,7 +151,7 @@ export function LabList() {
 		}));
 
 		return [...projectItems, ...articleItems];
-	}, []);
+	}, [articles, projects]);
 
 	const filteredItems = useMemo(() => {
 		const normalizedQuery = query.trim().toLowerCase();
@@ -163,6 +204,12 @@ export function LabList() {
 
 	return (
 		<section className="space-y-8">
+			{isLoading ? (
+				<p className="text-sm text-muted-foreground">Loading lab content...</p>
+			) : null}
+			{loadError ? (
+				<p className="text-sm text-destructive">{loadError}</p>
+			) : null}
 			<div className="grid items-start gap-6 sm:grid-cols-2">
 				{featuredProject ? (
 					<div className="space-y-3">

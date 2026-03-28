@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ExternalLink,
   Facebook,
@@ -11,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { contactDetails } from "@/lib/placeholder-data";
+import { apiRequest } from "@/lib/client-api";
 
 const subjects = [
   "Web Development",
@@ -72,7 +75,141 @@ const platformIcons = {
   Fiverr: FiverrIcon,
 } as const;
 
+type ContactInfo = {
+  email: string;
+  phone: string;
+  location: string;
+  socialLinks: Array<{ platform: "GitHub" | "LinkedIn" | "WhatsApp" | "Facebook"; label: string; url: string }>;
+  freelancePlatforms: Array<{ name: "Upwork" | "Freelancer" | "Fiverr"; url: string; handle?: string }>;
+};
+
+const fallbackContact: ContactInfo = {
+  email: "hello@mance.dev",
+  phone: "+509 0000 0000",
+  location: "Port-au-Prince, Haiti",
+  socialLinks: [],
+  freelancePlatforms: [],
+};
+
+function normalizePlatform(value: string): ContactInfo["socialLinks"][number]["platform"] | null {
+  const normalized = value.toUpperCase();
+  if (normalized === "GITHUB") return "GitHub";
+  if (normalized === "LINKEDIN") return "LinkedIn";
+  if (normalized === "WHATSAPP") return "WhatsApp";
+  if (normalized === "FACEBOOK") return "Facebook";
+  return null;
+}
+
+function normalizeFreelanceName(value: string): ContactInfo["freelancePlatforms"][number]["name"] | null {
+  const normalized = value.toUpperCase();
+  if (normalized === "UPWORK") return "Upwork";
+  if (normalized === "FREELANCER") return "Freelancer";
+  if (normalized === "FIVERR") return "Fiverr";
+  return null;
+}
+
 export function Contact() {
+  const [contact, setContact] = useState<ContactInfo>(fallbackContact);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProfile() {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        const response = await apiRequest<any>("/api/profile");
+        const details = response.data?.contactDetails;
+
+        if (!details || !isMounted) {
+          return;
+        }
+
+        const socialLinks = (details.socialLinks ?? [])
+          .map((entry: any) => {
+            const platform = normalizePlatform(String(entry.platform ?? ""));
+            if (!platform) return null;
+            return {
+              platform,
+              label: String(entry.label ?? platform),
+              url: String(entry.url ?? "#"),
+            };
+          })
+          .filter(Boolean) as ContactInfo["socialLinks"];
+
+        const freelancePlatforms = (details.freelancePlatforms ?? [])
+          .map((entry: any) => {
+            const name = normalizeFreelanceName(String(entry.name ?? ""));
+            if (!name) return null;
+            return {
+              name,
+              url: String(entry.url ?? "#"),
+              handle: entry.handle ? String(entry.handle) : undefined,
+            };
+          })
+          .filter(Boolean) as ContactInfo["freelancePlatforms"];
+
+        setContact({
+          email: String(details.email ?? fallbackContact.email),
+          phone: String(details.phone ?? fallbackContact.phone),
+          location: String(details.location ?? fallbackContact.location),
+          socialLinks,
+          freelancePlatforms,
+        });
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setLoadError(error instanceof Error ? error.message : "Unable to load contact details.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const socialLinks = useMemo(() => contact.socialLinks, [contact.socialLinks]);
+  const freelancePlatforms = useMemo(() => contact.freelancePlatforms, [contact.freelancePlatforms]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setSubmitState("submitting");
+    setSubmitError(null);
+
+    try {
+      await apiRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({
+          name: String(formData.get("name") ?? ""),
+          email: String(formData.get("email") ?? ""),
+          subject: String(formData.get("subject") ?? ""),
+          message: String(formData.get("message") ?? ""),
+          source: "public-contact",
+        }),
+      });
+
+      form.reset();
+      setSubmitState("success");
+    } catch (error) {
+      setSubmitState("error");
+      setSubmitError(error instanceof Error ? error.message : "Unable to send your message.");
+    }
+  };
+
   return (
     <section className="space-y-5" id="contact">
       <div>
@@ -88,7 +225,7 @@ export function Contact() {
             <CardTitle>Send a Message</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="flex flex-col justify-between gap-4 h-full" action="mailto:madickangecesar59@gmail.com" method="POST">
+            <form className="flex h-full flex-col justify-between gap-4" onSubmit={handleSubmit}>
               <Input name="name" placeholder="Your name" required />
               <Input
                 name="email"
@@ -126,8 +263,14 @@ export function Contact() {
                 rows={4}
               />
               <Button type="submit" className="w-full">
-                Send message
+                {submitState === "submitting" ? "Sending..." : "Send message"}
               </Button>
+              {submitState === "success" ? (
+                <p className="text-sm text-green-600">Message sent successfully.</p>
+              ) : null}
+              {submitState === "error" ? (
+                <p className="text-sm text-destructive">{submitError ?? "Unable to send message."}</p>
+              ) : null}
             </form>
           </CardContent>
         </Card>
@@ -138,17 +281,19 @@ export function Contact() {
               <CardTitle>Contact Details</CardTitle>
             </CardHeader>
             <CardContent className="grid xl:grid-cols-3 gap-1.5 text-sm">
+              {isLoading ? <p className="text-muted-foreground">Loading contact details...</p> : null}
+              {loadError ? <p className="text-destructive">{loadError}</p> : null}
               <p>
                 <span className="font-medium">Email:</span>{" "} <br/>
-                {contactDetails.email}
+                {contact.email}
               </p>
               <p>
                 <span className="font-medium">Phone:</span>{" "} <br/>
-                {contactDetails.phone}
+                {contact.phone}
               </p>
               <p>
                 <span className="font-medium">Location:</span>{" "} <br/>
-                {contactDetails.location}
+                {contact.location}
               </p>
             </CardContent>
           </Card>
@@ -158,7 +303,7 @@ export function Contact() {
               <CardTitle>Social Links</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 sm:grid-cols-1 xl:grid-cols-2 gap-2">
-              {contactDetails.socialLinks.map((social) => {
+              {socialLinks.map((social) => {
                 const Icon = socialIcons[social.platform];
                 return (
                   <Button
@@ -179,6 +324,9 @@ export function Contact() {
                   </Button>
                 );
               })}
+              {socialLinks.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No social links available.</p>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -187,7 +335,7 @@ export function Contact() {
               <CardTitle>Freelance Platforms</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2  xl:grid-cols-3">
-              {contactDetails.freelancePlatforms.map((platform) => (
+              {freelancePlatforms.map((platform) => (
                 <Link
                   key={platform.name}
                   href={platform.url}
@@ -205,6 +353,9 @@ export function Contact() {
                   <ExternalLink className="size-3" />
                 </Link>
               ))}
+              {freelancePlatforms.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No freelance links available.</p>
+              ) : null}
             </CardContent>
           </Card>
         </div>

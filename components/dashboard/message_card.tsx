@@ -7,9 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type MessageCardProps = {
 	message: MessagePreview;
+	onToggleRead: (id: string, nextRead: boolean) => Promise<void>;
+	onDelete: (id: string) => Promise<void>;
+	isPending?: boolean;
 };
 
-export function MessageCard({ message }: MessageCardProps) {
+export function MessageCard({ message, onToggleRead, onDelete, isPending = false }: MessageCardProps) {
 	return (
 		<Card className="border border-border/70 bg-card/80">
 			<CardHeader className="flex flex-row items-start justify-between gap-3 border-b border-border/70 pb-3">
@@ -28,15 +31,27 @@ export function MessageCard({ message }: MessageCardProps) {
 						Received {new Date(message.receivedAt).toLocaleString()}
 					</p>
 					<div className="flex gap-1">
-						<Button variant="ghost" size="sm" type="button">
+						<Button
+							variant="ghost"
+							size="sm"
+							type="button"
+							onClick={() => void onToggleRead(message.id, !message.isRead)}
+							disabled={isPending}
+						>
 							<MailOpen className="size-4" />
-							Open
+							{message.isRead ? "Mark unread" : "Mark read"}
 						</Button>
-						<Button variant="ghost" size="sm" type="button">
+						<Button variant="ghost" size="sm" type="button" disabled={isPending}>
 							<Reply className="size-4" />
 							Reply
 						</Button>
-						<Button variant="ghost" size="sm" type="button">
+						<Button
+							variant="ghost"
+							size="sm"
+							type="button"
+							onClick={() => void onDelete(message.id)}
+							disabled={isPending}
+						>
 							<Trash2 className="size-4" />
 							Delete
 						</Button>

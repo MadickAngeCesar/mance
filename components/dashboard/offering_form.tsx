@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useMemo } from "react";
+import type { FormEvent, ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Save } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { emitDashboardDataChanged } from "@/components/dashboard/data-events";
+import { apiRequest } from "@/lib/client-api";
 import type { Offering } from "@/lib/definitions";
 
 type OfferingFormProps = {
@@ -28,6 +30,60 @@ type OfferingFormProps = {
 export function OfferingForm({ mode = "create", initialOffering, trigger }: OfferingFormProps) {
 	const isEditMode = mode === "edit";
 	const { language } = useLanguage();
+	const [open, setOpen] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const toAbsoluteUrl = (value: string) => {
+		if (!value.startsWith("/")) {
+			return value;
+		}
+		if (typeof window === "undefined") {
+			return value;
+		}
+		return new URL(value, window.location.origin).toString();
+	};
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		setIsSubmitting(true);
+		setError(null);
+
+		const payload = {
+			title: String(formData.get("title") ?? ""),
+			description: String(formData.get("description") ?? ""),
+			features: String(formData.get("features") ?? "")
+				.split("\n")
+				.map((value) => value.trim())
+				.filter(Boolean),
+			ctaText: String(formData.get("ctaText") ?? ""),
+			ctaUrl: toAbsoluteUrl(String(formData.get("ctaUrl") ?? "")),
+		};
+
+		try {
+			if (isEditMode && initialOffering) {
+				await apiRequest(`/api/services/${initialOffering.id}`, {
+					method: "PATCH",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			} else {
+				await apiRequest("/api/services", {
+					method: "POST",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			}
+
+			emitDashboardDataChanged("services");
+			setOpen(false);
+		} catch (submitError) {
+			setError(submitError instanceof Error ? submitError.message : "Unable to save offering.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 	const copy = useMemo(() => {
 		if (language === "FR") {
 			return {
@@ -57,7 +113,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 	}, [isEditMode, language]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">
@@ -67,6 +123,7 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 				)}
 			</DialogTrigger>
 			<DialogContent className="max-w-2xl p-0">
+				<form onSubmit={handleSubmit}>
 				<DialogHeader className="border-b border-border/70 px-4 pt-4 pb-3">
 					<DialogTitle className="text-base">{copy.title}</DialogTitle>
 					<DialogDescription>{copy.description}</DialogDescription>
@@ -77,41 +134,43 @@ export function OfferingForm({ mode = "create", initialOffering, trigger }: Offe
 						<label htmlFor="offering-title" className="text-xs font-medium text-muted-foreground">
 							{copy.labelTitle}
 						</label>
-						<Input id="offering-title" placeholder="Web Product Development" defaultValue={initialOffering?.title} />
+						<Input id="offering-title" name="title" placeholder="Web Product Development" defaultValue={initialOffering?.title} />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="offering-description" className="text-xs font-medium text-muted-foreground">
 							{copy.labelDescription}
 						</label>
-						<Textarea id="offering-description" placeholder="Summarize expected outcomes and delivery scope." rows={3} defaultValue={initialOffering?.description} />
+						<Textarea id="offering-description" name="description" placeholder="Summarize expected outcomes and delivery scope." rows={3} defaultValue={initialOffering?.description} />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="offering-features" className="text-xs font-medium text-muted-foreground">
 							{copy.labelFeatures}
 						</label>
-						<Textarea id="offering-features" placeholder="Next.js architecture and setup&#10;API and database integration&#10;Auth, roles, and dashboard features" rows={5} defaultValue={initialOffering?.features.join("\n")} />
+						<Textarea id="offering-features" name="features" placeholder="Next.js architecture and setup&#10;API and database integration&#10;Auth, roles, and dashboard features" rows={5} defaultValue={initialOffering?.features.join("\n")} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="offering-cta-text" className="text-xs font-medium text-muted-foreground">
 							{copy.labelCtaText}
 						</label>
-						<Input id="offering-cta-text" placeholder="Start a web project" defaultValue={initialOffering?.ctaText} />
+						<Input id="offering-cta-text" name="ctaText" placeholder="Start a web project" defaultValue={initialOffering?.ctaText} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="offering-cta-url" className="text-xs font-medium text-muted-foreground">
 							{copy.labelCtaUrl}
 						</label>
-						<Input id="offering-cta-url" placeholder="/services#booking" defaultValue={initialOffering?.ctaUrl} />
+						<Input id="offering-cta-url" name="ctaUrl" placeholder="https://mance.dev/services#booking" defaultValue={initialOffering?.ctaUrl} />
 					</div>
 					</div>
 				</div>
 
 				<DialogFooter>
-					<Button type="button">
+					{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
+					<Button type="submit" disabled={isSubmitting}>
 						<Save className="size-4" />
-						{copy.save}
+						{isSubmitting ? "Saving..." : copy.save}
 					</Button>
 				</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

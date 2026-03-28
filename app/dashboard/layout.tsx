@@ -1,17 +1,34 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PortalMobileMenu, PortalSidebar } from "@/components/dashboard/portal_nav";
+import { SignOutButton } from "@/components/dashboard/sign_out_button";
+import { ACCESS_TOKEN_COOKIE, verifyToken } from "@/lib/auth";
 import { brandProfile } from "@/lib/placeholder-data";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
+
+  if (!accessToken) {
+    redirect("/sign-in");
+  }
+
+  try {
+    await verifyToken(accessToken);
+  } catch {
+    redirect("/sign-in");
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
@@ -29,6 +46,7 @@ export default function DashboardLayout({
             <Button asChild variant="outline" size="sm">
               <Link href="/"><Tx en="View Website" fr="Voir le site" /></Link>
             </Button>
+            <SignOutButton />
           </div>
         </div>
       </header>

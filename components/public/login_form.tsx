@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { apiRequest, persistAuthTokens } from "@/lib/client-api";
 import { brandProfile, contactDetails } from "@/lib/placeholder-data";
 
 const loginSchema = z.object({
@@ -25,11 +26,6 @@ const loginSchema = z.object({
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
-
-const DEMO_CREDENTIALS = {
-	email: "admin@mance.dev",
-	password: "MacTech@2026",
-};
 
 export function LoginForm() {
 	const router = useRouter();
@@ -73,26 +69,43 @@ export function LoginForm() {
 			return;
 		}
 
-		const isValidCredential =
-			parsed.data.email.trim().toLowerCase() === DEMO_CREDENTIALS.email &&
-			parsed.data.password === DEMO_CREDENTIALS.password;
+		try {
+			const response = await apiRequest<{
+				token: {
+					accessToken: string;
+					refreshToken?: string;
+				};
+			}>("/api/auth/sign-in", {
+				method: "POST",
+				body: JSON.stringify({
+					email: parsed.data.email,
+					password: parsed.data.password,
+					rememberMe: Boolean(parsed.data.rememberMe),
+				}),
+			});
 
-		if (!isValidCredential) {
+			if (response.data?.token?.accessToken) {
+				persistAuthTokens({
+					accessToken: response.data.token.accessToken,
+					refreshToken: response.data.token.refreshToken,
+				});
+			}
+
+			router.push("/dashboard");
+			router.refresh();
+		} catch (error) {
 			setError("root", {
 				type: "manual",
-				message: language === "FR"
-					? "Identifiants invalides. Utilisez les identifiants de demonstration ci-dessous."
-					: "Invalid credentials. Use the demo credentials shown below.",
+				message:
+					error instanceof Error
+						? error.message
+						: language === "FR"
+							? "Connexion impossible. Verifiez vos identifiants."
+							: "Unable to sign in. Check your credentials.",
 			});
-			setIsSubmitting(false);
-			return;
 		}
 
-		// Simulate auth latency until credential verification is wired with JWT + bcrypt.
-		await new Promise((resolve) => setTimeout(resolve, 900));
-
-		router.push("/dashboard");
-		router.refresh();
+		setIsSubmitting(false);
 	};
 
 	return (
@@ -204,12 +217,6 @@ export function LoginForm() {
 						<p className="text-xs text-destructive">{errors.root.message}</p>
 					) : null}
 				</form>
-
-				<div className="mt-4 rounded-lg border border-border/70 bg-muted/40 p-3 text-xs text-muted-foreground">
-					<p className="font-medium text-foreground">{language === "FR" ? "Identifiants de demonstration" : "Demo credentials"}</p>
-					<p className="mt-1">Email: {DEMO_CREDENTIALS.email}</p>
-					<p>{language === "FR" ? "Mot de passe" : "Password"}: {DEMO_CREDENTIALS.password}</p>
-				</div>
 
 				<div className="mt-3 rounded-lg border border-border/70 bg-muted/40 p-3 text-xs text-muted-foreground">
 					<p className="font-medium text-foreground">{language === "FR" ? "Besoin d'aide pour l'acces ?" : "Need access support?"}</p>

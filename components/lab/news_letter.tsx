@@ -1,7 +1,40 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { apiRequest } from "@/lib/client-api";
 
 export function NewsLetter() {
+	const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+	const [error, setError] = useState<string | null>(null);
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+
+		setStatus("submitting");
+		setError(null);
+
+		try {
+			await apiRequest("/api/subscribers", {
+				method: "POST",
+				body: JSON.stringify({
+					email: String(formData.get("email") ?? ""),
+					source: "public-lab-newsletter",
+				}),
+			});
+
+			form.reset();
+			setStatus("success");
+		} catch (submitError) {
+			setStatus("error");
+			setError(submitError instanceof Error ? submitError.message : "Unable to subscribe now.");
+		}
+	};
+
 	return (
 		<section className="relative overflow-hidden rounded-2xl border border-border/70 bg-card/60 p-6 sm:p-8">
 			<div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
@@ -14,7 +47,7 @@ export function NewsLetter() {
 					</p>
 				</div>
 
-				<form className="grid w-full gap-3 sm:grid-cols-[1fr_auto] lg:min-w-107.5" action="#" method="post">
+				<form className="grid w-full gap-3 sm:grid-cols-[1fr_auto] lg:min-w-107.5" onSubmit={handleSubmit}>
 					<Input
 						type="email"
 						name="email"
@@ -23,9 +56,15 @@ export function NewsLetter() {
 						aria-label="Email address"
 						className="h-11"
 					/>
-					<Button type="submit" className="h-11 px-6">
-						Subscribe
+					<Button type="submit" className="h-11 px-6" disabled={status === "submitting"}>
+						{status === "submitting" ? "Subscribing..." : "Subscribe"}
 					</Button>
+					{status === "success" ? (
+						<p className="text-sm text-green-600 sm:col-span-2">You are subscribed. Thank you.</p>
+					) : null}
+					{status === "error" ? (
+						<p className="text-sm text-destructive sm:col-span-2">{error ?? "Unable to subscribe."}</p>
+					) : null}
 				</form>
 			</div>
 		</section>

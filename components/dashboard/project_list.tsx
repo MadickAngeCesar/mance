@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -24,19 +24,69 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { DASHBOARD_DATA_EVENT } from "@/components/dashboard/data-events";
 import { ProjectForm } from "@/components/dashboard/project_form";
-import { labProjects } from "@/lib/placeholder-data";
+import { apiRequest } from "@/lib/client-api";
+import type { LabProject } from "@/lib/definitions";
 
 const PAGE_SIZE = 5;
 
 export function ProjectList() {
 	const { language } = useLanguage();
+	const [projects, setProjects] = useState<LabProject[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 	const [featuredFilter, setFeaturedFilter] = useState<"all" | "featured" | "standard">("all");
 	const [page, setPage] = useState(1);
 
+	const loadProjects = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		try {
+			const response = await apiRequest<LabProject[]>("/api/projects?limit=100&published=all", {
+				auth: true,
+			});
+			setProjects(response.data ?? []);
+		} catch (loadError) {
+			setError(loadError instanceof Error ? loadError.message : "Unable to load projects.");
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		void loadProjects();
+	}, [loadProjects]);
+
+	useEffect(() => {
+		const handler = (event: Event) => {
+			const custom = event as CustomEvent<{ domain?: string }>;
+			if (custom.detail?.domain === "projects") {
+				void loadProjects();
+			}
+		};
+
+		window.addEventListener(DASHBOARD_DATA_EVENT, handler);
+		return () => window.removeEventListener(DASHBOARD_DATA_EVENT, handler);
+	}, [loadProjects]);
+
+	const handleDelete = async (id: string) => {
+		const previous = projects;
+		setProjects((current) => current.filter((project) => project.id !== id));
+		try {
+			await apiRequest(`/api/projects/${id}`, {
+				method: "DELETE",
+				auth: true,
+			});
+		} catch (deleteError) {
+			setProjects(previous);
+			setError(deleteError instanceof Error ? deleteError.message : "Unable to delete project.");
+		}
+	};
+
 	const filtered = useMemo(() => {
-		return labProjects.filter((project) => {
+		return projects.filter((project) => {
 			const matchesQuery =
 				project.title.toLowerCase().includes(query.toLowerCase()) ||
 				project.tags.join(" ").toLowerCase().includes(query.toLowerCase());
@@ -45,7 +95,7 @@ export function ProjectList() {
 				(featuredFilter === "featured" ? project.featured : !project.featured);
 			return matchesQuery && matchesFeatured;
 		});
-	}, [featuredFilter, query]);
+	}, [featuredFilter, projects, query]);
 
 	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const currentPage = Math.min(page, pageCount);
@@ -84,6 +134,8 @@ export function ProjectList() {
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-3 pt-4">
+				{isLoading ? <p className="text-sm text-muted-foreground">Loading projects...</p> : null}
+				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -124,7 +176,7 @@ export function ProjectList() {
 												</Button>
 											}
 										/>
-										<Button variant="ghost" size="icon-sm" aria-label="Delete project">
+										<Button variant="ghost" size="icon-sm" aria-label="Delete project" onClick={() => void handleDelete(project.id)}>
 											<Trash2 className="size-4" />
 										</Button>
 									</div>
@@ -133,6 +185,9 @@ export function ProjectList() {
 						))}
 					</TableBody>
 				</Table>
+				{!isLoading && paginated.length === 0 ? (
+					<p className="text-sm text-muted-foreground">No projects found for the current filters.</p>
+				) : null}
 
 				<Pagination className="justify-end">
 					<PaginationContent>

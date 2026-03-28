@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -24,24 +24,74 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { DASHBOARD_DATA_EVENT } from "@/components/dashboard/data-events";
 import { ArticleForm } from "@/components/dashboard/article_form";
-import { labArticles } from "@/lib/placeholder-data";
+import { apiRequest } from "@/lib/client-api";
+import type { LabArticle } from "@/lib/definitions";
 
 const PAGE_SIZE = 5;
 
 export function ArticleList() {
 	const { language } = useLanguage();
+	const [articles, setArticles] = useState<LabArticle[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState("all");
 	const [page, setPage] = useState(1);
 
+	const loadArticles = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		try {
+			const response = await apiRequest<LabArticle[]>("/api/blogs?limit=100&published=all", {
+				auth: true,
+			});
+			setArticles(response.data ?? []);
+		} catch (loadError) {
+			setError(loadError instanceof Error ? loadError.message : "Unable to load articles.");
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		void loadArticles();
+	}, [loadArticles]);
+
+	useEffect(() => {
+		const handler = (event: Event) => {
+			const custom = event as CustomEvent<{ domain?: string }>;
+			if (custom.detail?.domain === "blogs") {
+				void loadArticles();
+			}
+		};
+
+		window.addEventListener(DASHBOARD_DATA_EVENT, handler);
+		return () => window.removeEventListener(DASHBOARD_DATA_EVENT, handler);
+	}, [loadArticles]);
+
+	const handleDelete = async (id: string) => {
+		const previous = articles;
+		setArticles((current) => current.filter((article) => article.id !== id));
+		try {
+			await apiRequest(`/api/blogs/${id}`, {
+				method: "DELETE",
+				auth: true,
+			});
+		} catch (deleteError) {
+			setArticles(previous);
+			setError(deleteError instanceof Error ? deleteError.message : "Unable to delete article.");
+		}
+	};
+
 	const categories = useMemo(
-		() => ["all", ...Array.from(new Set(labArticles.map((article) => article.category.toLowerCase())))],
-		[]
+		() => ["all", ...Array.from(new Set(articles.map((article) => article.category.toLowerCase())))],
+		[articles]
 	);
 
 	const filtered = useMemo(() => {
-		return labArticles.filter((article) => {
+		return articles.filter((article) => {
 			const matchesQuery =
 				article.title.toLowerCase().includes(query.toLowerCase()) ||
 				article.tags.join(" ").toLowerCase().includes(query.toLowerCase());
@@ -49,7 +99,7 @@ export function ArticleList() {
 				categoryFilter === "all" || article.category.toLowerCase() === categoryFilter;
 			return matchesQuery && matchesCategory;
 		});
-	}, [categoryFilter, query]);
+	}, [articles, categoryFilter, query]);
 
 	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const currentPage = Math.min(page, pageCount);
@@ -90,6 +140,8 @@ export function ArticleList() {
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-3 pt-4">
+				{isLoading ? <p className="text-sm text-muted-foreground">Loading articles...</p> : null}
+				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -130,7 +182,7 @@ export function ArticleList() {
 												</Button>
 											}
 										/>
-										<Button variant="ghost" size="icon-sm" aria-label="Delete article">
+										<Button variant="ghost" size="icon-sm" aria-label="Delete article" onClick={() => void handleDelete(article.id)}>
 											<Trash2 className="size-4" />
 										</Button>
 									</div>
@@ -139,6 +191,9 @@ export function ArticleList() {
 						))}
 					</TableBody>
 				</Table>
+				{!isLoading && paginated.length === 0 ? (
+					<p className="text-sm text-muted-foreground">No articles found for the current filters.</p>
+				) : null}
 
 				<Pagination className="justify-end">
 					<PaginationContent>

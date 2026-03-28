@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useMemo } from "react";
+import type { FormEvent, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Save } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { emitDashboardDataChanged } from "@/components/dashboard/data-events";
+import { apiRequest } from "@/lib/client-api";
 import type { TestimonialItem } from "@/lib/definitions";
-import { labProjects } from "@/lib/placeholder-data";
 
 type TestimonialFormProps = {
 	mode?: "create" | "edit";
@@ -29,6 +30,74 @@ type TestimonialFormProps = {
 export function TestimonialForm({ mode = "create", initialTestimonial, trigger }: TestimonialFormProps) {
 	const { language } = useLanguage();
 	const isEditMode = mode === "edit";
+	const [open, setOpen] = useState(false);
+	const [projects, setProjects] = useState<Array<{ id: string; title: string }>>([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		async function loadProjects() {
+			try {
+				const response = await apiRequest<any[]>("/api/projects?limit=100", { auth: true });
+				if (isMounted) {
+					setProjects((response.data ?? []).map((project) => ({ id: project.id, title: project.title })));
+				}
+			} catch {
+				if (isMounted) {
+					setProjects([]);
+				}
+			}
+		}
+
+		void loadProjects();
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		setIsSubmitting(true);
+		setError(null);
+
+		const payload = {
+			clientName: String(formData.get("clientName") ?? ""),
+			clientRoleCompany: String(formData.get("clientRoleCompany") ?? ""),
+			rating: Number(formData.get("rating") ?? 5),
+			avatarUrl: String(formData.get("avatarUrl") ?? "") || undefined,
+			projectReference: String(formData.get("projectReference") ?? ""),
+			text: String(formData.get("text") ?? ""),
+			date: String(formData.get("date") ?? ""),
+		};
+
+		try {
+			if (isEditMode && initialTestimonial) {
+				await apiRequest(`/api/testimonials/${initialTestimonial.id}`, {
+					method: "PATCH",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			} else {
+				await apiRequest("/api/testimonials", {
+					method: "POST",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			}
+
+			emitDashboardDataChanged("services");
+			setOpen(false);
+		} catch (submitError) {
+			setError(submitError instanceof Error ? submitError.message : "Unable to save testimonial.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	const copy = useMemo(() => {
 		if (language === "FR") {
 			return {
@@ -62,7 +131,7 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 	}, [isEditMode, language]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">
@@ -72,6 +141,7 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 				)}
 			</DialogTrigger>
 			<DialogContent className="max-w-xl p-0">
+				<form onSubmit={handleSubmit}>
 				<DialogHeader className="border-b border-border/70 px-4 pt-4 pb-3">
 					<DialogTitle className="text-base">{copy.title}</DialogTitle>
 					<DialogDescription>{copy.description}</DialogDescription>
@@ -82,19 +152,19 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 						<label htmlFor="testimonial-name" className="text-xs font-medium text-muted-foreground">
 							{copy.name}
 						</label>
-						<Input id="testimonial-name" placeholder="Sarah Jean" defaultValue={initialTestimonial?.clientName} />
+						<Input id="testimonial-name" name="clientName" placeholder="Sarah Jean" defaultValue={initialTestimonial?.clientName} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-role" className="text-xs font-medium text-muted-foreground">
 							{copy.role}
 						</label>
-						<Input id="testimonial-role" placeholder="Founder, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompany} />
+						<Input id="testimonial-role" name="clientRoleCompany" placeholder="Founder, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompany} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-rating" className="text-xs font-medium text-muted-foreground">
 							{copy.rating}
 						</label>
-						<select id="testimonial-rating" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={String(initialTestimonial?.rating ?? 5)}>
+						<select id="testimonial-rating" name="rating" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={String(initialTestimonial?.rating ?? 5)}>
 							<option value="5">{language === "FR" ? "5 etoiles" : "5 stars"}</option>
 							<option value="4">{language === "FR" ? "4 etoiles" : "4 stars"}</option>
 							<option value="3">{language === "FR" ? "3 etoiles" : "3 stars"}</option>
@@ -104,15 +174,15 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 						<label htmlFor="testimonial-image" className="text-xs font-medium text-muted-foreground">
 							{copy.avatar}
 						</label>
-						<Input id="testimonial-image" placeholder="/images/clients/sarah-jean.jpg" defaultValue={initialTestimonial?.avatarUrl} />
+						<Input id="testimonial-image" name="avatarUrl" placeholder="https://mance.dev/images/clients/sarah-jean.jpg" defaultValue={initialTestimonial?.avatarUrl} />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="testimonial-project" className="text-xs font-medium text-muted-foreground">
 							{copy.project}
 						</label>
-						<select id="testimonial-project" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={initialTestimonial?.projectReference ?? ""}>
+						<select id="testimonial-project" name="projectReference" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={initialTestimonial?.projectReference ?? ""}>
 							<option value="">{copy.projectNone}</option>
-							{labProjects.map((project) => (
+							{projects.map((project) => (
 								<option key={project.id} value={project.title}>
 									{project.title}
 								</option>
@@ -123,29 +193,31 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 						<label htmlFor="testimonial-text" className="text-xs font-medium text-muted-foreground">
 							{copy.quote}
 						</label>
-						<Textarea id="testimonial-text" placeholder="MAC TECH translated our rough idea into a complete platform..." rows={4} defaultValue={initialTestimonial?.text} />
+						<Textarea id="testimonial-text" name="text" placeholder="MAC TECH translated our rough idea into a complete platform..." rows={4} defaultValue={initialTestimonial?.text} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-date" className="text-xs font-medium text-muted-foreground">
 							{language === "FR" ? "Date" : "Date"}
 						</label>
-						<Input id="testimonial-date" placeholder="January 2025" defaultValue={initialTestimonial?.date} />
+						<Input id="testimonial-date" name="date" placeholder="January 2025" defaultValue={initialTestimonial?.date} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-project-reference" className="text-xs font-medium text-muted-foreground">
 							{language === "FR" ? "Reference projet" : "Project Reference"}
 						</label>
-						<Input id="testimonial-project-reference" placeholder="Project: Service Business Platform" defaultValue={initialTestimonial?.projectReference} />
+						<Input id="testimonial-project-reference" placeholder="Project: Service Business Platform" defaultValue={initialTestimonial?.projectReference} disabled />
 					</div>
 				</div>
 				</div>
 
 				<DialogFooter>
-					<Button type="button">
+					{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
+					<Button type="submit" disabled={isSubmitting}>
 						<Save className="size-4" />
-						{copy.save}
+						{isSubmitting ? "Saving..." : copy.save}
 					</Button>
 				</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

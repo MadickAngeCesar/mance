@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -5,9 +8,119 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { aboutSummary, brandProfile, contactDetails, education, experience, skills } from "@/lib/placeholder-data";
+import { apiRequest } from "@/lib/client-api";
+import { aboutSummary, contactDetails, education, experience, skills } from "@/lib/placeholder-data";
+
+type ProfilePayload = {
+	brandProfile: {
+		currentName: string;
+		currentDomain: string;
+		headline: string;
+		roleTagline: string;
+	};
+	aboutSummary: {
+		biography: string;
+		cvDownloadUrl: string;
+	};
+	contactDetails: {
+		email: string;
+		phone: string;
+		location: string;
+	};
+};
 
 export function ProfileForm() {
+	const [form, setForm] = useState<ProfilePayload>({
+		brandProfile: {
+			currentName: "",
+			currentDomain: "",
+			headline: "",
+			roleTagline: "",
+		},
+		aboutSummary: {
+			biography: "",
+			cvDownloadUrl: "",
+		},
+		contactDetails: {
+			email: "",
+			phone: "",
+			location: "",
+		},
+	});
+	const [isLoading, setIsLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		async function loadProfile() {
+			setIsLoading(true);
+			setError(null);
+			try {
+				const response = await apiRequest<any>("/api/profile", { auth: true });
+				const data = response.data;
+
+				if (!isMounted || !data) {
+					return;
+				}
+
+				setForm({
+					brandProfile: {
+						currentName: data.currentName ?? "",
+						currentDomain: data.currentDomain ?? "",
+						headline: data.headline ?? "",
+						roleTagline: data.roleTagline ?? "",
+					},
+					aboutSummary: {
+						biography: data.aboutSummary?.biography ?? "",
+						cvDownloadUrl: data.aboutSummary?.cvDownloadUrl ?? "",
+					},
+					contactDetails: {
+						email: data.contactDetails?.email ?? "",
+						phone: data.contactDetails?.phone ?? "",
+						location: data.contactDetails?.location ?? "",
+					},
+				});
+			} catch (loadError) {
+				if (!isMounted) {
+					return;
+				}
+				setError(loadError instanceof Error ? loadError.message : "Unable to load profile settings.");
+			} finally {
+				if (isMounted) {
+					setIsLoading(false);
+				}
+			}
+		}
+
+		void loadProfile();
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	const handleSave = async () => {
+		setIsSaving(true);
+		setError(null);
+		setSuccess(null);
+
+		try {
+			await apiRequest("/api/profile", {
+				method: "PATCH",
+				auth: true,
+				body: JSON.stringify(form),
+			});
+			setSuccess("Profile settings saved.");
+		} catch (saveError) {
+			setError(saveError instanceof Error ? saveError.message : "Unable to save profile settings.");
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
 	return (
 		<Card>
 			<CardHeader className="border-b border-border/70 pb-4">
@@ -17,6 +130,9 @@ export function ProfileForm() {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-4">
+				{isLoading ? <p className="mb-3 text-sm text-muted-foreground">Loading profile settings...</p> : null}
+				{error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
+				{success ? <p className="mb-3 text-sm text-green-600">{success}</p> : null}
 				<Tabs defaultValue="identity" className="gap-4">
 					<TabsList>
 						<TabsTrigger value="identity">Identity</TabsTrigger>
@@ -31,37 +147,92 @@ export function ProfileForm() {
 								<label htmlFor="current-name" className="text-xs font-medium text-muted-foreground">
 									Current Brand Name
 								</label>
-								<Input id="current-name" defaultValue={brandProfile.currentName} />
+								<Input
+									id="current-name"
+									value={form.brandProfile.currentName}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, currentName: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="domain" className="text-xs font-medium text-muted-foreground">
 									Current Domain
 								</label>
-								<Input id="domain" defaultValue={brandProfile.currentDomain} />
+								<Input
+									id="domain"
+									value={form.brandProfile.currentDomain}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, currentDomain: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="headline" className="text-xs font-medium text-muted-foreground">
 									Headline
 								</label>
-								<Input id="headline" defaultValue={brandProfile.headline} />
+								<Input
+									id="headline"
+									value={form.brandProfile.headline}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, headline: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="tagline" className="text-xs font-medium text-muted-foreground">
 									Role Tagline
 								</label>
-								<Input id="tagline" defaultValue={brandProfile.roleTagline} />
+								<Input
+									id="tagline"
+									value={form.brandProfile.roleTagline}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, roleTagline: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="bio" className="text-xs font-medium text-muted-foreground">
 									Biography
 								</label>
-								<Textarea id="bio" rows={6} defaultValue={aboutSummary.biography} />
+								<Textarea
+									id="bio"
+									rows={6}
+									value={form.aboutSummary.biography}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											aboutSummary: { ...current.aboutSummary, biography: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="resume" className="text-xs font-medium text-muted-foreground">
 									Resume URL
 								</label>
-								<Input id="resume" defaultValue={aboutSummary.cvDownloadUrl} />
+								<Input
+									id="resume"
+									value={form.aboutSummary.cvDownloadUrl}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											aboutSummary: { ...current.aboutSummary, cvDownloadUrl: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="avatar" className="text-xs font-medium text-muted-foreground">
@@ -147,19 +318,46 @@ export function ProfileForm() {
 								<label htmlFor="contact-email" className="text-xs font-medium text-muted-foreground">
 									Email
 								</label>
-								<Input id="contact-email" defaultValue={contactDetails.email} />
+								<Input
+									id="contact-email"
+									value={form.contactDetails.email}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											contactDetails: { ...current.contactDetails, email: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="contact-phone" className="text-xs font-medium text-muted-foreground">
 									Phone
 								</label>
-								<Input id="contact-phone" defaultValue={contactDetails.phone} />
+								<Input
+									id="contact-phone"
+									value={form.contactDetails.phone}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											contactDetails: { ...current.contactDetails, phone: event.target.value },
+										}))
+									}
+								/>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="contact-location" className="text-xs font-medium text-muted-foreground">
 									Location
 								</label>
-								<Input id="contact-location" defaultValue={contactDetails.location} />
+								<Input
+									id="contact-location"
+									value={form.contactDetails.location}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											contactDetails: { ...current.contactDetails, location: event.target.value },
+										}))
+									}
+								/>
 							</div>
 						</div>
 
@@ -176,9 +374,9 @@ export function ProfileForm() {
 				</Tabs>
 
 				<div className="mt-4 flex justify-end">
-					<Button type="button">
+					<Button type="button" onClick={() => void handleSave()} disabled={isSaving || isLoading}>
 						<Save className="size-4" />
-						Save Profile Settings
+						{isSaving ? "Saving..." : "Save Profile Settings"}
 					</Button>
 				</div>
 			</CardContent>

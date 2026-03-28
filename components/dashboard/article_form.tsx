@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Plus, WandSparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { emitDashboardDataChanged } from "@/components/dashboard/data-events";
+import { apiRequest } from "@/lib/client-api";
 import type { LabArticle } from "@/lib/definitions";
 
 type ArticleFormProps = {
@@ -30,7 +32,63 @@ type ArticleFormProps = {
 export function ArticleForm({ mode = "create", initialArticle, trigger }: ArticleFormProps) {
 	const isEditMode = mode === "edit";
 	const { language } = useLanguage();
+	const [open, setOpen] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [markdownContent, setMarkdownContent] = useState(initialArticle?.content ?? "");
+
+	const toAbsoluteUrl = (value: string) => {
+		if (!value.startsWith("/")) {
+			return value;
+		}
+		if (typeof window === "undefined") {
+			return value;
+		}
+		return new URL(value, window.location.origin).toString();
+	};
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		setIsSubmitting(true);
+		setError(null);
+
+		const payload = {
+			title: String(formData.get("title") ?? ""),
+			excerpt: String(formData.get("excerpt") ?? ""),
+			coverImageUrl: toAbsoluteUrl(String(formData.get("coverImageUrl") ?? "")),
+			slug: String(formData.get("slug") ?? ""),
+			category: String(formData.get("category") ?? ""),
+			tags: String(formData.get("tags") ?? "")
+				.split(",")
+				.map((tag) => tag.trim())
+				.filter(Boolean),
+			content: markdownContent,
+		};
+
+		try {
+			if (isEditMode && initialArticle) {
+				await apiRequest(`/api/blogs/${initialArticle.id}`, {
+					method: "PATCH",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			} else {
+				await apiRequest("/api/blogs", {
+					method: "POST",
+					auth: true,
+					body: JSON.stringify(payload),
+				});
+			}
+
+			emitDashboardDataChanged("blogs");
+			setOpen(false);
+		} catch (submitError) {
+			setError(submitError instanceof Error ? submitError.message : "Unable to save article.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
 	const copy = useMemo(() => {
 		if (language === "FR") {
@@ -73,7 +131,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	}, [isEditMode, language]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">
@@ -83,6 +141,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				)}
 			</DialogTrigger>
 			<DialogContent className="max-w-2xl p-0">
+				<form onSubmit={handleSubmit}>
 				<DialogHeader className="border-b border-border/70 px-4 pt-4 pb-3">
 					<DialogTitle className="text-base">{copy.title}</DialogTitle>
 					<DialogDescription>{copy.description}</DialogDescription>
@@ -95,6 +154,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						</label>
 						<Input
 							id="article-title"
+							name="title"
 							placeholder="Designing Reliable Form Pipelines in Next.js"
 							defaultValue={initialArticle?.title}
 						/>
@@ -105,6 +165,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						</label>
 						<Textarea
 							id="article-description"
+							name="excerpt"
 							placeholder="Concise summary for cards and SEO snippets."
 							rows={3}
 							defaultValue={initialArticle?.excerpt}
@@ -114,13 +175,13 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						<label htmlFor="article-image" className="text-xs font-medium text-muted-foreground">
 							{copy.labelImage}
 						</label>
-						<Input id="article-image" placeholder="/images/lab/your-article-cover.jpg" defaultValue={initialArticle?.coverImageUrl} />
+						<Input id="article-image" name="coverImageUrl" placeholder="https://mance.dev/images/lab/your-article-cover.jpg" defaultValue={initialArticle?.coverImageUrl} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="article-url" className="text-xs font-medium text-muted-foreground">
 							{copy.labelSlug}
 						</label>
-						<Input id="article-url" placeholder="reliable-form-pipelines-nextjs" defaultValue={initialArticle?.slug} />
+						<Input id="article-url" name="slug" placeholder="reliable-form-pipelines-nextjs" defaultValue={initialArticle?.slug} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="article-category" className="text-xs font-medium text-muted-foreground">
@@ -128,6 +189,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						</label>
 						<select
 							id="article-category"
+							name="category"
 							className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
 							defaultValue={initialArticle?.category ?? "Engineering"}
 						>
@@ -141,7 +203,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						<label htmlFor="article-tags" className="text-xs font-medium text-muted-foreground">
 							{copy.labelTags}
 						</label>
-						<Input id="article-tags" placeholder="nextjs, zod, forms" defaultValue={initialArticle?.tags.join(", ")} />
+						<Input id="article-tags" name="tags" placeholder="nextjs, zod, forms" defaultValue={initialArticle?.tags.join(", ")} />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="article-content" className="text-xs font-medium text-muted-foreground">
@@ -167,12 +229,14 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				</div>
 
 				<DialogFooter>
+					{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
 					<Button variant="outline" type="button">{copy.saveDraft}</Button>
-					<Button type="button">
+					<Button type="submit" disabled={isSubmitting}>
 						<WandSparkles className="size-4" />
-						{copy.publish}
+						{isSubmitting ? "Saving..." : copy.publish}
 					</Button>
 				</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

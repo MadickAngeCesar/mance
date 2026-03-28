@@ -1,17 +1,78 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DASHBOARD_DATA_EVENT } from "@/components/dashboard/data-events";
 import { TestimonialForm } from "@/components/dashboard/testimonial_form";
-import { testimonials } from "@/lib/placeholder-data";
+import { apiRequest } from "@/lib/client-api";
+import type { TestimonialItem } from "@/lib/definitions";
 
 export function TestimonialsList() {
+	const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
+
+	const loadTestimonials = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		try {
+			const response = await apiRequest<any[]>("/api/testimonials?limit=100", {
+				auth: true,
+			});
+			setTestimonials(
+				(response.data ?? []).map((item) => ({
+					id: item.id,
+					clientName: item.clientName,
+					clientRoleCompany: item.clientRoleCompany,
+					text: item.text,
+					avatarUrl: item.avatarUrl ?? undefined,
+					rating: item.rating,
+					projectReference: item.projectReference,
+					date: item.dateLabel,
+				}))
+			);
+		} catch (loadError) {
+			setError(loadError instanceof Error ? loadError.message : "Unable to load testimonials.");
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		void loadTestimonials();
+	}, [loadTestimonials]);
+
+	useEffect(() => {
+		const handler = (event: Event) => {
+			const custom = event as CustomEvent<{ domain?: string }>;
+			if (custom.detail?.domain === "services") {
+				void loadTestimonials();
+			}
+		};
+
+		window.addEventListener(DASHBOARD_DATA_EVENT, handler);
+		return () => window.removeEventListener(DASHBOARD_DATA_EVENT, handler);
+	}, [loadTestimonials]);
+
+	const handleDelete = async (id: string) => {
+		const previous = testimonials;
+		setTestimonials((current) => current.filter((testimonial) => testimonial.id !== id));
+		try {
+			await apiRequest(`/api/testimonials/${id}`, {
+				method: "DELETE",
+				auth: true,
+			});
+		} catch (deleteError) {
+			setTestimonials(previous);
+			setError(deleteError instanceof Error ? deleteError.message : "Unable to delete testimonial.");
+		}
+	};
 
 	const filtered = useMemo(() => {
 		return testimonials.filter((testimonial) => {
@@ -37,6 +98,8 @@ export function TestimonialsList() {
 				</div>
 			</CardHeader>
 			<CardContent className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 pt-4">
+				{isLoading ? <p className="text-sm text-muted-foreground">Loading testimonials...</p> : null}
+				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				{filtered.map((testimonial) => (
 					<div key={testimonial.id} className="rounded-lg border border-border/70 bg-card/70 p-3">
 						<div className="flex flex-wrap items-start justify-between gap-2">
@@ -61,12 +124,15 @@ export function TestimonialsList() {
 									</Button>
 								}
 							/>
-							<Button variant="ghost" size="icon-sm" aria-label="Delete testimonial">
+							<Button variant="ghost" size="icon-sm" aria-label="Delete testimonial" onClick={() => void handleDelete(testimonial.id)}>
 								<Trash2 className="size-4" />
 							</Button>
 						</div>
 					</div>
 				))}
+				{!isLoading && filtered.length === 0 ? (
+					<p className="text-sm text-muted-foreground">No testimonials found for this search.</p>
+				) : null}
 			</CardContent>
 		</Card>
 	);

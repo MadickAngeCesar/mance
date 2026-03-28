@@ -148,15 +148,30 @@ export async function generateMetadata({ params }: LabDetailPageProps): Promise<
 }
 
 function toIsoString(value?: string | Date | null) {
-  if (!value) {
+  const parsedDate = parseDate(value);
+  if (!parsedDate) {
     return undefined;
   }
 
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+  return parsedDate.toISOString();
 }
 
 function getPublishedTime(publishedAt?: string | Date | null) {
-  return publishedAt ? new Date(publishedAt).getTime() : 0;
+  const parsedDate = parseDate(publishedAt);
+  return parsedDate ? parsedDate.getTime() : 0;
+}
+
+function parseDate(value?: string | Date | null) {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate;
 }
 
 export default async function LabDetailPage({ params }: LabDetailPageProps) {

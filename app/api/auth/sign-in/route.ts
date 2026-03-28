@@ -6,7 +6,7 @@ import {
   AuthUserResponseSchema,
   ApiResponse,
 } from "@/lib/validators";
-import { ApiError, createApiHandler } from "@/lib/api-utils";
+import { ApiError, createApiHandler, isDatabaseUnavailableError } from "@/lib/api-utils";
 import {
   verifyPassword,
   generateAccessToken,
@@ -36,15 +36,6 @@ async function logAuthEventSafe(event: AuthEventPayload) {
     // Auth must not fail just because audit logging failed.
     console.error("Auth event logging failed:", error);
   }
-}
-
-function isDatabaseUnavailableError(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  const candidate = error as { code?: string };
-  return candidate.code === "ECONNREFUSED" || candidate.code === "P1001";
 }
 
 /**

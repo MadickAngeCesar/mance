@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 type ErrorWithCode = {
   code?: string;
+  message?: string;
+  cause?: unknown;
 };
 
 export function isDatabaseUnavailableError(error: unknown) {
@@ -10,7 +12,44 @@ export function isDatabaseUnavailableError(error: unknown) {
   }
 
   const candidate = error as ErrorWithCode;
-  return candidate.code === "ECONNREFUSED" || candidate.code === "P1001";
+
+  const knownCodes = new Set([
+    "ECONNREFUSED",
+    "ETIMEDOUT",
+    "ECONNRESET",
+    "ENOTFOUND",
+    "EHOSTUNREACH",
+    "P1001",
+    "P1002",
+    "P1017",
+  ]);
+
+  const directCode = typeof candidate.code === "string" ? candidate.code.toUpperCase() : undefined;
+  if (directCode && knownCodes.has(directCode)) {
+    return true;
+  }
+
+  if (candidate.cause && typeof candidate.cause === "object") {
+    const nestedCode =
+      typeof (candidate.cause as ErrorWithCode).code === "string"
+        ? ((candidate.cause as ErrorWithCode).code as string).toUpperCase()
+        : undefined;
+    if (nestedCode && knownCodes.has(nestedCode)) {
+      return true;
+    }
+  }
+
+  const fullMessage = [candidate.message, (candidate.cause as ErrorWithCode | undefined)?.message]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    fullMessage.includes("can't reach database server") ||
+    fullMessage.includes("connection timed out") ||
+    fullMessage.includes("etimedout") ||
+    fullMessage.includes("connect timeout")
+  );
 }
 
 /**

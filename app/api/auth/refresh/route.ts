@@ -14,6 +14,29 @@ import {
 } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+type AuthEventPayload = {
+  userId?: string;
+  eventType: string;
+  ipAddress?: string;
+  userAgent?: string;
+};
+
+function getRequestMetadata(request: NextRequest) {
+  return {
+    ipAddress: request.headers.get("x-forwarded-for") || "unknown",
+    userAgent: request.headers.get("user-agent") || undefined,
+  };
+}
+
+async function logAuthEventSafe(event: AuthEventPayload) {
+  try {
+    await prisma.authEvent.create({ data: event });
+  } catch (error) {
+    // Token refresh should not fail only because audit logging failed.
+    console.error("Auth event logging failed:", error);
+  }
+}
+
 /**
  * POST /api/auth/refresh
  * Refresh access token using refresh token
@@ -21,6 +44,7 @@ import { prisma } from "@/lib/prisma";
 async function handleRefresh(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const parsed = AuthRefreshSchema.safeParse(body);
+  const metadata = getRequestMetadata(request);
   const refreshToken =
     (parsed.success ? parsed.data.refreshToken : undefined) ??
     request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
@@ -53,13 +77,10 @@ async function handleRefresh(request: NextRequest) {
       tokenType: "Bearer",
     });
 
-    await prisma.authEvent.create({
-      data: {
-        userId: payload.userId,
-        eventType: "TOKEN_REFRESH",
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-        userAgent: request.headers.get("user-agent") || undefined,
-      },
+    await logAuthEventSafe({
+      userId: payload.userId,
+      eventType: "TOKEN_REFRESH",
+      ...metadata,
     });
 
     const response: ApiResponse = {
@@ -87,12 +108,9 @@ async function handleRefresh(request: NextRequest) {
 
     return result;
   } catch (error) {
-    await prisma.authEvent.create({
-      data: {
-        eventType: "TOKEN_REFRESH_FAILURE",
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-        userAgent: request.headers.get("user-agent") || undefined,
-      },
+    await logAuthEventSafe({
+      eventType: "TOKEN_REFRESH_FAILURE",
+      ...metadata,
     });
 
     if (error instanceof ApiError) {

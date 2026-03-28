@@ -15,6 +15,38 @@ import {
   REFRESH_TOKEN_COOKIE,
 } from "@/lib/auth";
 
+type AuthEventPayload = {
+  userId?: string;
+  eventType: string;
+  ipAddress?: string;
+  userAgent?: string;
+};
+
+function getRequestMetadata(request: NextRequest) {
+  return {
+    ipAddress: request.headers.get("x-forwarded-for") || "unknown",
+    userAgent: request.headers.get("user-agent") || undefined,
+  };
+}
+
+async function logAuthEventSafe(event: AuthEventPayload) {
+  try {
+    await prisma.authEvent.create({ data: event });
+  } catch (error) {
+    // Auth must not fail just because audit logging failed.
+    console.error("Auth event logging failed:", error);
+  }
+}
+
+function isDatabaseUnavailableError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as { code?: string };
+  return candidate.code === "ECONNREFUSED" || candidate.code === "P1001";
+}
+
 /**
  * POST /api/auth/sign-in
  * Authenticate user and return JWT tokens
@@ -23,18 +55,25 @@ async function handleSignIn(request: NextRequest) {
   const body = await request.json();
   const { email, password, rememberMe } = AuthSignInSchema.parse(body);
 
+  const metadata = getRequestMetadata(request);
+
   // Find user by email
-  const user = await prisma.authUser.findUnique({
-    where: { email },
-  });
+  let user;
+  try {
+    user = await prisma.authUser.findUnique({
+      where: { email },
+    });
+  } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      throw new ApiError("Authentication service is temporarily unavailable", 503);
+    }
+    throw error;
+  }
 
   if (!user || !user.passwordHash) {
-    await prisma.authEvent.create({
-      data: {
-        eventType: "SIGN_IN_FAILURE",
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-        userAgent: request.headers.get("user-agent") || undefined,
-      },
+    await logAuthEventSafe({
+      eventType: "SIGN_IN_FAILURE",
+      ...metadata,
     });
     // Don't reveal if user exists
     throw ApiError.unauthorized("Invalid email or password");
@@ -47,13 +86,10 @@ async function handleSignIn(request: NextRequest) {
   // Verify password
   const passwordValid = await verifyPassword(password, user.passwordHash);
   if (!passwordValid) {
-    await prisma.authEvent.create({
-      data: {
-        userId: user.id,
-        eventType: "SIGN_IN_FAILURE",
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-        userAgent: request.headers.get("user-agent") || undefined,
-      },
+    await logAuthEventSafe({
+      userId: user.id,
+      eventType: "SIGN_IN_FAILURE",
+      ...metadata,
     });
     throw ApiError.unauthorized("Invalid email or password");
   }
@@ -74,13 +110,10 @@ async function handleSignIn(request: NextRequest) {
     : undefined;
 
   // Log auth event
-  await prisma.authEvent.create({
-    data: {
-      userId: user.id,
-      eventType: "SIGN_IN_SUCCESS",
-      ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-      userAgent: request.headers.get("user-agent") || undefined,
-    },
+  await logAuthEventSafe({
+    userId: user.id,
+    eventType: "SIGN_IN_SUCCESS",
+    ...metadata,
   });
 
   const tokenResponse = AuthTokenSchema.parse({

@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
+type ErrorWithCode = {
+  code?: string;
+};
+
+export function isDatabaseUnavailableError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as ErrorWithCode;
+  return candidate.code === "ECONNREFUSED" || candidate.code === "P1001";
+}
+
 /**
  * API Request logging middleware
  * Logs method, path, status, and duration
@@ -30,7 +43,7 @@ export function createApiHandler<T = any>(
       return response;
     } catch (error) {
       const duration = Date.now() - startTime;
-      const status = error instanceof ApiError ? error.statusCode : 500;
+      const status = error instanceof ApiError ? error.statusCode : isDatabaseUnavailableError(error) ? 503 : 500;
 
       logRequest(req, status, duration);
 
@@ -41,6 +54,16 @@ export function createApiHandler<T = any>(
             error: error.message,
           },
           { status: error.statusCode }
+        );
+      }
+
+      if (isDatabaseUnavailableError(error)) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Database is temporarily unavailable.",
+          },
+          { status: 503 }
         );
       }
 

@@ -5,10 +5,11 @@ import {
   LabArticleQuerySchema,
   ApiResponse,
 } from "@/lib/validators";
-import { createApiHandler } from "@/lib/api-utils";
+import { createApiHandler, isDatabaseUnavailableError } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 import { WorkKind } from "@/lib/generated/prisma/client";
 import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workflows";
+import { labArticles as fallbackLabArticles } from "@/lib/placeholder-data";
 
 /**
  * GET /api/blogs
@@ -55,16 +56,74 @@ async function handleGet(request: NextRequest) {
     orderBy = { views: "desc" };
   }
 
-  // Fetch articles and total count
-  const [articles, total] = await Promise.all([
-    prisma.labArticle.findMany({
-      where,
-      orderBy,
-      skip,
-      take: query.limit,
-    }),
-    prisma.labArticle.count({ where }),
-  ]);
+  let articles;
+  let total;
+
+  try {
+    [articles, total] = await Promise.all([
+      prisma.labArticle.findMany({
+        where,
+        orderBy,
+        skip,
+        take: query.limit,
+      }),
+      prisma.labArticle.count({ where }),
+    ]);
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      throw error;
+    }
+
+    const filtered = fallbackLabArticles.filter((item) => {
+      if (query.category && item.category !== query.category) {
+        return false;
+      }
+      if (query.featured === "featured" && !item.featured) {
+        return false;
+      }
+      if (query.featured === "unfeatured" && item.featured) {
+        return false;
+      }
+      if (query.published === "published" && !item.publishedAt) {
+        return false;
+      }
+      if (query.published === "draft" && item.publishedAt) {
+        return false;
+      }
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      if (query.sort === "views") {
+        return b.views - a.views;
+      }
+
+      const aTs = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const bTs = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      if (query.sort === "oldest") {
+        return aTs - bTs;
+      }
+      return bTs - aTs;
+    });
+
+    total = filtered.length;
+    articles = filtered.slice(skip, skip + query.limit).map((item) => ({
+      id: item.id,
+      externalId: item.id,
+      title: item.title,
+      slug: item.slug,
+      category: item.category,
+      excerpt: item.excerpt,
+      content: item.content,
+      coverImageUrl: item.coverImageUrl,
+      tags: item.tags,
+      views: item.views,
+      featured: item.featured,
+      publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
+      createdAt: item.publishedAt ? new Date(item.publishedAt) : new Date(0),
+      updatedAt: item.publishedAt ? new Date(item.publishedAt) : new Date(0),
+    }));
+  }
 
   const response: ApiResponse = {
     ok: true,

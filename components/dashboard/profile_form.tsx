@@ -47,22 +47,54 @@ type ExperienceItem = {
 type SkillItem = {
 	id: string;
 	name: string;
-	category: string;
+	category: "FRONTEND" | "BACKEND" | "DEVOPS" | "IT_SUPPORT" | "TOOLS" | "LANGUAGES";
 	proficiency: number;
+	iconSlug?: string;
 };
 
 type SocialLinkItem = {
 	id: string;
-	platform: string;
+	platform: "GITHUB" | "LINKEDIN" | "WHATSAPP" | "FACEBOOK";
 	label: string;
 	url: string;
+};
+
+type FreelancePlatformItem = {
+	id: string;
+	name: "UPWORK" | "FREELANCER" | "FIVERR";
+	url: string;
+	handle?: string;
 };
 
 type ProfileReferenceResponse = {
 	education: EducationItem[];
 	experience: ExperienceItem[];
 	skills: SkillItem[];
+	socialLinks: SocialLinkItem[];
+	freelancePlatforms: FreelancePlatformItem[];
 };
+
+const skillCategoryOptions: Array<{ value: SkillItem["category"]; label: string }> = [
+	{ value: "FRONTEND", label: "Frontend" },
+	{ value: "BACKEND", label: "Backend" },
+	{ value: "DEVOPS", label: "DevOps" },
+	{ value: "IT_SUPPORT", label: "IT Support" },
+	{ value: "TOOLS", label: "Tools" },
+	{ value: "LANGUAGES", label: "Languages" },
+];
+
+const socialPlatformOptions: Array<{ value: SocialLinkItem["platform"]; label: string }> = [
+	{ value: "GITHUB", label: "GitHub" },
+	{ value: "LINKEDIN", label: "LinkedIn" },
+	{ value: "WHATSAPP", label: "WhatsApp" },
+	{ value: "FACEBOOK", label: "Facebook" },
+];
+
+const freelancePlatformOptions: Array<{ value: FreelancePlatformItem["name"]; label: string }> = [
+	{ value: "UPWORK", label: "Upwork" },
+	{ value: "FREELANCER", label: "Freelancer" },
+	{ value: "FIVERR", label: "Fiverr" },
+];
 
 export function ProfileForm() {
 	const [form, setForm] = useState<ProfilePayload>({
@@ -90,6 +122,7 @@ export function ProfileForm() {
 	const [experience, setExperience] = useState<ExperienceItem[]>([]);
 	const [skills, setSkills] = useState<SkillItem[]>([]);
 	const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
+	const [freelancePlatforms, setFreelancePlatforms] = useState<FreelancePlatformItem[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 
@@ -162,7 +195,8 @@ export function ProfileForm() {
 				setEducation(referenceResponse.data?.education ?? []);
 				setExperience(referenceResponse.data?.experience ?? []);
 				setSkills(referenceResponse.data?.skills ?? []);
-				setSocialLinks(data.contactDetails?.socialLinks ?? []);
+				setSocialLinks(referenceResponse.data?.socialLinks ?? data.contactDetails?.socialLinks ?? []);
+				setFreelancePlatforms(referenceResponse.data?.freelancePlatforms ?? data.contactDetails?.freelancePlatforms ?? []);
 			} catch (loadError) {
 				if (!isMounted) {
 					return;
@@ -188,17 +222,92 @@ export function ProfileForm() {
 		setSuccess(null);
 
 		try {
-			await apiRequest("/api/profile", {
-				method: "PATCH",
-				auth: true,
-				body: JSON.stringify(form),
-			});
+			await Promise.all([
+				apiRequest("/api/profile", {
+					method: "PATCH",
+					auth: true,
+					body: JSON.stringify(form),
+				}),
+				apiRequest("/api/profile/reference", {
+					method: "PATCH",
+					auth: true,
+					body: JSON.stringify({
+						education: education
+							.map((entry) => ({
+								title: entry.title.trim(),
+								institution: entry.institution.trim(),
+								period: entry.period.trim(),
+								location: entry.location?.trim() || null,
+							}))
+							.filter((entry) => entry.title && entry.institution && entry.period),
+						experience: experience
+							.map((entry) => ({
+								role: entry.role.trim(),
+								company: entry.company.trim(),
+								period: entry.period.trim(),
+								summary: entry.summary.trim(),
+							}))
+							.filter((entry) => entry.role && entry.company && entry.period && entry.summary),
+						skills: skills
+							.map((entry) => ({
+								name: entry.name.trim(),
+								category: entry.category,
+								proficiency: Math.min(5, Math.max(1, Number(entry.proficiency) || 1)),
+								iconSlug: entry.iconSlug?.trim() || undefined,
+							}))
+							.filter((entry) => entry.name),
+						socialLinks: socialLinks
+							.map((entry) => ({
+								platform: entry.platform,
+								label: entry.label.trim(),
+								url: entry.url.trim(),
+							}))
+							.filter((entry) => entry.label && entry.url),
+						freelancePlatforms: freelancePlatforms
+							.map((entry) => ({
+								name: entry.name,
+								url: entry.url.trim(),
+								handle: entry.handle?.trim() || undefined,
+							}))
+							.filter((entry) => entry.url),
+					}),
+				}),
+			]);
 			setSuccess("Profile settings saved.");
 		} catch (saveError) {
 			setError(saveError instanceof Error ? saveError.message : "Unable to save profile settings.");
 		} finally {
 			setIsSaving(false);
 		}
+	};
+
+	const addExperience = () => {
+		setExperience((current) => [...current, { id: crypto.randomUUID(), role: "", company: "", period: "", summary: "" }]);
+	};
+
+	const addEducation = () => {
+		setEducation((current) => [...current, { id: crypto.randomUUID(), title: "", institution: "", period: "", location: "" }]);
+	};
+
+	const addSkill = () => {
+		setSkills((current) => [
+			...current,
+			{ id: crypto.randomUUID(), name: "", category: "FRONTEND", proficiency: 3, iconSlug: "" },
+		]);
+	};
+
+	const addSocialLink = () => {
+		setSocialLinks((current) => [
+			...current,
+			{ id: crypto.randomUUID(), platform: "GITHUB", label: "", url: "" },
+		]);
+	};
+
+	const addFreelancePlatform = () => {
+		setFreelancePlatforms((current) => [
+			...current,
+			{ id: crypto.randomUUID(), name: "UPWORK", url: "", handle: "" },
+		]);
 	};
 
 	return (
@@ -339,23 +448,71 @@ export function ProfileForm() {
 						<div className="space-y-3">
 							<div className="flex items-center justify-between">
 								<h3 className="text-sm font-medium">Experience</h3>
-								<Button variant="outline" size="sm" type="button">
+								<Button variant="outline" size="sm" type="button" onClick={addExperience}>
 									<Plus className="size-4" />
 									Add Entry
 								</Button>
 							</div>
-								{experience.map((entry) => (
+								{experience.map((entry, index) => (
 								<div key={`${entry.company}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
 									<div className="grid gap-2 md:grid-cols-2">
-										<Input defaultValue={entry.role} aria-label="Role" />
-										<Input defaultValue={entry.company} aria-label="Company" />
-										<Input defaultValue={entry.period} aria-label="Period" />
-										<Button variant="ghost" size="sm" type="button" className="justify-self-start">
+										<Input
+											value={entry.role}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, role: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Role"
+										/>
+										<Input
+											value={entry.company}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, company: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Company"
+										/>
+										<Input
+											value={entry.period}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, period: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Period"
+										/>
+										<Button
+											variant="ghost"
+											size="sm"
+											type="button"
+											className="justify-self-start"
+											onClick={() => setExperience((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+										>
 											<Trash2 className="size-4" />
 											Remove
 										</Button>
 									</div>
-									<Textarea defaultValue={entry.summary} className="mt-2" rows={3} aria-label="Summary" />
+									<Textarea
+										value={entry.summary}
+										onChange={(event) =>
+											setExperience((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, summary: event.target.value } : item
+												)
+											)
+										}
+										className="mt-2"
+										rows={3}
+										aria-label="Summary"
+									/>
 								</div>
 							))}
 								{experience.length === 0 ? <p className="text-sm text-muted-foreground">No experience entries yet.</p> : null}
@@ -364,18 +521,67 @@ export function ProfileForm() {
 						<div className="space-y-3">
 							<div className="flex items-center justify-between">
 								<h3 className="text-sm font-medium">Education & Certifications</h3>
-								<Button variant="outline" size="sm" type="button">
+								<Button variant="outline" size="sm" type="button" onClick={addEducation}>
 									<Plus className="size-4" />
 									Add Entry
 								</Button>
 							</div>
-							{education.map((entry) => (
+							{education.map((entry, index) => (
 								<div key={`${entry.title}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
 									<div className="grid gap-2 md:grid-cols-2">
-										<Input defaultValue={entry.title} aria-label="Title" />
-										<Input defaultValue={entry.institution} aria-label="Institution" />
-										<Input defaultValue={entry.period} aria-label="Period" />
-										<Input defaultValue={entry.location ?? ""} aria-label="Location" />
+										<Input
+											value={entry.title}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, title: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Title"
+										/>
+										<Input
+											value={entry.institution}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, institution: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Institution"
+										/>
+										<Input
+											value={entry.period}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, period: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Period"
+										/>
+										<Input
+											value={entry.location ?? ""}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, location: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Location"
+										/>
+										<Button
+											variant="ghost"
+											size="sm"
+											type="button"
+											onClick={() => setEducation((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+										>
+											<Trash2 className="size-4" />
+											Remove
+										</Button>
 									</div>
 								</div>
 							))}
@@ -386,18 +592,67 @@ export function ProfileForm() {
 					<TabsContent value="skills" className="space-y-3">
 						<div className="flex items-center justify-between">
 							<h3 className="text-sm font-medium">Skills Matrix</h3>
-							<Button variant="outline" size="sm" type="button">
+							<Button variant="outline" size="sm" type="button" onClick={addSkill}>
 								<Plus className="size-4" />
 								Add Skill
 							</Button>
 						</div>
 						<div className="grid gap-2">
-							{skills.slice(0, 10).map((skill) => (
+							{skills.map((skill, index) => (
 								<div key={skill.name} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[1fr_150px_80px_auto]">
-									<Input defaultValue={skill.name} aria-label="Skill" />
-									<Input defaultValue={skill.category} aria-label="Category" />
-									<Input defaultValue={String(skill.proficiency)} aria-label="Proficiency" />
-									<Button variant="ghost" size="sm" type="button">
+									<Input
+										value={skill.name}
+										onChange={(event) =>
+											setSkills((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, name: event.target.value } : item
+												)
+											)
+										}
+										aria-label="Skill"
+									/>
+									<select
+										value={skill.category}
+										onChange={(event) =>
+											setSkills((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index
+														? { ...item, category: event.target.value as SkillItem["category"] }
+														: item
+												)
+											)
+										}
+										className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm"
+										aria-label="Category"
+									>
+										{skillCategoryOptions.map((option) => (
+											<option key={option.value} value={option.value}>
+												{option.label}
+											</option>
+										))}
+									</select>
+									<Input
+										type="number"
+										min={1}
+										max={5}
+										value={String(skill.proficiency)}
+										onChange={(event) =>
+											setSkills((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index
+														? { ...item, proficiency: Number(event.target.value) || 1 }
+														: item
+												)
+											)
+										}
+										aria-label="Proficiency"
+									/>
+									<Button
+										variant="ghost"
+										size="sm"
+										type="button"
+										onClick={() => setSkills((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+									>
 										<Trash2 className="size-4" />
 										Remove
 									</Button>
@@ -457,14 +712,134 @@ export function ProfileForm() {
 						</div>
 
 						<div className="grid gap-2">
-							{socialLinks.map((link) => (
-								<div key={link.id} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[120px_1fr_1fr]">
-									<Input defaultValue={link.platform} aria-label="Platform" />
-									<Input defaultValue={link.label} aria-label="Label" />
-									<Input defaultValue={link.url} aria-label="URL" />
+							<div className="flex items-center justify-between">
+								<h3 className="text-sm font-medium">Social Links</h3>
+								<Button variant="outline" size="sm" type="button" onClick={addSocialLink}>
+									<Plus className="size-4" />
+									Add Social Link
+								</Button>
+							</div>
+							{socialLinks.map((link, index) => (
+								<div key={link.id} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[160px_1fr_1fr_auto]">
+									<select
+										value={link.platform}
+										onChange={(event) =>
+											setSocialLinks((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index
+														? { ...item, platform: event.target.value as SocialLinkItem["platform"] }
+														: item
+												)
+											)
+										}
+										className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm"
+										aria-label="Platform"
+									>
+										{socialPlatformOptions.map((option) => (
+											<option key={option.value} value={option.value}>
+												{option.label}
+											</option>
+										))}
+									</select>
+									<Input
+										value={link.label}
+										onChange={(event) =>
+											setSocialLinks((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, label: event.target.value } : item
+												)
+											)
+										}
+										aria-label="Label"
+									/>
+									<Input
+										value={link.url}
+										onChange={(event) =>
+											setSocialLinks((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, url: event.target.value } : item
+												)
+											)
+										}
+										aria-label="URL"
+									/>
+									<Button
+										variant="ghost"
+										size="sm"
+										type="button"
+										onClick={() => setSocialLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+									>
+										<Trash2 className="size-4" />
+										Remove
+									</Button>
 								</div>
 							))}
 							{socialLinks.length === 0 ? <p className="text-sm text-muted-foreground">No social links configured yet.</p> : null}
+
+							<div className="mt-3 flex items-center justify-between">
+								<h3 className="text-sm font-medium">Freelance Platforms</h3>
+								<Button variant="outline" size="sm" type="button" onClick={addFreelancePlatform}>
+									<Plus className="size-4" />
+									Add Platform
+								</Button>
+							</div>
+							{freelancePlatforms.map((platform, index) => (
+								<div key={platform.id} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[160px_1fr_1fr_auto]">
+									<select
+										value={platform.name}
+										onChange={(event) =>
+											setFreelancePlatforms((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index
+														? { ...item, name: event.target.value as FreelancePlatformItem["name"] }
+														: item
+												)
+											)
+										}
+										className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm"
+									>
+										{freelancePlatformOptions.map((option) => (
+											<option key={option.value} value={option.value}>
+												{option.label}
+											</option>
+										))}
+									</select>
+									<Input
+										value={platform.url}
+										onChange={(event) =>
+											setFreelancePlatforms((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, url: event.target.value } : item
+												)
+											)
+										}
+										aria-label="Platform URL"
+									/>
+									<Input
+										value={platform.handle ?? ""}
+										onChange={(event) =>
+											setFreelancePlatforms((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, handle: event.target.value } : item
+												)
+											)
+										}
+										aria-label="Handle"
+									/>
+									<Button
+										variant="ghost"
+										size="sm"
+										type="button"
+										onClick={() =>
+											setFreelancePlatforms((current) => current.filter((_, itemIndex) => itemIndex !== index))
+										}
+									>
+										<Trash2 className="size-4" />
+										Remove
+									</Button>
+								</div>
+							))}
+							{freelancePlatforms.length === 0 ? <p className="text-sm text-muted-foreground">No freelance platforms configured yet.</p> : null}
 						</div>
 					</TabsContent>
 				</Tabs>

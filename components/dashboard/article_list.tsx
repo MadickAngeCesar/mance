@@ -170,7 +170,12 @@ export function ArticleList() {
 								<TableCell>{article.views.toLocaleString()}</TableCell>
 								<TableCell>
 									<div className="flex gap-1">
-										<Button variant="ghost" size="icon-sm" aria-label="View article">
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											aria-label="View article"
+											onClick={() => window.open(`/lab/${article.slug}`, "_blank", "noopener,noreferrer")}
+										>
 											<Eye className="size-4" />
 										</Button>
 										<ArticleForm

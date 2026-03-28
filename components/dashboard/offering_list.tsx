@@ -72,7 +72,7 @@ export function OfferingList() {
 				offering.description.toLowerCase().includes(query.toLowerCase())
 			);
 		});
-	}, [query]);
+	}, [offerings, query]);
 
 	return (
 		<Card>
@@ -106,7 +106,12 @@ export function OfferingList() {
 							))}
 						</ul>
 						<div className="mt-3 flex gap-1">
-							<Button variant="ghost" size="icon-sm" aria-label="View offering">
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								aria-label="View offering"
+								onClick={() => window.open(offering.ctaUrl, "_blank", "noopener,noreferrer")}
+							>
 								<Eye className="size-4" />
 							</Button>
 							<OfferingForm

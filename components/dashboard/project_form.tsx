@@ -54,47 +54,47 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 		setIsSubmitting(true);
 		setError(null);
 
-		let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
-		const coverImageFile = formData.get("coverImageFile");
-		if (coverImageFile instanceof File && coverImageFile.size > 0) {
-			const uploadFormData = new FormData();
-			uploadFormData.append("file", coverImageFile);
-			uploadFormData.append("kind", "project-cover");
-
-			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
-				method: "POST",
-				auth: true,
-				body: uploadFormData,
-			});
-
-			coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
-			setUploadedCoverUrl(coverImageUrl);
-		}
-
-		const toOptionalAbsoluteUrl = (value: string) => {
-			if (!value.trim()) {
-				return undefined;
-			}
-			return toAbsoluteUrl(value);
-		};
-
-		const payload = {
-			title: String(formData.get("title") ?? ""),
-			slug: String(formData.get("slug") ?? ""),
-			summary: String(formData.get("summary") ?? ""),
-			content: markdownDetails,
-			coverImageUrl,
-			stack: String(formData.get("stack") ?? "")
-				.split(",")
-				.map((item) => item.trim())
-				.filter(Boolean),
-			demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
-			repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
-			tags: initialProject?.tags ?? [],
-			screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
-		};
-
 		try {
+			let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
+			const coverImageFile = formData.get("coverImageFile");
+			if (coverImageFile instanceof File && coverImageFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", coverImageFile);
+				uploadFormData.append("kind", "project-cover");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+				setUploadedCoverUrl(coverImageUrl);
+			}
+
+			const toOptionalAbsoluteUrl = (value: string) => {
+				if (!value.trim()) {
+					return undefined;
+				}
+				return toAbsoluteUrl(value);
+			};
+
+			const payload = {
+				title: String(formData.get("title") ?? ""),
+				slug: String(formData.get("slug") ?? ""),
+				summary: String(formData.get("summary") ?? ""),
+				content: markdownDetails,
+				coverImageUrl,
+				stack: String(formData.get("stack") ?? "")
+					.split(",")
+					.map((item) => item.trim())
+					.filter(Boolean),
+				demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
+				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
+				tags: initialProject?.tags ?? [],
+				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
+			};
+
 			if (isEditMode && initialProject) {
 				await apiRequest(`/api/projects/${initialProject.id}`, {
 					method: "PATCH",

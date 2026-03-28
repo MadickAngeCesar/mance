@@ -164,7 +164,12 @@ export function ProjectList() {
 								<TableCell>{project.views.toLocaleString()}</TableCell>
 								<TableCell>
 									<div className="flex gap-1">
-										<Button variant="ghost" size="icon-sm" aria-label="View project">
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											aria-label="View project"
+											onClick={() => window.open(`/lab/${project.slug}`, "_blank", "noopener,noreferrer")}
+										>
 											<Eye className="size-4" />
 										</Button>
 										<ProjectForm

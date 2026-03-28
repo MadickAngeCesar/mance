@@ -6,6 +6,15 @@ import { requireRole } from "@/lib/auth";
 import { WorkKind } from "@/lib/generated/prisma/client";
 import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workflows";
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+async function resolveId(context: RouteContext) {
+  const params = await context.params;
+  return params.id;
+}
+
 /**
  * GET /api/projects/[id]
  * Get a single lab project by ID (or slug)
@@ -13,9 +22,9 @@ import { triggerNewsletterCampaignForPublishedContent } from "@/lib/email-workfl
  */
 async function handleGet(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params;
+  const id = await resolveId(context);
 
   // Try to find by ID first, then by slug
   let project = await prisma.labProject.findUnique({
@@ -57,11 +66,11 @@ async function handleGet(
  */
 async function handlePatch(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
   const body = await request.json();
   const data = LabProjectUpdateSchema.partial().parse(body);
 
@@ -110,9 +119,9 @@ async function handlePatch(
  */
 async function handleDelete(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params;
+  const id = await resolveId(context);
 
   await prisma.labProject.delete({
     where: { id },

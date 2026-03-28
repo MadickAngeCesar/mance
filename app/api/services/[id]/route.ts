@@ -4,6 +4,15 @@ import { ServiceUpdateSchema, ApiResponse } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+async function resolveId(context: RouteContext) {
+  const params = await context.params;
+  return params.id;
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -25,9 +34,9 @@ function buildOfferingCtaUrl(input: { title?: string; ctaText?: string }) {
  */
 async function handleGet(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params;
+  const id = await resolveId(context);
 
   const service = await prisma.offering.findUnique({
     where: { id },
@@ -51,11 +60,11 @@ async function handleGet(
  */
 async function handlePatch(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
   const body = await request.json();
   const data = ServiceUpdateSchema.partial().parse(body);
 
@@ -89,11 +98,11 @@ async function handlePatch(
  */
 async function handleDelete(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
 
   await prisma.offering.delete({
     where: { id },

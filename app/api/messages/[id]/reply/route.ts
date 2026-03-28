@@ -11,6 +11,10 @@ const ReplySchema = z.object({
   body: z.string().min(1, "Reply body is required.").max(5000),
 });
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -22,7 +26,7 @@ function escapeHtml(value: string) {
 
 async function handlePost(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
@@ -31,6 +35,7 @@ async function handlePost(
   }
 
   const payload = ReplySchema.parse(await request.json());
+  const params = await context.params;
   const message = await prisma.message.findUnique({ where: { id: params.id } });
 
   if (!message) {

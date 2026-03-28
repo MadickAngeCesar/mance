@@ -54,37 +54,37 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 		setIsSubmitting(true);
 		setError(null);
 
-		let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
-		const coverImageFile = formData.get("coverImageFile");
-		if (coverImageFile instanceof File && coverImageFile.size > 0) {
-			const uploadFormData = new FormData();
-			uploadFormData.append("file", coverImageFile);
-			uploadFormData.append("kind", "article-cover");
-
-			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
-				method: "POST",
-				auth: true,
-				body: uploadFormData,
-			});
-
-			coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
-			setUploadedCoverUrl(coverImageUrl);
-		}
-
-		const payload = {
-			title: String(formData.get("title") ?? ""),
-			excerpt: String(formData.get("excerpt") ?? ""),
-			coverImageUrl,
-			slug: String(formData.get("slug") ?? ""),
-			category: String(formData.get("category") ?? ""),
-			tags: String(formData.get("tags") ?? "")
-				.split(",")
-				.map((tag) => tag.trim())
-				.filter(Boolean),
-			content: markdownContent,
-		};
-
 		try {
+			let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
+			const coverImageFile = formData.get("coverImageFile");
+			if (coverImageFile instanceof File && coverImageFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", coverImageFile);
+				uploadFormData.append("kind", "article-cover");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+				setUploadedCoverUrl(coverImageUrl);
+			}
+
+			const payload = {
+				title: String(formData.get("title") ?? ""),
+				excerpt: String(formData.get("excerpt") ?? ""),
+				coverImageUrl,
+				slug: String(formData.get("slug") ?? ""),
+				category: String(formData.get("category") ?? ""),
+				tags: String(formData.get("tags") ?? "")
+					.split(",")
+					.map((tag) => tag.trim())
+					.filter(Boolean),
+				content: markdownContent,
+			};
+
 			if (isEditMode && initialArticle) {
 				await apiRequest(`/api/blogs/${initialArticle.id}`, {
 					method: "PATCH",

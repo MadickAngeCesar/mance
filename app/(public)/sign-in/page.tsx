@@ -5,18 +5,40 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { LoginForm } from "@/components/public/login_form";
-import { brandProfile, contactDetails } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  title: `Sign In | ${brandProfile.currentName}`,
-  description: "Sign in to the MAC TECH dashboard to manage projects, inquiries, services, and content.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const profile = await prisma.brandProfile.findFirst({
+		select: { currentName: true },
+	});
 
-export default function SignInPage() {
+	return {
+		title: `Sign In | ${profile?.currentName ?? "MAC TECH"}`,
+		description: "Sign in to the MAC TECH dashboard to manage projects, inquiries, services, and content.",
+		robots: {
+			index: false,
+			follow: false,
+		},
+	};
+}
+
+export default async function SignInPage() {
+	const [profile, contact] = await Promise.all([
+		prisma.brandProfile.findFirst({
+			select: {
+				currentName: true,
+				roleTagline: true,
+			},
+		}),
+		prisma.contactDetails.findFirst({
+			select: { email: true },
+		}),
+	]);
+
+	const brandName = profile?.currentName ?? "MAC TECH";
+	const roleTagline = profile?.roleTagline ?? "Technology and digital solutions";
+	const supportEmail = contact?.email ?? "hello@mance.dev";
+
 	const dashboardSections = [
 		{ en: "Message and lead inbox", fr: "Boite de messages et prospects" },
 		{ en: "Project and service records", fr: "Suivi des projets et services" },
@@ -34,7 +56,7 @@ export default function SignInPage() {
 			<div className="mx-auto w-full gap-8 px-4 py-12 sm:px-6 sm:grid sm:grid-cols-[1.1fr_0.9fr] sm:py-16">
 				<div className="hidden sm:grid items-start gap-8">
 					<Badge variant="secondary" className="border border-primary/30 bg-primary/15 text-primary">
-						{brandProfile.currentName} Admin
+						{brandName} Admin
 					</Badge>
 
 					<div className="space-y-3">
@@ -42,7 +64,7 @@ export default function SignInPage() {
 							<Tx en="Secure sign-in for your portfolio operations hub." fr="Connexion securisee pour votre hub d'operations portfolio." />
 						</h1>
 						<p className="max-w-xl text-sm text-muted-foreground sm:text-base">
-							{brandProfile.roleTagline}. <Tx en="Access the workspace that centralizes delivery, communication, and publishing." fr="Accedez a l'espace qui centralise la livraison, la communication et la publication." />
+							{roleTagline}. <Tx en="Access the workspace that centralizes delivery, communication, and publishing." fr="Accedez a l'espace qui centralise la livraison, la communication et la publication." />
 						</p>
 					</div>
 
@@ -60,13 +82,13 @@ export default function SignInPage() {
 						<p>
 							<Tx en="Authentication API is prepared for JWT + bcrypt integration per portfolio requirements." fr="L'API d'authentification est prete pour l'integration JWT + bcrypt selon les exigences du portfolio." />
 							 {" "}
-							<Tx en="Need credentials? Reach out via" fr="Besoin d'identifiants ? Contactez" /> {contactDetails.email}.
+							<Tx en="Need credentials? Reach out via" fr="Besoin d'identifiants ? Contactez" /> {supportEmail}.
 						</p>
 					</div>
 				</div>
 
 				<div>
-					<LoginForm />
+					<LoginForm brandName={brandName} supportEmail={supportEmail} />
 				</div>
 			</div>
 		</section>

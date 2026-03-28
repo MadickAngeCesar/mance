@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { apiRequest, persistAuthTokens } from "@/lib/client-api";
-import { brandProfile, contactDetails } from "@/lib/placeholder-data";
 
 const loginSchema = z.object({
 	email: z
@@ -27,7 +26,12 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+type LoginFormProps = {
+	brandName: string;
+	supportEmail: string;
+};
+
+export function LoginForm({ brandName, supportEmail }: LoginFormProps) {
 	const router = useRouter();
 	const { language } = useLanguage();
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +119,7 @@ export function LoginForm() {
 					{language === "FR" ? "Acces Dashboard" : "Dashboard Access"}
 				</Badge>
 				<div className="space-y-1">
-					<CardTitle className="text-xl">{language === "FR" ? "Se connecter a" : "Sign in to"} {brandProfile.currentName}</CardTitle>
+					<CardTitle className="text-xl">{language === "FR" ? "Se connecter a" : "Sign in to"} {brandName}</CardTitle>
 					<CardDescription>
 						{language === "FR"
 							? "Gerez en toute securite les messages, projets, services et contenus depuis un seul espace."
@@ -221,7 +225,7 @@ export function LoginForm() {
 				<div className="mt-3 rounded-lg border border-border/70 bg-muted/40 p-3 text-xs text-muted-foreground">
 					<p className="font-medium text-foreground">{language === "FR" ? "Besoin d'aide pour l'acces ?" : "Need access support?"}</p>
 					<p className="mt-1">
-						{language === "FR" ? "Contactez" : "Contact"} <a href={`mailto:${contactDetails.email}`} className="text-primary hover:underline">{contactDetails.email}</a> {language === "FR" ? "pour la recuperation de compte ou un nouvel acces contributeur." : "for account recovery or new contributor access."}
+						{language === "FR" ? "Contactez" : "Contact"} <a href={`mailto:${supportEmail}`} className="text-primary hover:underline">{supportEmail}</a> {language === "FR" ? "pour la recuperation de compte ou un nouvel acces contributeur." : "for account recovery or new contributor access."}
 					</p>
 				</div>
 			</CardContent>

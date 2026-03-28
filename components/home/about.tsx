@@ -1,9 +1,33 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { aboutSummary, education, experience } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export function About() {
+export async function About() {
+	const [profile, education, experience] = await Promise.all([
+		prisma.brandProfile.findFirst({
+			select: {
+				aboutSummary: {
+					select: {
+						biography: true,
+						cvDownloadUrl: true,
+						linkedinResumeSource: true,
+						interests: true,
+					},
+				},
+			},
+		}),
+		prisma.education.findMany({ orderBy: { displayOrder: "asc" } }),
+		prisma.experience.findMany({ orderBy: { displayOrder: "asc" } }),
+	]);
+
+	const aboutSummary = {
+		biography: profile?.aboutSummary?.biography ?? "Biography is not available yet.",
+		cvDownloadUrl: profile?.aboutSummary?.cvDownloadUrl ?? "/MadickAngeCesar_FullStack_Resume_EN.pdf",
+		linkedinResumeSource: profile?.aboutSummary?.linkedinResumeSource ?? "",
+		interests: profile?.aboutSummary?.interests ?? [],
+	};
+
 	return (
 		<section className="space-y-5">
 			<div className="flex flex-wrap items-end justify-between gap-3">
@@ -34,6 +58,7 @@ export function About() {
 						<CardTitle>Education and Certification</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
+						{education.length === 0 ? <p className="text-sm text-muted-foreground">No education entries yet.</p> : null}
 						{education.map((item) => (
 							<div key={`${item.title}-${item.institution}`} className="space-y-1">
 								<p className="font-medium">{item.title}</p>
@@ -51,6 +76,7 @@ export function About() {
 						<CardTitle>Work Experience</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
+						{experience.length === 0 ? <p className="text-sm text-muted-foreground">No work experience entries yet.</p> : null}
 						{experience.map((item) => (
 							<div key={`${item.role}-${item.company}`} className="space-y-1">
 								<p className="font-medium">{item.role}</p>
@@ -70,6 +96,7 @@ export function About() {
 						{interest}
 					</Badge>
 				))}
+				{aboutSummary.interests.length === 0 ? <p className="text-sm text-muted-foreground">No interests configured yet.</p> : null}
 			</div>
 		</section>
 	);

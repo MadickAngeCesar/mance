@@ -6,7 +6,6 @@ import { ArticleSpec } from "@/components/lab/article_spec";
 import { ClientWorkSpec } from "@/components/lab/client_work_spec";
 import { ProjectSpec } from "@/components/lab/project_spec";
 import { prisma } from "@/lib/prisma";
-import { clientWork, labArticles, labProjects } from "@/lib/placeholder-data";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 
 type LabDetailPageProps = {
@@ -17,13 +16,29 @@ type LabDetailPageProps = {
 
 export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const [projects, articles, workItems] = await Promise.all([
+    prisma.labProject.findMany({
+      where: { publishedAt: { not: null } },
+      select: { slug: true },
+    }),
+    prisma.labArticle.findMany({
+      where: { publishedAt: { not: null } },
+      select: { slug: true },
+    }),
+    prisma.clientWork.findMany({
+      where: {
+        slug: { not: null },
+        publishedAt: { not: null },
+      },
+      select: { slug: true },
+    }),
+  ]);
+
   return [
-    ...labProjects.map((project) => ({ slug: project.slug })),
-    ...labArticles.map((article) => ({ slug: article.slug })),
-    ...clientWork
-      .filter((item) => Boolean(item.slug))
-      .map((item) => ({ slug: item.slug as string })),
+    ...projects.map((item) => ({ slug: item.slug })),
+    ...articles.map((item) => ({ slug: item.slug })),
+    ...workItems.map((item) => ({ slug: item.slug as string })),
   ];
 }
 
@@ -47,19 +62,15 @@ async function getLabEntryBySlug(slug: string) {
     }
   }
 
-  const fallbackProject = labProjects.find((item) => item.slug === slug);
-  if (fallbackProject) {
-    return { kind: "project" as const, data: fallbackProject };
-  }
-
-  const fallbackArticle = labArticles.find((item) => item.slug === slug);
-  if (fallbackArticle) {
-    return { kind: "article" as const, data: fallbackArticle };
-  }
-
-  const fallbackClientWork = clientWork.find((item) => item.slug === slug);
-  if (fallbackClientWork) {
-    return { kind: "client-work" as const, data: fallbackClientWork };
+  try {
+    const workItem = await prisma.clientWork.findUnique({ where: { slug } });
+    if (workItem && workItem.publishedAt) {
+      return { kind: "client-work" as const, data: workItem };
+    }
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      throw error;
+    }
   }
 
   return null;
@@ -67,7 +78,7 @@ async function getLabEntryBySlug(slug: string) {
 
 async function getLabNavigation(slug: string) {
   try {
-    const [projects, articles] = await Promise.all([
+    const [projects, articles, workItems] = await Promise.all([
       prisma.labProject.findMany({
         where: { publishedAt: { not: null } },
         select: { slug: true, title: true, publishedAt: true },
@@ -76,9 +87,16 @@ async function getLabNavigation(slug: string) {
         where: { publishedAt: { not: null } },
         select: { slug: true, title: true, publishedAt: true },
       }),
+      prisma.clientWork.findMany({
+        where: {
+          slug: { not: null },
+          publishedAt: { not: null },
+        },
+        select: { slug: true, title: true, publishedAt: true },
+      }),
     ]);
 
-    const entries = [...projects, ...articles].sort(
+    const entries = [...projects, ...articles, ...workItems].sort(
       (a, b) => getPublishedTime(b.publishedAt?.toISOString()) - getPublishedTime(a.publishedAt?.toISOString())
     );
     const index = entries.findIndex((entry) => entry.slug === slug);
@@ -94,23 +112,7 @@ async function getLabNavigation(slug: string) {
     }
   }
 
-  const fallbackEntries = [
-    ...labProjects.map((project) => ({ slug: project.slug, title: project.title, publishedAt: project.publishedAt })),
-    ...labArticles.map((article) => ({ slug: article.slug, title: article.title, publishedAt: article.publishedAt })),
-    ...clientWork
-      .filter((item) => Boolean(item.slug))
-      .map((item) => ({ slug: item.slug as string, title: item.title, publishedAt: item.publishedAt })),
-  ].sort((a, b) => getPublishedTime(b.publishedAt) - getPublishedTime(a.publishedAt));
-
-  const fallbackIndex = fallbackEntries.findIndex((entry) => entry.slug === slug);
-  if (fallbackIndex < 0) {
-    return { previous: null, next: null };
-  }
-
-  return {
-    previous: fallbackEntries[fallbackIndex - 1] ?? null,
-    next: fallbackEntries[fallbackIndex + 1] ?? null,
-  };
+  return { previous: null, next: null };
 }
 
 export async function generateMetadata({ params }: LabDetailPageProps): Promise<Metadata> {
@@ -218,9 +220,17 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
   }
 
   if (entry?.kind === "client-work") {
+    const clientWorkItem = {
+      ...entry.data,
+      projectUrl: entry.data.projectUrl ?? undefined,
+      slug: entry.data.slug ?? undefined,
+      content: entry.data.content ?? undefined,
+      publishedAt: toIsoString(entry.data.publishedAt),
+    };
+
     return (
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <ClientWorkSpec clientWorkItem={entry.data} />
+        <ClientWorkSpec clientWorkItem={clientWorkItem} />
         <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
           {navigation.previous ? (
             <Link href={`/lab/${navigation.previous.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40">

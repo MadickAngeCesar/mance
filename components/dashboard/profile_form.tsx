@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/client-api";
-import { aboutSummary, contactDetails, education, experience, skills } from "@/lib/placeholder-data";
 
 type ProfilePayload = {
 	brandProfile: {
@@ -27,6 +26,42 @@ type ProfilePayload = {
 		phone: string;
 		location: string;
 	};
+};
+
+type EducationItem = {
+	id: string;
+	title: string;
+	institution: string;
+	period: string;
+	location?: string | null;
+};
+
+type ExperienceItem = {
+	id: string;
+	role: string;
+	company: string;
+	period: string;
+	summary: string;
+};
+
+type SkillItem = {
+	id: string;
+	name: string;
+	category: string;
+	proficiency: number;
+};
+
+type SocialLinkItem = {
+	id: string;
+	platform: string;
+	label: string;
+	url: string;
+};
+
+type ProfileReferenceResponse = {
+	education: EducationItem[];
+	experience: ExperienceItem[];
+	skills: SkillItem[];
 };
 
 export function ProfileForm() {
@@ -51,6 +86,10 @@ export function ProfileForm() {
 	const [isSaving, setIsSaving] = useState(false);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [profileImageUrl, setProfileImageUrl] = useState("/images/Profile.jpg");
+	const [education, setEducation] = useState<EducationItem[]>([]);
+	const [experience, setExperience] = useState<ExperienceItem[]>([]);
+	const [skills, setSkills] = useState<SkillItem[]>([]);
+	const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 
@@ -91,8 +130,12 @@ export function ProfileForm() {
 			setIsLoading(true);
 			setError(null);
 			try {
-				const response = await apiRequest<any>("/api/profile", { auth: true });
-				const data = response.data;
+				const [profileResponse, referenceResponse] = await Promise.all([
+					apiRequest<any>("/api/profile", { auth: true }),
+					apiRequest<ProfileReferenceResponse>("/api/profile/reference", { auth: true }),
+				]);
+
+				const data = profileResponse.data;
 
 				if (!isMounted || !data) {
 					return;
@@ -115,6 +158,11 @@ export function ProfileForm() {
 						location: data.contactDetails?.location ?? "",
 					},
 				});
+
+				setEducation(referenceResponse.data?.education ?? []);
+				setExperience(referenceResponse.data?.experience ?? []);
+				setSkills(referenceResponse.data?.skills ?? []);
+				setSocialLinks(data.contactDetails?.socialLinks ?? []);
 			} catch (loadError) {
 				if (!isMounted) {
 					return;
@@ -296,7 +344,7 @@ export function ProfileForm() {
 									Add Entry
 								</Button>
 							</div>
-							{experience.map((entry) => (
+								{experience.map((entry) => (
 								<div key={`${entry.company}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
 									<div className="grid gap-2 md:grid-cols-2">
 										<Input defaultValue={entry.role} aria-label="Role" />
@@ -310,6 +358,7 @@ export function ProfileForm() {
 									<Textarea defaultValue={entry.summary} className="mt-2" rows={3} aria-label="Summary" />
 								</div>
 							))}
+								{experience.length === 0 ? <p className="text-sm text-muted-foreground">No experience entries yet.</p> : null}
 						</div>
 
 						<div className="space-y-3">
@@ -330,6 +379,7 @@ export function ProfileForm() {
 									</div>
 								</div>
 							))}
+							{education.length === 0 ? <p className="text-sm text-muted-foreground">No education entries yet.</p> : null}
 						</div>
 					</TabsContent>
 
@@ -353,6 +403,7 @@ export function ProfileForm() {
 									</Button>
 								</div>
 							))}
+							{skills.length === 0 ? <p className="text-sm text-muted-foreground">No skills configured yet.</p> : null}
 						</div>
 					</TabsContent>
 
@@ -406,13 +457,14 @@ export function ProfileForm() {
 						</div>
 
 						<div className="grid gap-2">
-							{contactDetails.socialLinks.map((link) => (
-								<div key={link.platform} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[120px_1fr_1fr]">
+							{socialLinks.map((link) => (
+								<div key={link.id} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[120px_1fr_1fr]">
 									<Input defaultValue={link.platform} aria-label="Platform" />
 									<Input defaultValue={link.label} aria-label="Label" />
 									<Input defaultValue={link.url} aria-label="URL" />
 								</div>
 							))}
+							{socialLinks.length === 0 ? <p className="text-sm text-muted-foreground">No social links configured yet.</p> : null}
 						</div>
 					</TabsContent>
 				</Tabs>

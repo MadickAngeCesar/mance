@@ -4,9 +4,14 @@ import { ArrowUpRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { clientWork } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export function ClientWork() {
+export async function ClientWork() {
+	const clientWork = await prisma.clientWork.findMany({
+		where: { publishedAt: { not: null } },
+		orderBy: { publishedAt: "desc" },
+	});
+
 	return (
 		<section className="space-y-5" id="client-work">
 			<div className="text-center">
@@ -15,6 +20,9 @@ export function ClientWork() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+				{clientWork.length === 0 ? (
+					<p className="text-sm text-muted-foreground md:col-span-3">No client work has been published yet.</p>
+				) : null}
 				{clientWork.map((item) => (
 					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
 						<div className="relative h-44 w-full border-b border-border/60 bg-muted/40">

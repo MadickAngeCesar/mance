@@ -3,9 +3,13 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mainWorkHighlights } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export function MainWork() {
+export async function MainWork() {
+	const mainWorkHighlights = await prisma.mainWorkHighlight.findMany({
+		orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+	});
+
 	return (
 		<section className="space-y-5">
 			<div>
@@ -14,6 +18,9 @@ export function MainWork() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
+				{mainWorkHighlights.length === 0 ? (
+					<p className="text-sm text-muted-foreground md:col-span-3">No featured work has been published yet.</p>
+				) : null}
 				{mainWorkHighlights.map((item, index) => (
 					<Card
 						key={item.id}
@@ -31,7 +38,7 @@ export function MainWork() {
 						<CardHeader>
 							<div className="flex items-center justify-between gap-3">
 								<Badge variant="outline" className="rounded-full capitalize">
-									{item.kind}
+									{item.kind.replace("_", " ").toLowerCase()}
 								</Badge>
 								{item.featured ? <Badge className="rounded-full">Featured</Badge> : null}
 							</div>

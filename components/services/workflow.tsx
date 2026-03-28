@@ -1,8 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { workflowStages } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export function Workflow() {
+export async function Workflow() {
+	const workflowStages = await prisma.workflowStage.findMany({
+		orderBy: { step: "asc" },
+	});
+
 	return (
 		<section className="space-y-5" id="workflow">
 			<div className="text-center">
@@ -11,6 +15,9 @@ export function Workflow() {
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-3 md:grid-cols-5">
+				{workflowStages.length === 0 ? (
+					<p className="text-sm text-muted-foreground md:col-span-5">No workflow stages configured yet.</p>
+				) : null}
 				{workflowStages.map((stage) => (
 					<Card key={stage.step} className="h-full border-border/80">
 						<CardHeader className="space-y-2">

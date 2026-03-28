@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PortalMobileMenu, PortalSidebar } from "@/components/dashboard/portal_nav";
 import { SignOutButton } from "@/components/dashboard/sign_out_button";
 import { ACCESS_TOKEN_COOKIE, verifyToken } from "@/lib/auth";
-import { brandProfile } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
   children,
@@ -29,6 +29,10 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
+  const profile = await prisma.brandProfile.findFirst({
+    select: { currentName: true },
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
@@ -36,7 +40,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-2">
             <PortalMobileMenu />
             <div className="leading-none">
-              <p className="text-sm font-semibold tracking-wide">{brandProfile.currentName}</p>
+              <p className="text-sm font-semibold tracking-wide">{profile?.currentName ?? "MAC TECH"}</p>
               <p className="text-xs text-muted-foreground"><Tx en="Administration Portal" fr="Portail d'administration" /></p>
             </div>
           </div>

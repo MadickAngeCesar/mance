@@ -1,9 +1,20 @@
 import { Badge } from "@/components/ui/badge";
-import { skills } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
 const categories = ["Frontend", "Backend", "DevOps", "IT Support", "Tools", "Languages"] as const;
 
-export function Skills() {
+const categoryMap: Record<(typeof categories)[number], string> = {
+	Frontend: "FRONTEND",
+	Backend: "BACKEND",
+	DevOps: "DEVOPS",
+	"IT Support": "IT_SUPPORT",
+	Tools: "TOOLS",
+	Languages: "LANGUAGES",
+};
+
+export async function Skills() {
+	const skills = await prisma.skill.findMany({ orderBy: { displayOrder: "asc" } });
+
 	return (
 		<section className="space-y-5">
 			<div>
@@ -14,8 +25,7 @@ export function Skills() {
 			<div className="space-y-4 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{categories.map((category) => {
 					const items = skills
-						.filter((skill) => skill.category === category)
-						.sort((a, b) => a.order - b.order);
+						.filter((skill) => skill.category === categoryMap[category]);
 
 					if (!items.length) {
 						return null;

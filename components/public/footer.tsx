@@ -2,16 +2,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Github, Linkedin, MessageCircle } from "lucide-react";
 
-import { contactDetails } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
-export function Footer() {
+export async function Footer() {
 	const year = new Date().getFullYear();
+	const [contact, about] = await Promise.all([
+		prisma.contactDetails.findFirst({
+			include: {
+				socialLinks: {
+					orderBy: { displayOrder: "asc" },
+				},
+			},
+		}),
+		prisma.aboutSummary.findFirst({
+			select: { cvDownloadUrl: true },
+		}),
+	]);
 
 	const socialIcons = {
-		GitHub: Github,
-		LinkedIn: Linkedin,
-		WhatsApp: MessageCircle,
-		Facebook: Facebook,
+		GITHUB: Github,
+		LINKEDIN: Linkedin,
+		WHATSAPP: MessageCircle,
+		FACEBOOK: Facebook,
 	} as const;
 
 	return (
@@ -31,16 +43,19 @@ export function Footer() {
 					<p className="text-sm text-muted-foreground">Building digital solutions for modern organizations.</p>
 					<div className="pt-2">
 						<div className="flex items-center gap-2">
-							{contactDetails.socialLinks.map((link) => {
-								const Icon = socialIcons[link.platform];
+							{(contact?.socialLinks ?? []).map((link) => {
+								const Icon = socialIcons[link.platform as keyof typeof socialIcons];
+								if (!Icon) {
+									return null;
+								}
 								return (
 									<Link
-										key={link.platform}
+										key={link.id}
 										href={link.url}
 										target="_blank"
 										rel="noreferrer noopener"
 										className="inline-flex size-8 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition-colors hover:text-foreground"
-										aria-label={link.platform}
+										aria-label={link.label || link.platform}
 									>
 										<Icon className="size-4" />
 									</Link>
@@ -53,7 +68,7 @@ export function Footer() {
 				<div className="space-y-2 lg:justify-self-end lg:text-right">
 					<p className="text-sm font-semibold">Resources</p>
 					<div className="grid gap-1 text-sm text-muted-foreground">
-						<a href="/MadickAngeCesar_FullStack_Resume_EN.pdf" download className="transition-colors hover:text-foreground">
+						<a href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_Resume_EN.pdf"} download className="transition-colors hover:text-foreground">
 							Resume (PDF)
 						</a>
 						<Link href="/sign-in" className="transition-colors hover:text-foreground">Dashboard</Link>

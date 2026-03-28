@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { offerings } from "@/lib/placeholder-data";
+import { prisma } from "@/lib/prisma";
 
 const serviceCategoryById: Record<string, string> = {
 	"web-product-development": "Web Development",
@@ -12,7 +12,11 @@ const serviceCategoryById: Record<string, string> = {
 	"technical-writing": "Technical Writing",
 };
 
-export function OfferingsCards() {
+export async function OfferingsCards() {
+	const offerings = await prisma.offering.findMany({
+		orderBy: { createdAt: "desc" },
+	});
+
 	return (
 		<section className="space-y-5" id="offerings">
 			<div className="text-center">
@@ -23,6 +27,9 @@ export function OfferingsCards() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-3">
+				{offerings.length === 0 ? (
+					<p className="text-sm text-muted-foreground sm:col-span-3">No offerings published yet.</p>
+				) : null}
 				{offerings.map((offering) => (
 					<Card key={offering.id} className="h-full border-border/80">
 						<CardHeader className="space-y-2 text-center">
@@ -41,7 +48,7 @@ export function OfferingsCards() {
 						</CardContent>
 						<CardFooter>
 							<Button asChild className="w-full">
-								<Link href={offering.ctaUrl}>{offering.ctaText}</Link>
+								<Link href={offering.ctaUrl || "/#contact"}>{offering.ctaText}</Link>
 							</Button>
 						</CardFooter>
 					</Card>

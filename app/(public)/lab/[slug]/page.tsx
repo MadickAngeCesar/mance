@@ -145,7 +145,15 @@ export async function generateMetadata({ params }: LabDetailPageProps): Promise<
   };
 }
 
-function getPublishedTime(publishedAt?: string) {
+function toIsoString(value?: string | Date | null) {
+  if (!value) {
+    return undefined;
+  }
+
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+
+function getPublishedTime(publishedAt?: string | Date | null) {
   return publishedAt ? new Date(publishedAt).getTime() : 0;
 }
 
@@ -158,7 +166,7 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
       ...entry.data,
       demoUrl: entry.data.demoUrl ?? undefined,
       repoUrl: entry.data.repoUrl ?? undefined,
-      publishedAt: entry.data.publishedAt ? entry.data.publishedAt.toISOString() : undefined,
+      publishedAt: toIsoString(entry.data.publishedAt),
     };
 
     return (
@@ -185,7 +193,7 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
   if (entry?.kind === "article") {
     const article = {
       ...entry.data,
-      publishedAt: entry.data.publishedAt ? entry.data.publishedAt.toISOString() : undefined,
+      publishedAt: toIsoString(entry.data.publishedAt),
     };
 
     return (

@@ -17,29 +17,37 @@ type LabDetailPageProps = {
 export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
-  const [projects, articles, workItems] = await Promise.all([
-    prisma.labProject.findMany({
-      where: { publishedAt: { not: null } },
-      select: { slug: true },
-    }),
-    prisma.labArticle.findMany({
-      where: { publishedAt: { not: null } },
-      select: { slug: true },
-    }),
-    prisma.clientWork.findMany({
-      where: {
-        slug: { not: null },
-        publishedAt: { not: null },
-      },
-      select: { slug: true },
-    }),
-  ]);
+  try {
+    const [projects, articles, workItems] = await Promise.all([
+      prisma.labProject.findMany({
+        where: { publishedAt: { not: null } },
+        select: { slug: true },
+      }),
+      prisma.labArticle.findMany({
+        where: { publishedAt: { not: null } },
+        select: { slug: true },
+      }),
+      prisma.clientWork.findMany({
+        where: {
+          slug: { not: null },
+          publishedAt: { not: null },
+        },
+        select: { slug: true },
+      }),
+    ]);
 
-  return [
-    ...projects.map((item) => ({ slug: item.slug })),
-    ...articles.map((item) => ({ slug: item.slug })),
-    ...workItems.map((item) => ({ slug: item.slug as string })),
-  ];
+    return [
+      ...projects.map((item) => ({ slug: item.slug })),
+      ...articles.map((item) => ({ slug: item.slug })),
+      ...workItems.map((item) => ({ slug: item.slug as string })),
+    ];
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      console.error("generateStaticParams failed for /lab/[slug], using empty params:", error);
+    }
+
+    return [];
+  }
 }
 
 async function getLabEntryBySlug(slug: string) {

@@ -9,6 +9,8 @@ import { ApiError, createApiHandler } from "@/lib/api-utils";
 export const runtime = "nodejs";
 
 const FALLBACK_UPLOADS_ROOT = path.join(os.tmpdir(), "mance-uploads");
+const PUBLIC_UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
+const PUBLIC_IMAGES_ROOT = path.join(process.cwd(), "public", "images");
 
 type RouteContext = {
   params: Promise<{ path: string[] }> | { path: string[] };
@@ -47,23 +49,47 @@ async function resolveSegments(context: RouteContext) {
 
 async function handleGet(_request: NextRequest, context: RouteContext) {
   const segments = await resolveSegments(context);
-  const unsafeFilePath = path.join(FALLBACK_UPLOADS_ROOT, ...segments);
-  const resolvedFilePath = path.resolve(unsafeFilePath);
-  const resolvedRoot = path.resolve(FALLBACK_UPLOADS_ROOT);
+  const fallbackUnsafeFilePath = path.join(FALLBACK_UPLOADS_ROOT, ...segments);
+  const fallbackResolvedFilePath = path.resolve(fallbackUnsafeFilePath);
+  const fallbackResolvedRoot = path.resolve(FALLBACK_UPLOADS_ROOT);
 
-  if (!resolvedFilePath.startsWith(`${resolvedRoot}${path.sep}`)) {
+  if (!fallbackResolvedFilePath.startsWith(`${fallbackResolvedRoot}${path.sep}`)) {
     throw ApiError.badRequest("Invalid upload path");
   }
 
-  let fileBytes: Buffer;
+  const publicUnsafeFilePath = path.join(PUBLIC_UPLOADS_ROOT, ...segments);
+  const publicResolvedFilePath = path.resolve(publicUnsafeFilePath);
+  const publicResolvedRoot = path.resolve(PUBLIC_UPLOADS_ROOT);
+
+  if (!publicResolvedFilePath.startsWith(`${publicResolvedRoot}${path.sep}`)) {
+    throw ApiError.badRequest("Invalid upload path");
+  }
+
+  let fileBytes: Buffer | null = null;
+  let resolvedPathForMime = fallbackResolvedFilePath;
   try {
-    fileBytes = await readFile(resolvedFilePath);
+    fileBytes = await readFile(fallbackResolvedFilePath);
   } catch (error) {
-    console.error("Fallback upload read failed:", error);
+    console.warn("Fallback upload read failed; trying public upload path.", error);
+    try {
+      fileBytes = await readFile(publicResolvedFilePath);
+      resolvedPathForMime = publicResolvedFilePath;
+    } catch (publicError) {
+      console.warn("Public upload read failed; serving placeholder image.", publicError);
+      try {
+        fileBytes = await readFile(path.join(PUBLIC_IMAGES_ROOT, "Profile.jpg"));
+        resolvedPathForMime = path.join(PUBLIC_IMAGES_ROOT, "Profile.jpg");
+      } catch (placeholderError) {
+        console.error("Placeholder image read failed:", placeholderError);
+      }
+    }
+  }
+
+  if (!fileBytes) {
     throw ApiError.notFound("Upload not found");
   }
 
-  const extension = path.extname(resolvedFilePath).toLowerCase();
+  const extension = path.extname(resolvedPathForMime).toLowerCase();
   const contentType = MIME_BY_EXTENSION[extension] ?? "application/octet-stream";
 
   return new NextResponse(new Uint8Array(fileBytes), {

@@ -2,6 +2,17 @@ import { useState } from "react";
 import { MailOpen, Reply, Trash2 } from "lucide-react";
 
 import type { MessagePreview } from "@/lib/definitions";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,16 +123,33 @@ export function MessageCard({ message, onToggleRead, onReply, onDelete, isPendin
 								</DialogFooter>
 							</DialogContent>
 						</Dialog>
-						<Button
-							variant="ghost"
-							size="sm"
-							type="button"
-							onClick={() => void onDelete(message.id)}
-							disabled={isPending}
-						>
-							<Trash2 className="size-4" />
-							Delete
-						</Button>
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									type="button"
+									disabled={isPending}
+								>
+									<Trash2 className="size-4" />
+									Delete
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent size="sm">
+								<AlertDialogHeader>
+									<AlertDialogTitle>Delete message?</AlertDialogTitle>
+									<AlertDialogDescription>
+										This will permanently delete the message from {message.name}.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>Cancel</AlertDialogCancel>
+									<AlertDialogAction variant="destructive" onClick={() => void onDelete(message.id)}>
+										Delete
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
 					</div>
 				</div>
 			</CardContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,6 +30,11 @@ const navLinks = [
 export function Navbar() {
 	const { language } = useLanguage();
 	const pathname = usePathname();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	const isActive = (href: string) => {
 		return pathname === href;
@@ -70,39 +76,45 @@ export function Navbar() {
 						<Link href="/#contact">{language === "FR" ? "Demarrer un projet" : "Start a Project"}</Link>
 					</Button>
 
-					<Sheet>
-						<SheetTrigger asChild>
-							<Button variant="outline" size="icon-sm" className="md:hidden" aria-label="Open navigation menu">
-								<Menu className="size-4" />
-							</Button>
-						</SheetTrigger>
-						<SheetContent side="right" className="w-72">
-							<SheetHeader>
-								<SheetTitle>{language === "FR" ? "Navigation" : "Navigation"}</SheetTitle>
-								<SheetDescription>{language === "FR" ? "Liens rapides vers les sections principales du portfolio." : "Quick links to the core sections of the portfolio."}</SheetDescription>
-							</SheetHeader>
-							<nav className="grid gap-2 px-4 pb-4">
-								{navLinks.map((link) => (
-									<Link
-										key={link.href}
-										href={link.href}
-										className={cn(
-											"rounded-md border border-border/70 px-3 py-2 text-sm transition-colors hover:text-foreground",
-											isActive(link.href)
-												? "bg-primary/10 text-foreground"
-												: "text-muted-foreground"
-										)}
-										aria-current={isActive(link.href) ? "page" : undefined}
-									>
-										{link.label[language]}
-									</Link>
-								))}
-								<Button asChild className="mt-2">
-									<Link href="/#contact">{language === "FR" ? "Demarrer un projet" : "Start a Project"}</Link>
+					{mounted ? (
+						<Sheet>
+							<SheetTrigger asChild>
+								<Button variant="outline" size="icon-sm" className="md:hidden" aria-label="Open navigation menu">
+									<Menu className="size-4" />
 								</Button>
-							</nav>
-						</SheetContent>
-					</Sheet>
+							</SheetTrigger>
+							<SheetContent side="right" className="w-72">
+								<SheetHeader>
+									<SheetTitle>{language === "FR" ? "Navigation" : "Navigation"}</SheetTitle>
+									<SheetDescription>{language === "FR" ? "Liens rapides vers les sections principales du portfolio." : "Quick links to the core sections of the portfolio."}</SheetDescription>
+								</SheetHeader>
+								<nav className="grid gap-2 px-4 pb-4">
+									{navLinks.map((link) => (
+										<Link
+											key={link.href}
+											href={link.href}
+											className={cn(
+												"rounded-md border border-border/70 px-3 py-2 text-sm transition-colors hover:text-foreground",
+												isActive(link.href)
+													? "bg-primary/10 text-foreground"
+													: "text-muted-foreground"
+											)}
+											aria-current={isActive(link.href) ? "page" : undefined}
+										>
+											{link.label[language]}
+										</Link>
+									))}
+									<Button asChild className="mt-2">
+										<Link href="/#contact">{language === "FR" ? "Demarrer un projet" : "Start a Project"}</Link>
+									</Button>
+								</nav>
+							</SheetContent>
+						</Sheet>
+					) : (
+						<Button variant="outline" size="icon-sm" className="md:hidden" aria-label="Open navigation menu" type="button">
+							<Menu className="size-4" />
+						</Button>
+					)}
 				</div>
 			</div>
 		</header>

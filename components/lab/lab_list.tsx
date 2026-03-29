@@ -109,8 +109,8 @@ export function LabList() {
 			setLoadError(null);
 			try {
 				const [projectsResult, articlesResult] = await Promise.allSettled([
-					fetchAllPages<ProjectItem>("/api/projects?published=published&sort=newest&featured=all"),
-					fetchAllPages<ArticleItem>("/api/blogs?published=published&sort=newest&featured=all"),
+					fetchAllPages<ProjectItem>("/api/projects?published=all&sort=newest&featured=all"),
+					fetchAllPages<ArticleItem>("/api/blogs?published=all&sort=newest&featured=all"),
 				]);
 
 				if (!isMounted) {
@@ -294,9 +294,7 @@ export function LabList() {
 
 	return (
 		<section className="space-y-8">
-			{isLoading ? (
-				<p className="text-sm text-muted-foreground">Loading lab content...</p>
-			) : null}
+			{isLoading ? <p className="text-sm text-muted-foreground">Loading lab content...</p> : null}
 			{loadError ? (
 				<p className="text-sm text-destructive">{loadError}</p>
 			) : null}
@@ -383,29 +381,36 @@ export function LabList() {
 					))}
 				</div>
 
-				<div className="grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-					{paginatedItems.map((item) => (
-						<LabCard
-							key={item.id}
-							title={item.title}
-							summary={item.summary}
-							href={item.href}
-							coverImageUrl={item.coverImageUrl}
-							tags={item.tags}
-							kind={item.kind}
-							featured={item.featured}
-							views={item.views}
-							meta={item.meta}
-							publishedAt={item.publishedAt}
-						/>
-					))}
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{isLoading
+						? Array.from({ length: itemsPerPage }).map((_, index) => (
+							<div
+								key={`loading-card-${index}`}
+								className="h-90 animate-pulse rounded-xl border border-border/70 bg-card/40"
+							/>
+						))
+						: paginatedItems.map((item) => (
+								<LabCard
+									key={item.id}
+									title={item.title}
+									summary={item.summary}
+									href={item.href}
+									coverImageUrl={item.coverImageUrl}
+									tags={item.tags}
+									kind={item.kind}
+									featured={item.featured}
+									views={item.views}
+									meta={item.meta}
+									publishedAt={item.publishedAt}
+								/>
+							))}
 				</div>
 
-				{paginatedItems.length === 0 ? (
+				{!isLoading && paginatedItems.length === 0 ? (
 					<p className="text-sm text-muted-foreground">No items match your current search and filters.</p>
 				) : null}
 
-				<Pagination>
+				<Pagination className={isLoading ? "opacity-50 pointer-events-none" : ""}>
 					<PaginationContent>
 						<PaginationItem>
 							<PaginationPrevious

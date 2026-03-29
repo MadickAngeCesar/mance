@@ -4,6 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,9 +134,27 @@ export function OfferingList() {
 									</Button>
 								}
 							/>
-							<Button variant="ghost" size="icon-sm" aria-label="Delete offering" onClick={() => void handleDelete(offering.id)}>
-								<Trash2 className="size-4" />
-							</Button>
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button variant="ghost" size="icon-sm" aria-label="Delete offering">
+										<Trash2 className="size-4" />
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent size="sm">
+									<AlertDialogHeader>
+										<AlertDialogTitle>Delete offering?</AlertDialogTitle>
+										<AlertDialogDescription>
+											This will permanently delete {offering.title}.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancel</AlertDialogCancel>
+										<AlertDialogAction variant="destructive" onClick={() => void handleDelete(offering.id)}>
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
 						</div>
 					</div>
 				))}

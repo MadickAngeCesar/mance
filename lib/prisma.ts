@@ -1,6 +1,26 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
+const normalizePgSslMode = (connectionString: string) => {
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(connectionString);
+  } catch {
+    return connectionString;
+  }
+
+  const sslMode = parsedUrl.searchParams.get("sslmode");
+  const useLibpqCompat = parsedUrl.searchParams.get("uselibpqcompat")?.toLowerCase() === "true";
+
+  // Keep current pg v8 behavior explicit and silence the deprecation warning.
+  if (!useLibpqCompat && (sslMode === "prefer" || sslMode === "require" || sslMode === "verify-ca")) {
+    parsedUrl.searchParams.set("sslmode", "verify-full");
+  }
+
+  return parsedUrl.toString();
+};
+
 const prismaClientSingleton = () => {
   const directConnectionString = process.env.DIRECT_DATABASE_URL;
   const databaseUrl = process.env.DATABASE_URL;
@@ -10,7 +30,7 @@ const prismaClientSingleton = () => {
   }
 
   if (directConnectionString) {
-    const adapter = new PrismaPg({ connectionString: directConnectionString });
+    const adapter = new PrismaPg({ connectionString: normalizePgSslMode(directConnectionString) });
     return new PrismaClient({ adapter });
   }
 
@@ -19,7 +39,7 @@ const prismaClientSingleton = () => {
     return new PrismaClient({ accelerateUrl: databaseUrl });
   }
 
-  const adapter = new PrismaPg({ connectionString: databaseUrl! });
+  const adapter = new PrismaPg({ connectionString: normalizePgSslMode(databaseUrl!) });
   return new PrismaClient({ adapter });
 };
 

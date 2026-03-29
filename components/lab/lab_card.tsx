@@ -19,15 +19,46 @@ type LabCardProps = {
 };
 
 export function LabCard({ title, summary, href, coverImageUrl, tags, kind, featured = false, views, meta, publishedAt }: LabCardProps) {
+	const normalizedCoverImageUrl = (() => {
+		if (!coverImageUrl) {
+			return "/images/Profile.jpg";
+		}
+
+		if (coverImageUrl.startsWith("/")) {
+			return coverImageUrl;
+		}
+
+		try {
+			const parsed = new URL(coverImageUrl);
+			if (
+				parsed.hostname === "localhost" ||
+				parsed.hostname === "127.0.0.1" ||
+				parsed.hostname === "mance.dev" ||
+				parsed.hostname === "www.mance.dev"
+			) {
+				return `${parsed.pathname}${parsed.search}`;
+			}
+		} catch {
+			return coverImageUrl;
+		}
+
+		return coverImageUrl;
+	})();
+
 	const formattedDate = publishedAt
-		? new Date(publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+		? new Date(publishedAt).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			timeZone: "UTC",
+		})
 		: null;
 
 	return (
 		<Card className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
 			<div className="relative h-44 w-full border-b border-border/60 bg-muted/40">
 				<Image
-					src={coverImageUrl}
+					src={normalizedCoverImageUrl}
 					alt={`${title} cover image`}
 					fill
 					sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"

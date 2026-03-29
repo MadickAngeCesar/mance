@@ -4,6 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -157,9 +168,15 @@ export function ProjectList() {
 								</TableCell>
 								<TableCell className="max-w-65 truncate">{project.stack.join(", ")}</TableCell>
 								<TableCell>
-									<Badge variant={project.featured ? "default" : "outline"}>
-										{project.featured ? (language === "FR" ? "En vedette" : "Featured") : (language === "FR" ? "Publie" : "Published")}
-									</Badge>
+										<Badge variant={project.publishedAt ? "default" : "outline"}>
+											{project.publishedAt
+												? language === "FR"
+													? "Publie"
+													: "Published"
+												: language === "FR"
+													? "Brouillon"
+													: "Draft"}
+										</Badge>
 								</TableCell>
 								<TableCell>{project.views.toLocaleString()}</TableCell>
 								<TableCell>
@@ -181,9 +198,27 @@ export function ProjectList() {
 												</Button>
 											}
 										/>
-										<Button variant="ghost" size="icon-sm" aria-label="Delete project" onClick={() => void handleDelete(project.id)}>
-											<Trash2 className="size-4" />
-										</Button>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button variant="ghost" size="icon-sm" aria-label="Delete project">
+													<Trash2 className="size-4" />
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent size="sm">
+												<AlertDialogHeader>
+													<AlertDialogTitle>Delete project?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This will permanently delete {project.title}.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction variant="destructive" onClick={() => void handleDelete(project.id)}>
+														Delete
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
 									</div>
 								</TableCell>
 							</TableRow>

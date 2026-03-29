@@ -3,6 +3,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,9 +135,27 @@ export function TestimonialsList() {
 									</Button>
 								}
 							/>
-							<Button variant="ghost" size="icon-sm" aria-label="Delete testimonial" onClick={() => void handleDelete(testimonial.id)}>
-								<Trash2 className="size-4" />
-							</Button>
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button variant="ghost" size="icon-sm" aria-label="Delete testimonial">
+										<Trash2 className="size-4" />
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent size="sm">
+									<AlertDialogHeader>
+										<AlertDialogTitle>Delete testimonial?</AlertDialogTitle>
+										<AlertDialogDescription>
+											This will permanently delete the testimonial from {testimonial.clientName}.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancel</AlertDialogCancel>
+										<AlertDialogAction variant="destructive" onClick={() => void handleDelete(testimonial.id)}>
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
 						</div>
 					</div>
 				))}

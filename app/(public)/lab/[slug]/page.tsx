@@ -9,9 +9,9 @@ import { prisma } from "@/lib/prisma";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 
 type LabDetailPageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export const dynamic = "force-dynamic";
@@ -53,15 +53,25 @@ export async function generateStaticParams() {
 async function getLabEntryBySlug(slug: string) {
   try {
     const [project, article] = await Promise.all([
-      prisma.labProject.findUnique({ where: { slug } }),
-      prisma.labArticle.findUnique({ where: { slug } }),
+      prisma.labProject.findFirst({
+        where: {
+          slug,
+          publishedAt: { not: null },
+        },
+      }),
+      prisma.labArticle.findFirst({
+        where: {
+          slug,
+          publishedAt: { not: null },
+        },
+      }),
     ]);
 
-    if (project && project.publishedAt) {
+    if (project) {
       return { kind: "project" as const, data: project };
     }
 
-    if (article && article.publishedAt) {
+    if (article) {
       return { kind: "article" as const, data: article };
     }
   } catch (error) {
@@ -71,8 +81,13 @@ async function getLabEntryBySlug(slug: string) {
   }
 
   try {
-    const workItem = await prisma.clientWork.findUnique({ where: { slug } });
-    if (workItem && workItem.publishedAt) {
+    const workItem = await prisma.clientWork.findFirst({
+      where: {
+        slug,
+        publishedAt: { not: null },
+      },
+    });
+    if (workItem) {
       return { kind: "client-work" as const, data: workItem };
     }
   } catch (error) {
@@ -124,7 +139,8 @@ async function getLabNavigation(slug: string) {
 }
 
 export async function generateMetadata({ params }: LabDetailPageProps): Promise<Metadata> {
-  const entry = await getLabEntryBySlug(params.slug);
+  const { slug } = await params;
+  const entry = await getLabEntryBySlug(slug);
 
   if (entry?.kind === "project") {
     const project = entry.data;
@@ -183,8 +199,9 @@ function parseDate(value?: string | Date | null) {
 }
 
 export default async function LabDetailPage({ params }: LabDetailPageProps) {
-  const entry = await getLabEntryBySlug(params.slug);
-  const navigation = await getLabNavigation(params.slug);
+  const { slug } = await params;
+  const entry = await getLabEntryBySlug(slug);
+  const navigation = await getLabNavigation(slug);
 
   if (entry?.kind === "project") {
     const project = {

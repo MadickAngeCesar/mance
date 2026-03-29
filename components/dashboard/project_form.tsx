@@ -38,14 +38,26 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 
-	const toAbsoluteUrl = (value: string) => {
-		if (!value.startsWith("/")) {
-			return value;
+	const normalizeMediaUrl = (value: string) => {
+		const trimmed = value.trim();
+		if (!trimmed) {
+			return trimmed;
 		}
-		if (typeof window === "undefined") {
-			return value;
+
+		if (trimmed.startsWith("/")) {
+			return trimmed;
 		}
-		return new URL(value, window.location.origin).toString();
+
+		try {
+			const parsed = new URL(trimmed);
+			if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+				return `${parsed.pathname}${parsed.search}`;
+			}
+		} catch {
+			return trimmed;
+		}
+
+		return trimmed;
 	};
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -56,7 +68,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 		setError(null);
 
 		try {
-			let coverImageUrl = toAbsoluteUrl(String(formData.get("coverImageUrl") ?? ""));
+			let coverImageUrl = normalizeMediaUrl(String(formData.get("coverImageUrl") ?? ""));
 			const coverImageFile = formData.get("coverImageFile");
 			if (coverImageFile instanceof File && coverImageFile.size > 0) {
 				const uploadFormData = new FormData();
@@ -69,7 +81,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 					body: uploadFormData,
 				});
 
-				coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+				coverImageUrl = normalizeMediaUrl(uploadResponse.data?.url ?? coverImageUrl);
 				setUploadedCoverUrl(coverImageUrl);
 			}
 
@@ -77,7 +89,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				if (!value.trim()) {
 					return undefined;
 				}
-				return toAbsoluteUrl(value);
+				return normalizeMediaUrl(value);
 			};
 
 			const payload = {
@@ -94,7 +106,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
 				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
 				tags: initialProject?.tags ?? [],
-				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
+				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => normalizeMediaUrl(url)),
 				publishedAt:
 					intent === "publish"
 						? initialProject?.publishedAt ?? new Date().toISOString()

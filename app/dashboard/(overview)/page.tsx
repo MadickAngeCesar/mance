@@ -21,19 +21,17 @@ export default async function DashboardOverviewPage() {
     topProjects,
     recentMessages,
   ] = await Promise.all([
-    prisma.labArticle.count({ where: { publishedAt: { not: null } } }),
-    prisma.labProject.count({ where: { publishedAt: { not: null } } }),
+    prisma.labArticle.count(),
+    prisma.labProject.count(),
     prisma.message.count(),
     prisma.message.count({ where: { isRead: false } }),
     prisma.subscriber.count({ where: { active: true } }),
     prisma.labArticle.findMany({
-      where: { publishedAt: { not: null } },
       select: { id: true, title: true, slug: true, views: true },
       orderBy: { views: "desc" },
       take: 3,
     }),
     prisma.labProject.findMany({
-      where: { publishedAt: { not: null } },
       select: { id: true, title: true, slug: true, views: true },
       orderBy: { views: "desc" },
       take: 3,
@@ -47,13 +45,13 @@ export default async function DashboardOverviewPage() {
 
   const metrics = [
     {
-      title: "Published Articles",
+      title: "Articles",
       value: totalArticles,
       icon: Newspaper,
       trend: `${topArticles.length} top entries tracked`,
     },
     {
-      title: "Portfolio Projects",
+      title: "Projects",
       value: totalProjects,
       icon: Rocket,
       trend: `${topProjects.length} top entries tracked`,

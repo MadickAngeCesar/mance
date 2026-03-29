@@ -4,6 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, PencilLine, Search, Trash2 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -163,9 +174,15 @@ export function ArticleList() {
 								</TableCell>
 								<TableCell>{article.category}</TableCell>
 								<TableCell>
-									<Badge variant={article.featured ? "default" : "outline"}>
-										{article.featured ? (language === "FR" ? "En vedette" : "Featured") : (language === "FR" ? "Publie" : "Published")}
-									</Badge>
+										<Badge variant={article.publishedAt ? "default" : "outline"}>
+											{article.publishedAt
+												? language === "FR"
+													? "Publie"
+													: "Published"
+												: language === "FR"
+													? "Brouillon"
+													: "Draft"}
+										</Badge>
 								</TableCell>
 								<TableCell>{article.views.toLocaleString()}</TableCell>
 								<TableCell>
@@ -187,9 +204,27 @@ export function ArticleList() {
 												</Button>
 											}
 										/>
-										<Button variant="ghost" size="icon-sm" aria-label="Delete article" onClick={() => void handleDelete(article.id)}>
-											<Trash2 className="size-4" />
-										</Button>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button variant="ghost" size="icon-sm" aria-label="Delete article">
+													<Trash2 className="size-4" />
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent size="sm">
+												<AlertDialogHeader>
+													<AlertDialogTitle>Delete article?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This will permanently delete {article.title}.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction variant="destructive" onClick={() => void handleDelete(article.id)}>
+														Delete
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
 									</div>
 								</TableCell>
 							</TableRow>

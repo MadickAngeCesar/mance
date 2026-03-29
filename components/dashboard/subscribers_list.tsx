@@ -3,6 +3,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, Trash2 } from "lucide-react";
 
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -135,16 +146,33 @@ export function SubscribersList() {
 								<TableCell>{subscriber.source}</TableCell>
 								<TableCell>{new Date(subscriber.subscribedAt).toLocaleDateString()}</TableCell>
 								<TableCell>
-									<Button
-										variant="ghost"
-										size="icon-sm"
-										type="button"
-										aria-label="Delete subscriber"
-										onClick={() => void handleDelete(subscriber.id)}
-										disabled={pendingIds.has(subscriber.id)}
-									>
-										<Trash2 className="size-4" />
-									</Button>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon-sm"
+												type="button"
+												aria-label="Delete subscriber"
+												disabled={pendingIds.has(subscriber.id)}
+											>
+												<Trash2 className="size-4" />
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent size="sm">
+											<AlertDialogHeader>
+												<AlertDialogTitle>Delete subscriber?</AlertDialogTitle>
+												<AlertDialogDescription>
+													This will permanently delete {subscriber.email} from your subscribers.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Cancel</AlertDialogCancel>
+												<AlertDialogAction variant="destructive" onClick={() => void handleDelete(subscriber.id)}>
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
 								</TableCell>
 							</TableRow>
 						))}

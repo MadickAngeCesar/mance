@@ -5,6 +5,17 @@ import { PencilLine, Search, Trash2 } from "lucide-react";
 
 import { DASHBOARD_DATA_EVENT } from "@/components/dashboard/data-events";
 import { WorkflowStageForm } from "@/components/dashboard/workflow_stage_form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,14 +151,31 @@ export function WorkflowStageList() {
                   </Button>
                 }
               />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Delete workflow stage"
-                onClick={() => void handleDelete(stage.id)}
-              >
-                <Trash2 className="size-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Delete workflow stage"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent size="sm">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete workflow stage?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete step {stage.step}: {stage.title}.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={() => void handleDelete(stage.id)}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type AppLanguage = "EN" | "FR";
 
@@ -14,14 +14,14 @@ const LANGUAGE_STORAGE_KEY = "mac-tech-language";
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-	const [language, setLanguageState] = useState<AppLanguage>(() => {
-		if (typeof window === "undefined") {
-			return "EN";
-		}
+	const [language, setLanguageState] = useState<AppLanguage>("EN");
 
+	useEffect(() => {
 		const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-		return stored === "EN" || stored === "FR" ? stored : "EN";
-	});
+		if (stored === "EN" || stored === "FR") {
+			setLanguageState(stored);
+		}
+	}, []);
 
 	const setLanguage = (nextLanguage: AppLanguage) => {
 		setLanguageState(nextLanguage);

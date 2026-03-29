@@ -10,6 +10,48 @@ export async function MainWork() {
 		orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
 	});
 
+	const fallbackItems =
+		mainWorkHighlights.length === 0
+			? await Promise.all([
+					prisma.labProject.findMany({
+						where: { publishedAt: { not: null } },
+						orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+						take: 3,
+					}),
+					prisma.labArticle.findMany({
+						where: { publishedAt: { not: null } },
+						orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+						take: 3,
+					}),
+				])
+			: [[], []];
+
+	const [fallbackProjects, fallbackArticles] = fallbackItems;
+
+	const items =
+		mainWorkHighlights.length > 0
+			? mainWorkHighlights
+			: [
+					...fallbackProjects.map((item) => ({
+						id: item.id,
+						title: item.title,
+						kind: "PROJECT",
+						summary: item.summary,
+						href: `/lab/${item.slug}`,
+						featured: item.featured,
+						imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+					})),
+					...fallbackArticles.map((item) => ({
+						id: item.id,
+						title: item.title,
+						kind: "ARTICLE",
+						summary: item.excerpt,
+						href: `/lab/${item.slug}`,
+						featured: item.featured,
+						imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+					})),
+				].sort((a, b) => Number(b.featured) - Number(a.featured));
+
 	return (
 		<section className="space-y-5">
 			<div>
@@ -18,10 +60,10 @@ export async function MainWork() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
-				{mainWorkHighlights.length === 0 ? (
+				{items.length === 0 ? (
 					<p className="text-sm text-muted-foreground md:col-span-3">No featured work has been published yet.</p>
 				) : null}
-				{mainWorkHighlights.map((item, index) => (
+				{items.map((item, index) => (
 					<Card
 						key={item.id}
 						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 ${index >= 3 ? "hidden lg:flex" : "flex"}`}

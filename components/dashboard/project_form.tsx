@@ -34,7 +34,6 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const { language } = useLanguage();
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitIntent, setSubmitIntent] = useState<"publish" | "draft">("publish");
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
@@ -52,6 +51,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
+		const intent = formData.get("intent") === "draft" ? "draft" : "publish";
 		setIsSubmitting(true);
 		setError(null);
 
@@ -86,6 +86,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				summary: String(formData.get("summary") ?? ""),
 				content: markdownDetails,
 				coverImageUrl,
+				featured: formData.get("featured") === "on",
 				stack: String(formData.get("stack") ?? "")
 					.split(",")
 					.map((item) => item.trim())
@@ -95,7 +96,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				tags: initialProject?.tags ?? [],
 				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => toAbsoluteUrl(url)),
 				publishedAt:
-					submitIntent === "publish"
+					intent === "publish"
 						? initialProject?.publishedAt ?? new Date().toISOString()
 						: null,
 			};
@@ -137,6 +138,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelStack: "Stack technique",
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
+				labelFeatured: "Mis en avant",
 				preview: "Apercu Markdown",
 				saveDraft: "Enregistrer le brouillon",
 				publish: isEditMode ? "Mettre a jour" : "Publier le projet",
@@ -155,6 +157,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelStack: "Tech Stack",
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
+			labelFeatured: "Featured",
 			preview: "Markdown Preview",
 			saveDraft: "Save Draft",
 			publish: isEditMode ? "Update Project" : "Publish Project",
@@ -234,6 +237,18 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 								</label>
 								<Input id="project-stack" name="stack" placeholder="Next.js, TypeScript, Prisma, PostgreSQL" defaultValue={initialProject?.stack.join(", ")} />
 							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground" htmlFor="project-featured">
+									<input
+										id="project-featured"
+										name="featured"
+										type="checkbox"
+										defaultChecked={Boolean(initialProject?.featured)}
+										className="size-4 rounded border-input"
+									/>
+									{copy.labelFeatured}
+								</label>
+							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="project-demo" className="text-xs font-medium text-muted-foreground">
 									{copy.labelDemo}
@@ -251,10 +266,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 
 					<DialogFooter>
 						{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
-						<Button variant="outline" type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("draft")}>
+						<Button variant="outline" type="submit" name="intent" value="draft" disabled={isSubmitting}>
 							{copy.saveDraft}
 						</Button>
-						<Button type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("publish")}>
+						<Button type="submit" name="intent" value="publish" disabled={isSubmitting}>
 							<Rocket className="size-4" />
 							{isSubmitting ? "Saving..." : copy.publish}
 						</Button>

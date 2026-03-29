@@ -44,7 +44,7 @@ export async function Footer() {
 		]);
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			throw error;
+			console.error("Footer data query failed, rendering fallback footer:", error);
 		}
 	}
 

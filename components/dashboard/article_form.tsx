@@ -34,7 +34,6 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	const { language } = useLanguage();
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitIntent, setSubmitIntent] = useState<"publish" | "draft">("publish");
 	const [error, setError] = useState<string | null>(null);
 	const [markdownContent, setMarkdownContent] = useState(initialArticle?.content ?? "");
   const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
@@ -52,6 +51,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
+		const intent = formData.get("intent") === "draft" ? "draft" : "publish";
 		setIsSubmitting(true);
 		setError(null);
 
@@ -79,13 +79,14 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				coverImageUrl,
 				slug: String(formData.get("slug") ?? ""),
 				category: String(formData.get("category") ?? ""),
+				featured: formData.get("featured") === "on",
 				tags: String(formData.get("tags") ?? "")
 					.split(",")
 					.map((tag) => tag.trim())
 					.filter(Boolean),
 				content: markdownContent,
 				publishedAt:
-					submitIntent === "publish"
+					intent === "publish"
 						? initialArticle?.publishedAt ?? new Date().toISOString()
 						: null,
 			};
@@ -132,6 +133,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				preview: "Apercu Markdown",
 				saveDraft: "Enregistrer le brouillon",
 				publish: isEditMode ? "Mettre a jour" : "Publier l'article",
+				labelFeatured: "Mis en avant",
 			};
 		}
 
@@ -152,6 +154,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 			preview: "Markdown Preview",
 			saveDraft: "Save Draft",
 			publish: isEditMode ? "Update Article" : "Publish Article",
+			labelFeatured: "Featured",
 		};
 	}, [isEditMode, language]);
 
@@ -238,6 +241,18 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						<Input id="article-tags" name="tags" placeholder="nextjs, zod, forms" defaultValue={initialArticle?.tags.join(", ")} />
 					</div>
 					<div className="space-y-1.5 md:col-span-2">
+						<label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground" htmlFor="article-featured">
+							<input
+								id="article-featured"
+								name="featured"
+								type="checkbox"
+								defaultChecked={Boolean(initialArticle?.featured)}
+								className="size-4 rounded border-input"
+							/>
+							{copy.labelFeatured}
+						</label>
+					</div>
+					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="article-content" className="text-xs font-medium text-muted-foreground">
 							{copy.labelContent}
 						</label>
@@ -262,10 +277,10 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 
 				<DialogFooter>
 					{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
-					<Button variant="outline" type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("draft")}>
+					<Button variant="outline" type="submit" name="intent" value="draft" disabled={isSubmitting}>
 						{copy.saveDraft}
 					</Button>
-					<Button type="submit" disabled={isSubmitting} onClick={() => setSubmitIntent("publish")}>
+					<Button type="submit" name="intent" value="publish" disabled={isSubmitting}>
 						<WandSparkles className="size-4" />
 						{isSubmitting ? "Saving..." : copy.publish}
 					</Button>

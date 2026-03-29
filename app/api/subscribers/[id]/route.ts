@@ -4,17 +4,26 @@ import { ApiResponse } from "@/lib/validators";
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+async function resolveId(context: RouteContext) {
+  const params = await context.params;
+  return params.id;
+}
+
 /**
  * GET /api/subscribers/[id]
  * Get a single subscriber by ID
  */
 async function handleGet(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
 
   const subscriber = await prisma.subscriber.findUnique({
     where: { id },
@@ -39,11 +48,11 @@ async function handleGet(
  */
 async function handlePatch(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
   const body = await request.json();
 
   const subscriber = await prisma.subscriber.update({
@@ -65,11 +74,11 @@ async function handlePatch(
  */
 async function handleDelete(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
 
-  const { id } = params;
+  const id = await resolveId(context);
 
   await prisma.subscriber.delete({
     where: { id },

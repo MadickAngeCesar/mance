@@ -5,21 +5,31 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ApiResponse, WorkflowStageUpdateSchema } from "@/lib/validators";
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+async function resolveId(context: RouteContext) {
+  const params = await context.params;
+  return params.id;
+}
+
 /**
  * PATCH /api/workflow-stages/[id]
  * Update workflow stage (admin only)
  */
 async function handlePatch(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
+  const id = await resolveId(context);
 
   const body = await request.json();
   const data = WorkflowStageUpdateSchema.omit({ id: true }).parse(body);
 
   const existing = await prisma.workflowStage.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!existing) {
@@ -27,7 +37,7 @@ async function handlePatch(
   }
 
   const stage = await prisma.workflowStage.update({
-    where: { id: params.id },
+    where: { id },
     data,
   });
 
@@ -45,17 +55,27 @@ async function handlePatch(
  */
 async function handleDelete(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
+  const id = await resolveId(context);
+
+  const existing = await prisma.workflowStage.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    throw ApiError.notFound("Workflow stage not found");
+  }
 
   await prisma.workflowStage.delete({
-    where: { id: params.id },
+    where: { id },
   });
 
   const response: ApiResponse = {
     ok: true,
-    data: { id: params.id },
+    data: { id },
   };
 
   return NextResponse.json(response);

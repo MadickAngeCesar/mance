@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "fs/promises";
+import os from "os";
 import path from "path";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -7,6 +8,11 @@ import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 
 export const runtime = "nodejs";
+
+const PUBLIC_ROOT = path.join(process.cwd(), "public");
+const PUBLIC_UPLOADS_ROOT = path.join(PUBLIC_ROOT, "uploads");
+const PUBLIC_PROFILE_DIR = path.join(PUBLIC_ROOT, "images");
+const FALLBACK_UPLOADS_ROOT = path.join(os.tmpdir(), "mance-uploads");
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
@@ -62,6 +68,15 @@ function sanitizeFileName(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9.-]+/g, "-").replace(/-+/g, "-");
 }
 
+function sanitizeKind(value: string) {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return normalized || "generic";
+}
+
 function extensionFromMimeType(type: string, fallbackName: string) {
   const byMime: Record<string, string> = {
     "image/jpeg": ".jpg",
@@ -88,7 +103,7 @@ async function handlePost(request: NextRequest) {
 
   const form = await request.formData();
   const file = asUploadedFile(form.get("file"));
-  const kind = String(form.get("kind") ?? "generic").toLowerCase();
+  const kind = sanitizeKind(String(form.get("kind") ?? "generic"));
 
   if (!file) {
     throw ApiError.badRequest("Missing file field.");
@@ -112,43 +127,75 @@ async function handlePost(request: NextRequest) {
 
   // Profile image keeps a stable path so existing UI can read it without DB schema changes.
   if (kind === "profile") {
-    const profileDir = path.join(process.cwd(), "public", "images");
-    await mkdir(profileDir, { recursive: true });
-    const profilePath = path.join(profileDir, "Profile.jpg");
     try {
+      await mkdir(PUBLIC_PROFILE_DIR, { recursive: true });
+      const profilePath = path.join(PUBLIC_PROFILE_DIR, "Profile.jpg");
       await writeFile(profilePath, bytes);
+
+      return NextResponse.json({
+        ok: true,
+        data: { url: "/images/Profile.jpg" },
+      });
     } catch (error) {
-      console.error("Profile upload write failed:", error);
-      throw new ApiError("Unable to store profile image on server.", 503);
+      console.error("Profile upload to public directory failed:", error);
     }
 
-    return NextResponse.json({
-      ok: true,
-      data: { url: "/images/Profile.jpg" },
-    });
-  }
+    try {
+      const fallbackProfileDir = path.join(FALLBACK_UPLOADS_ROOT, "profile");
+      await mkdir(fallbackProfileDir, { recursive: true });
+      const fallbackProfilePath = path.join(fallbackProfileDir, "Profile.jpg");
+      await writeFile(fallbackProfilePath, bytes);
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", kind || "generic");
-  await mkdir(uploadDir, { recursive: true });
+      return NextResponse.json({
+        ok: true,
+        data: { url: "/api/uploads/files/profile/Profile.jpg" },
+      });
+    } catch (error) {
+      console.error("Profile upload fallback write failed:", error);
+      throw new ApiError(
+        "Unable to store profile image. Configure writable storage for uploads.",
+        503
+      );
+    }
+  }
 
   const baseName = sanitizeFileName(path.basename(file.name || "image"));
   const ext = extensionFromMimeType(file.type, baseName);
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 8);
   const fileName = `${timestamp}-${random}${ext}`;
-  const filePath = path.join(uploadDir, fileName);
 
   try {
+    const uploadDir = path.join(PUBLIC_UPLOADS_ROOT, kind);
+    await mkdir(uploadDir, { recursive: true });
+    const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, bytes);
+
+    return NextResponse.json({
+      ok: true,
+      data: { url: `/uploads/${kind}/${fileName}` },
+    });
   } catch (error) {
-    console.error("Upload write failed:", error);
-    throw new ApiError("Unable to store uploaded image on server.", 503);
+    console.error("Upload write to public directory failed:", error);
   }
 
-  return NextResponse.json({
-    ok: true,
-    data: { url: `/uploads/${kind || "generic"}/${fileName}` },
-  });
+  try {
+    const fallbackDir = path.join(FALLBACK_UPLOADS_ROOT, kind);
+    await mkdir(fallbackDir, { recursive: true });
+    const fallbackPath = path.join(fallbackDir, fileName);
+    await writeFile(fallbackPath, bytes);
+
+    return NextResponse.json({
+      ok: true,
+      data: { url: `/api/uploads/files/${kind}/${fileName}` },
+    });
+  } catch (error) {
+    console.error("Upload fallback write failed:", error);
+    throw new ApiError(
+      "Unable to store uploaded image. Configure writable storage for uploads.",
+      503
+    );
+  }
 }
 
 export const POST = createApiHandler(handlePost);

@@ -90,34 +90,34 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 		setIsSubmitting(true);
 		setError(null);
 
-		let avatarUrl = String(formData.get("avatarUrl") ?? "") || undefined;
-		const avatarFile = formData.get("avatarFile");
-		if (avatarFile instanceof File && avatarFile.size > 0) {
-			const uploadFormData = new FormData();
-			uploadFormData.append("file", avatarFile);
-			uploadFormData.append("kind", "testimonial-avatar");
-
-			const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
-				method: "POST",
-				auth: true,
-				body: uploadFormData,
-			});
-
-			avatarUrl = uploadResponse.data?.url ?? avatarUrl;
-			setUploadedAvatarUrl(avatarUrl ?? null);
-		}
-
-		const payload = {
-			clientName: String(formData.get("clientName") ?? ""),
-			clientRoleCompany: String(formData.get("clientRoleCompany") ?? ""),
-			rating: Number(formData.get("rating") ?? 5),
-			avatarUrl,
-			projectReference: String(formData.get("projectReference") ?? ""),
-			text: String(formData.get("text") ?? ""),
-			date: String(formData.get("date") ?? ""),
-		};
-
 		try {
+			let avatarUrl = String(formData.get("avatarUrl") ?? "") || undefined;
+			const avatarFile = formData.get("avatarFile");
+			if (avatarFile instanceof File && avatarFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", avatarFile);
+				uploadFormData.append("kind", "testimonial-avatar");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				avatarUrl = uploadResponse.data?.url ?? avatarUrl;
+				setUploadedAvatarUrl(avatarUrl ?? null);
+			}
+
+			const payload = {
+				clientName: String(formData.get("clientName") ?? ""),
+				clientRoleCompany: String(formData.get("clientRoleCompany") ?? ""),
+				rating: Number(formData.get("rating") ?? 5),
+				avatarUrl,
+				projectReference: String(formData.get("projectReference") ?? ""),
+				text: String(formData.get("text") ?? ""),
+				date: String(formData.get("date") ?? ""),
+			};
+
 			if (isEditMode && initialTestimonial) {
 				await apiRequest(`/api/testimonials/${initialTestimonial.id}`, {
 					method: "PATCH",

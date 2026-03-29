@@ -41,7 +41,7 @@ async function handlePost(request: NextRequest) {
 
   const created = await prisma.testimonial.create({
     data: {
-      externalId: `testimonial-${Date.now()}`,
+      externalId: `testimonial-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       clientName: parsed.clientName,
       clientRoleCompany: parsed.clientRoleCompany,
       text: parsed.text,

@@ -5,6 +5,15 @@ import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+async function resolveId(context: RouteContext) {
+  const params = await context.params;
+  return params.id;
+}
+
 const TestimonialUpdateSchema = z.object({
   clientName: z.string().min(1).max(200).optional(),
   clientRoleCompany: z.string().min(1).max(200).optional(),
@@ -21,10 +30,12 @@ const TestimonialUpdateSchema = z.object({
 
 async function handleGet(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
+  const id = await resolveId(context);
+
   const testimonial = await prisma.testimonial.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!testimonial) {
@@ -39,22 +50,31 @@ async function handleGet(
 
 async function handlePatch(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
+  const id = await resolveId(context);
 
   const body = TestimonialUpdateSchema.parse(await request.json());
 
+  const existing = await prisma.testimonial.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    throw ApiError.notFound("Testimonial not found");
+  }
+
   const updated = await prisma.testimonial.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       clientName: body.clientName,
       clientRoleCompany: body.clientRoleCompany,
       text: body.text,
-      avatarUrl: body.avatarUrl ?? null,
+      avatarUrl: body.avatarUrl === undefined ? existing.avatarUrl : body.avatarUrl,
       rating: body.rating,
       projectReference: body.projectReference,
-      dateLabel: body.date ?? body.dateLabel,
+      dateLabel: body.date ?? body.dateLabel ?? existing.dateLabel,
     },
   });
 
@@ -66,17 +86,27 @@ async function handlePatch(
 
 async function handleDelete(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   await requireRole(request, "admin");
+  const id = await resolveId(context);
+
+  const existing = await prisma.testimonial.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    throw ApiError.notFound("Testimonial not found");
+  }
 
   await prisma.testimonial.delete({
-    where: { id: params.id },
+    where: { id },
   });
 
   return NextResponse.json({
     ok: true,
-    data: { id: params.id },
+    data: { id },
   });
 }
 

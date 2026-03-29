@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 const categories = ["Frontend", "Backend", "DevOps", "IT Support", "Tools", "Languages"] as const;
@@ -13,7 +14,15 @@ const categoryMap: Record<(typeof categories)[number], string> = {
 };
 
 export async function Skills() {
-	const skills = await prisma.skill.findMany({ orderBy: { displayOrder: "asc" } });
+	let skills: Array<{ name: string; category: string }> = [];
+
+	try {
+		skills = await prisma.skill.findMany({ orderBy: { displayOrder: "asc" } });
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			console.error("Skills section query failed, rendering fallback content:", error);
+		}
+	}
 
 	return (
 		<section className="space-y-5">

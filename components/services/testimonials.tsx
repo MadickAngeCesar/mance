@@ -21,7 +21,7 @@ export async function Testimonials() {
 		});
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			throw error;
+			console.error("Testimonials query failed, rendering empty state:", error);
 		}
 	}
 

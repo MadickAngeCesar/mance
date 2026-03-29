@@ -12,7 +12,7 @@ export async function Workflow() {
 		});
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			throw error;
+			console.error("Workflow query failed, rendering empty state:", error);
 		}
 	}
 

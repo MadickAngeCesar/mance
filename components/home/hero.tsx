@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 function getFreelanceAvailabilityText(label: string) {
@@ -21,17 +22,33 @@ function getFreelanceAvailabilityText(label: string) {
 }
 
 export async function Hero() {
-	const profile = await prisma.brandProfile.findFirst({
-		select: {
-			currentName: true,
-			ownerName: true,
-			roleTagline: true,
-			headline: true,
-			subTagline: true,
-			freelanceAvailabilityLabel: true,
-			jobAvailabilityLabel: true,
-		},
-	});
+	let profile: {
+		currentName: string;
+		ownerName: string;
+		roleTagline: string;
+		headline: string;
+		subTagline: string;
+		freelanceAvailabilityLabel: string;
+		jobAvailabilityLabel: string;
+	} | null = null;
+
+	try {
+		profile = await prisma.brandProfile.findFirst({
+			select: {
+				currentName: true,
+				ownerName: true,
+				roleTagline: true,
+				headline: true,
+				subTagline: true,
+				freelanceAvailabilityLabel: true,
+				jobAvailabilityLabel: true,
+			},
+		});
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			console.error("Hero section query failed, rendering fallback content:", error);
+		}
+	}
 
 	const brand = {
 		currentName: profile?.currentName ?? "MAC TECH",

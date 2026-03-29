@@ -29,7 +29,7 @@ export async function OfferingsCards() {
 		});
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			throw error;
+			console.error("Offerings query failed, rendering empty state:", error);
 		}
 	}
 

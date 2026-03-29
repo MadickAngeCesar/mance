@@ -40,7 +40,7 @@ export async function ClientWork() {
 		]);
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			throw error;
+			console.error("Client work query failed, rendering fallback state:", error);
 		}
 	}
 

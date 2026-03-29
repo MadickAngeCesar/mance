@@ -3,32 +3,84 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
-export async function MainWork() {
-	const mainWorkHighlights = await prisma.mainWorkHighlight.findMany({
-		orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-	});
+type MainWorkItem = {
+	id: string;
+	title: string;
+	kind: string;
+	summary: string;
+	href: string;
+	featured: boolean;
+	imageUrl: string;
+};
 
-	const fallbackItems =
-		mainWorkHighlights.length === 0
-			? await Promise.all([
-					prisma.labProject.findMany({
-						where: { publishedAt: { not: null } },
-						orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-						take: 3,
-					}),
-					prisma.labArticle.findMany({
-						where: { publishedAt: { not: null } },
-						orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-						take: 3,
-					}),
-				])
-			: [[], []];
+export async function MainWork() {
+	let mainWorkHighlights: MainWorkItem[] = [];
+
+	try {
+		const rows = await prisma.mainWorkHighlight.findMany({
+			orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+		});
+		mainWorkHighlights = rows.map((item) => ({
+			id: item.id,
+			title: item.title,
+			kind: item.kind,
+			summary: item.summary,
+			href: item.href,
+			featured: item.featured,
+			imageUrl: item.imageUrl,
+		}));
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			console.error("Main work highlights query failed, using fallback content:", error);
+		}
+	}
+
+	let fallbackItems: [
+		Array<{
+			id: string;
+			title: string;
+			summary: string;
+			slug: string;
+			featured: boolean;
+			coverImageUrl: string;
+		}>,
+		Array<{
+			id: string;
+			title: string;
+			excerpt: string;
+			slug: string;
+			featured: boolean;
+			coverImageUrl: string;
+		}>
+	] = [[], []];
+
+	if (mainWorkHighlights.length === 0) {
+		try {
+			fallbackItems = await Promise.all([
+				prisma.labProject.findMany({
+					where: { publishedAt: { not: null } },
+					orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+					take: 3,
+				}),
+				prisma.labArticle.findMany({
+					where: { publishedAt: { not: null } },
+					orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+					take: 3,
+				}),
+			]);
+		} catch (error) {
+			if (!isDatabaseUnavailableError(error)) {
+				console.error("Main work fallback query failed:", error);
+			}
+		}
+	}
 
 	const [fallbackProjects, fallbackArticles] = fallbackItems;
 
-	const items =
+	const items: MainWorkItem[] =
 		mainWorkHighlights.length > 0
 			? mainWorkHighlights
 			: [

@@ -1,25 +1,43 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function About() {
-	const [profile, education, experience] = await Promise.all([
-		prisma.brandProfile.findFirst({
-			select: {
-				aboutSummary: {
-					select: {
-						biography: true,
-						cvDownloadUrl: true,
-						linkedinResumeSource: true,
-						interests: true,
+	let profile: {
+		aboutSummary: {
+			biography: string;
+			cvDownloadUrl: string;
+			linkedinResumeSource: string;
+			interests: string[];
+		} | null;
+	} | null = null;
+	let education: Array<{ title: string; institution: string; period: string; location: string | null }> = [];
+	let experience: Array<{ role: string; company: string; period: string; summary: string }> = [];
+
+	try {
+		[profile, education, experience] = await Promise.all([
+			prisma.brandProfile.findFirst({
+				select: {
+					aboutSummary: {
+						select: {
+							biography: true,
+							cvDownloadUrl: true,
+							linkedinResumeSource: true,
+							interests: true,
+						},
 					},
 				},
-			},
-		}),
-		prisma.education.findMany({ orderBy: { displayOrder: "asc" } }),
-		prisma.experience.findMany({ orderBy: { displayOrder: "asc" } }),
-	]);
+			}),
+			prisma.education.findMany({ orderBy: { displayOrder: "asc" } }),
+			prisma.experience.findMany({ orderBy: { displayOrder: "asc" } }),
+		]);
+	} catch (error) {
+		if (!isDatabaseUnavailableError(error)) {
+			console.error("About section query failed, rendering fallback content:", error);
+		}
+	}
 
 	const aboutSummary = {
 		biography: profile?.aboutSummary?.biography ?? "Biography is not available yet.",

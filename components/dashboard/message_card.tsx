@@ -89,7 +89,11 @@ export function MessageCard({ message, onToggleRead, onReply, onDelete, isPendin
 								<div className="space-y-3">
 									<div className="space-y-1.5">
 										<label className="text-xs font-medium text-muted-foreground">Subject</label>
-										<Input value={replySubject} onChange={(event) => setReplySubject(event.target.value)} />
+										<Input
+											value={replySubject}
+											onChange={(event) => setReplySubject(event.target.value)}
+											placeholder="Re: Your request"
+										/>
 									</div>
 									<div className="space-y-1.5">
 										<label className="text-xs font-medium text-muted-foreground">Message</label>

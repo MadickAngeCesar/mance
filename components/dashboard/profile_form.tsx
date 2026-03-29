@@ -433,7 +433,7 @@ export function ProfileForm() {
 								<label htmlFor="avatar" className="text-xs font-medium text-muted-foreground">
 									Profile Image URL
 								</label>
-								<Input id="avatar" value={profileImageUrl} readOnly />
+								<Input id="avatar" value={profileImageUrl} placeholder="/images/Profile.jpg" readOnly />
 								<Input
 									id="avatar-file"
 									type="file"

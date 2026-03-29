@@ -124,6 +124,7 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
                 name="step"
                 type="number"
                 min={1}
+                placeholder="1"
                 defaultValue={initialStage?.step ?? 1}
                 required
               />
@@ -133,21 +134,40 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
               <label htmlFor="workflow-title" className="text-xs font-medium text-muted-foreground">
                 Title
               </label>
-              <Input id="workflow-title" name="title" defaultValue={initialStage?.title} required />
+              <Input
+                id="workflow-title"
+                name="title"
+                placeholder="Discovery and Planning"
+                defaultValue={initialStage?.title}
+                required
+              />
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="workflow-subtitle" className="text-xs font-medium text-muted-foreground">
                 Subtitle
               </label>
-              <Input id="workflow-subtitle" name="subtitle" defaultValue={initialStage?.subtitle} required />
+              <Input
+                id="workflow-subtitle"
+                name="subtitle"
+                placeholder="Align scope, goals, and milestones"
+                defaultValue={initialStage?.subtitle}
+                required
+              />
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="workflow-details" className="text-xs font-medium text-muted-foreground">
                 Details
               </label>
-              <Textarea id="workflow-details" name="details" rows={4} defaultValue={initialStage?.details} required />
+              <Textarea
+                id="workflow-details"
+                name="details"
+                placeholder="Kickoff, requirements mapping, and implementation timeline with clear ownership."
+                rows={4}
+                defaultValue={initialStage?.details}
+                required
+              />
             </div>
           </div>
 

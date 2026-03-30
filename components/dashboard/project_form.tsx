@@ -36,7 +36,8 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
-  const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
+	const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
+	const [uploadedScreenshots, setUploadedScreenshots] = useState<string[]>(initialProject?.screenshotUrls ?? []);
 
 	const normalizeMediaUrl = (value: string) => {
 		const trimmed = value.trim();
@@ -85,6 +86,31 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				setUploadedCoverUrl(coverImageUrl);
 			}
 
+			// Upload screenshot files
+			const screenshotFiles = formData.getAll("screenshotFiles") as File[];
+			let screenshotUrls = [...uploadedScreenshots]; // Start with existing screenshots
+
+			for (const file of screenshotFiles) {
+				if (file instanceof File && file.size > 0) {
+					const uploadFormData = new FormData();
+					uploadFormData.append("file", file);
+					uploadFormData.append("kind", "project-screenshot");
+
+					const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+						method: "POST",
+						auth: true,
+						body: uploadFormData,
+					});
+
+					const uploadedUrl = normalizeMediaUrl(uploadResponse.data?.url ?? "");
+					if (uploadedUrl) {
+						screenshotUrls.push(uploadedUrl);
+					}
+				}
+			}
+
+			setUploadedScreenshots(screenshotUrls);
+
 			const toOptionalAbsoluteUrl = (value: string) => {
 				if (!value.trim()) {
 					return undefined;
@@ -107,10 +133,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 					.split(",")
 					.map((item) => item.trim())
 					.filter(Boolean),
-				screenshotUrls: String(formData.get("screenshotUrls") ?? "")
-					.split(/[\n,]/)
-					.map((item) => normalizeMediaUrl(item.trim()))
-					.filter(Boolean),
+				screenshotUrls,
 				demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
 				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
 				publishedAt:
@@ -155,7 +178,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelImageUpload: "Televerser l'image de couverture",
 				labelStack: "Stack technique",
 				labelTags: "Tags",
-				labelScreenshots: "URLs de captures d'ecran",
+				labelScreenshots: "Televerser les captures d'ecran",
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
 				labelFeatured: "Mis en avant",
@@ -176,7 +199,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelImageUpload: "Upload Cover Image",
 			labelStack: "Tech Stack",
 			labelTags: "Tags",
-			labelScreenshots: "Screenshot URLs",
+			labelScreenshots: "Upload Screenshots",
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
 			labelFeatured: "Featured",
@@ -187,7 +210,12 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	}, [isEditMode, language]);
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={(newOpen) => {
+			setOpen(newOpen);
+			if (!newOpen && !isEditMode) {
+				setUploadedScreenshots([]);
+			}
+		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">
@@ -269,14 +297,25 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 								<label htmlFor="project-screenshots" className="text-xs font-medium text-muted-foreground">
 									{copy.labelScreenshots}
 								</label>
-								<Textarea
+								<Input
 									id="project-screenshots"
-									name="screenshotUrls"
-									rows={3}
-									placeholder="/images/lab/project-screen-1.jpg\n/images/lab/project-screen-2.jpg"
-									defaultValue={(initialProject?.screenshotUrls ?? []).join("\n")}
+									name="screenshotFiles"
+									type="file"
+									accept="image/*"
+									multiple
 								/>
-								<p className="text-xs text-muted-foreground">Use one URL per line or separate with commas.</p>
+								{uploadedScreenshots.length > 0 ? (
+									<div className="space-y-1.5">
+										<p className="text-xs text-muted-foreground">Uploaded screenshots:</p>
+										<div className="space-y-1">
+											{uploadedScreenshots.map((url, index) => (
+												<p key={`${url}-${index}`} className="text-xs text-muted-foreground break-all">
+													{index + 1}. {url}
+												</p>
+											))}
+										</div>
+									</div>
+								) : null}
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground" htmlFor="project-featured">

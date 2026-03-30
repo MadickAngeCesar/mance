@@ -34,7 +34,23 @@ function isSafePathSegment(segment: string) {
 
 async function resolveSegments(context: RouteContext) {
   const params = await context.params;
-  const segments = params.path;
+  const rawSegments = params.path;
+
+  if (!Array.isArray(rawSegments) || rawSegments.length === 0) {
+    throw ApiError.notFound("Upload not found");
+  }
+
+  let segments: string[];
+  try {
+    // Handle encoded paths like "project-cover%2Ffile.png" by decoding then splitting.
+    segments = rawSegments.flatMap((segment) =>
+      decodeURIComponent(segment)
+        .split("/")
+        .filter(Boolean)
+    );
+  } catch {
+    throw ApiError.badRequest("Invalid upload path");
+  }
 
   if (!Array.isArray(segments) || segments.length < 2) {
     throw ApiError.notFound("Upload not found");

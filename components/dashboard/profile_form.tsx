@@ -16,10 +16,14 @@ type ProfilePayload = {
 		currentDomain: string;
 		headline: string;
 		roleTagline: string;
+		subTagline: string;
+		freelanceAvailabilityLabel: string;
+		jobAvailabilityLabel: string;
 	};
 	aboutSummary: {
 		biography: string;
 		cvDownloadUrl: string;
+		interests: string[];
 	};
 	contactDetails: {
 		email: string;
@@ -54,14 +58,24 @@ type SkillItem = {
 
 type SocialLinkItem = {
 	id: string;
-	platform: "GITHUB" | "LINKEDIN" | "WHATSAPP" | "FACEBOOK";
+	platform:
+		| "GITHUB"
+		| "LINKEDIN"
+		| "WHATSAPP"
+		| "FACEBOOK"
+		| "X"
+		| "INSTAGRAM"
+		| "YOUTUBE"
+		| "BEHANCE"
+		| "DRIBBBLE"
+		| "TIKTOK";
 	label: string;
 	url: string;
 };
 
 type FreelancePlatformItem = {
 	id: string;
-	name: "UPWORK" | "FREELANCER" | "FIVERR";
+	name: "UPWORK" | "FREELANCER" | "FIVERR" | "TOPTAL" | "GURU" | "PEOPLE_PER_HOUR" | "MALT" | "CONTRA";
 	url: string;
 	handle?: string;
 };
@@ -88,12 +102,23 @@ const socialPlatformOptions: Array<{ value: SocialLinkItem["platform"]; label: s
 	{ value: "LINKEDIN", label: "LinkedIn" },
 	{ value: "WHATSAPP", label: "WhatsApp" },
 	{ value: "FACEBOOK", label: "Facebook" },
+	{ value: "X", label: "X (Twitter)" },
+	{ value: "INSTAGRAM", label: "Instagram" },
+	{ value: "YOUTUBE", label: "YouTube" },
+	{ value: "BEHANCE", label: "Behance" },
+	{ value: "DRIBBBLE", label: "Dribbble" },
+	{ value: "TIKTOK", label: "TikTok" },
 ];
 
 const freelancePlatformOptions: Array<{ value: FreelancePlatformItem["name"]; label: string }> = [
 	{ value: "UPWORK", label: "Upwork" },
 	{ value: "FREELANCER", label: "Freelancer" },
 	{ value: "FIVERR", label: "Fiverr" },
+	{ value: "TOPTAL", label: "Toptal" },
+	{ value: "GURU", label: "Guru" },
+	{ value: "PEOPLE_PER_HOUR", label: "PeoplePerHour" },
+	{ value: "MALT", label: "Malt" },
+	{ value: "CONTRA", label: "Contra" },
 ];
 
 export function ProfileForm() {
@@ -103,10 +128,14 @@ export function ProfileForm() {
 			currentDomain: "",
 			headline: "",
 			roleTagline: "",
+			subTagline: "",
+			freelanceAvailabilityLabel: "",
+			jobAvailabilityLabel: "",
 		},
 		aboutSummary: {
 			biography: "",
 			cvDownloadUrl: "",
+			interests: [],
 		},
 		contactDetails: {
 			email: "",
@@ -180,10 +209,14 @@ export function ProfileForm() {
 						currentDomain: data.currentDomain ?? "",
 						headline: data.headline ?? "",
 						roleTagline: data.roleTagline ?? "",
+						subTagline: data.subTagline ?? "",
+						freelanceAvailabilityLabel: data.freelanceAvailabilityLabel ?? "",
+						jobAvailabilityLabel: data.jobAvailabilityLabel ?? "",
 					},
 					aboutSummary: {
 						biography: data.aboutSummary?.biography ?? "",
 						cvDownloadUrl: data.aboutSummary?.cvDownloadUrl ?? "",
+						interests: data.aboutSummary?.interests ?? [],
 					},
 					contactDetails: {
 						email: data.contactDetails?.email ?? "",
@@ -397,6 +430,57 @@ export function ProfileForm() {
 								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="sub-tagline" className="text-xs font-medium text-muted-foreground">
+									Sub Tagline
+								</label>
+								<Input
+									id="sub-tagline"
+									placeholder="We design and deliver modern web solutions for organizations and founders."
+									value={form.brandProfile.subTagline}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, subTagline: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="freelance-label" className="text-xs font-medium text-muted-foreground">
+									Freelance Availability Label
+								</label>
+								<Input
+									id="freelance-label"
+									placeholder="Freelance"
+									value={form.brandProfile.freelanceAvailabilityLabel}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: {
+												...current.brandProfile,
+												freelanceAvailabilityLabel: event.target.value,
+											},
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="job-label" className="text-xs font-medium text-muted-foreground">
+									Job Availability Label
+								</label>
+								<Input
+									id="job-label"
+									placeholder="Career"
+									value={form.brandProfile.jobAvailabilityLabel}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, jobAvailabilityLabel: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="bio" className="text-xs font-medium text-muted-foreground">
 									Biography
 								</label>
@@ -412,6 +496,29 @@ export function ProfileForm() {
 										}))
 									}
 								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="interests" className="text-xs font-medium text-muted-foreground">
+									About Interests
+								</label>
+								<Textarea
+									id="interests"
+									placeholder="React\nPrisma\nProduct Design"
+									rows={4}
+									value={form.aboutSummary.interests.join("\n")}
+									onChange={(event) => {
+										const interests = event.target.value
+											.split(/[,\n]/)
+											.map((interest) => interest.trim())
+											.filter(Boolean);
+
+										setForm((current) => ({
+											...current,
+											aboutSummary: { ...current.aboutSummary, interests },
+										}));
+									}}
+								/>
+								<p className="text-xs text-muted-foreground">Use one item per line or separate with commas.</p>
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="resume" className="text-xs font-medium text-muted-foreground">

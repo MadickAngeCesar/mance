@@ -66,7 +66,6 @@ export async function About() {
 				</CardHeader>
 				<CardContent className="space-y-2 text-sm leading-7 text-muted-foreground">
 					<p>{aboutSummary.biography}</p>
-					<p className="text-xs text-muted-foreground/80">{aboutSummary.linkedinResumeSource}</p>
 				</CardContent>
 			</Card>
 

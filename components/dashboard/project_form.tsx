@@ -103,10 +103,16 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 					.split(",")
 					.map((item) => item.trim())
 					.filter(Boolean),
+				tags: String(formData.get("tags") ?? "")
+					.split(",")
+					.map((item) => item.trim())
+					.filter(Boolean),
+				screenshotUrls: String(formData.get("screenshotUrls") ?? "")
+					.split(/[\n,]/)
+					.map((item) => normalizeMediaUrl(item.trim()))
+					.filter(Boolean),
 				demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
 				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
-				tags: initialProject?.tags ?? [],
-				screenshotUrls: (initialProject?.screenshotUrls ?? []).map((url) => normalizeMediaUrl(url)),
 				publishedAt:
 					intent === "publish"
 						? initialProject?.publishedAt ?? new Date().toISOString()
@@ -148,6 +154,8 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelImage: "URL image de couverture",
 				labelImageUpload: "Televerser l'image de couverture",
 				labelStack: "Stack technique",
+				labelTags: "Tags",
+				labelScreenshots: "URLs de captures d'ecran",
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
 				labelFeatured: "Mis en avant",
@@ -167,6 +175,8 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelImage: "Cover Image URL",
 			labelImageUpload: "Upload Cover Image",
 			labelStack: "Tech Stack",
+			labelTags: "Tags",
+			labelScreenshots: "Screenshot URLs",
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
 			labelFeatured: "Featured",
@@ -248,6 +258,25 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 									{copy.labelStack}
 								</label>
 								<Input id="project-stack" name="stack" placeholder="Next.js, TypeScript, Prisma, PostgreSQL" defaultValue={initialProject?.stack.join(", ")} />
+							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="project-tags" className="text-xs font-medium text-muted-foreground">
+									{copy.labelTags}
+								</label>
+								<Input id="project-tags" name="tags" placeholder="platform, case-study, nextjs" defaultValue={initialProject?.tags.join(", ")} />
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="project-screenshots" className="text-xs font-medium text-muted-foreground">
+									{copy.labelScreenshots}
+								</label>
+								<Textarea
+									id="project-screenshots"
+									name="screenshotUrls"
+									rows={3}
+									placeholder="/images/lab/project-screen-1.jpg\n/images/lab/project-screen-2.jpg"
+									defaultValue={(initialProject?.screenshotUrls ?? []).join("\n")}
+								/>
+								<p className="text-xs text-muted-foreground">Use one URL per line or separate with commas.</p>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground" htmlFor="project-featured">

@@ -32,12 +32,23 @@ enum SocialPlatform {
   LINKEDIN
   WHATSAPP
   FACEBOOK
+  X
+  INSTAGRAM
+  YOUTUBE
+  BEHANCE
+  DRIBBBLE
+  TIKTOK
 }
 
 enum FreelancePlatformName {
   UPWORK
   FREELANCER
   FIVERR
+  TOPTAL
+  GURU
+  PEOPLE_PER_HOUR
+  MALT
+  CONTRA
 }
 
 enum CampaignStatus {

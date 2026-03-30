@@ -290,6 +290,7 @@ export type WorkflowStageQuery = z.infer<typeof WorkflowStageQuerySchema>;
  */
 export const BrandProfileUpdateSchema = z.object({
   currentName: z.string().optional(),
+  currentDomain: z.string().optional(),
   roleTagline: z.string().optional(),
   headline: z.string().optional(),
   subTagline: z.string().optional(),

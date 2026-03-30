@@ -242,8 +242,11 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 						>
 							<option>Engineering</option>
 							<option>Case Study</option>
-							<option>IT Support</option>
+							<option>Tutorial</option>
 							<option>Research</option>
+							<option>IT Support</option>
+							<option>Product Design</option>
+							<option>Business</option>
 						</select>
 					</div>
 					<div className="space-y-1.5">

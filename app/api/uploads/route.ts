@@ -100,7 +100,7 @@ async function handlePost(request: NextRequest) {
   } catch (configError) {
     console.error("Supabase configuration error:", configError);
     throw new ApiError(
-      "Supabase admin key is missing. Set SUPABASE_SERVICE_ROLE_KEY in .env.",
+      "Supabase server key is missing. Set SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY in .env.",
       500
     );
   }

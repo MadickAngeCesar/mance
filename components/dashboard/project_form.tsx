@@ -3,10 +3,9 @@
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Plus, Rocket } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { useLanguage } from "@/components/i18n/language-provider";
+import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -22,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { emitDashboardDataChanged } from "@/components/dashboard/data-events";
 import { apiRequest } from "@/lib/client-api";
 import type { LabProject } from "@/lib/definitions";
+import { cn } from "@/lib/utils";
 
 type ProjectFormProps = {
 	mode?: "create" | "edit";
@@ -36,6 +36,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
+	const [editorView, setEditorView] = useState<"write" | "preview">("write");
 	const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 	const [uploadedScreenshots, setUploadedScreenshots] = useState<string[]>(initialProject?.screenshotUrls ?? []);
 
@@ -182,6 +183,8 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
 				labelFeatured: "Mis en avant",
+				write: "Ecrire",
+				previewOnly: "Apercu",
 				preview: "Apercu Markdown",
 				saveDraft: "Enregistrer le brouillon",
 				publish: isEditMode ? "Mettre a jour" : "Publier le projet",
@@ -203,6 +206,8 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
 			labelFeatured: "Featured",
+			write: "Write",
+			previewOnly: "Preview",
 			preview: "Markdown Preview",
 			saveDraft: "Save Draft",
 			publish: isEditMode ? "Update Project" : "Publish Project",
@@ -215,6 +220,9 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			if (!newOpen && !isEditMode) {
 				setUploadedScreenshots([]);
 			}
+			if (!newOpen) {
+				setEditorView("write");
+			}
 		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
@@ -224,13 +232,13 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="max-w-2xl p-0">
-				<form onSubmit={handleSubmit}>
+			<DialogContent className="max-w-4xl p-0">
+				<form onSubmit={handleSubmit} className="flex max-h-[92vh] flex-col sm:max-h-[88vh]">
 					<DialogHeader className="border-b border-border/70 px-4 pt-4 pb-3">
 						<DialogTitle className="text-base">{copy.title}</DialogTitle>
 						<DialogDescription>{copy.description}</DialogDescription>
 					</DialogHeader>
-					<div className="max-h-[70vh] space-y-3 overflow-y-auto px-4 pt-4">
+					<div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-4 sm:px-5">
 						<div className="grid gap-3 md:grid-cols-2">
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="project-title" className="text-xs font-medium text-muted-foreground">
@@ -251,23 +259,54 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 								<Textarea id="project-summary" name="summary" placeholder="Short problem and solution summary." rows={3} defaultValue={initialProject?.summary} />
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
-								<label htmlFor="project-content" className="text-xs font-medium text-muted-foreground">
-									{copy.labelDetails}
-								</label>
-								<Textarea
-									id="project-content"
-									placeholder={language === "FR" ? "Ecrivez le contenu detaille en Markdown." : "Write detailed content in Markdown."}
-									rows={8}
-									value={markdownDetails}
-									onChange={(event) => setMarkdownDetails(event.target.value)}
-								/>
-							</div>
-							<div className="space-y-1.5 md:col-span-2">
-								<p className="text-xs font-medium text-muted-foreground">{copy.preview}</p>
-								<div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border border-border/70 bg-card/50 p-3">
-									<ReactMarkdown remarkPlugins={[remarkGfm]}>
-										{markdownDetails || (language === "FR" ? "Aucun contenu pour le moment." : "No content yet.")}
-									</ReactMarkdown>
+								<div className="flex items-center justify-between gap-3">
+									<label htmlFor="project-content" className="text-xs font-medium text-muted-foreground">
+										{copy.labelDetails}
+									</label>
+									<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
+										<button
+											type="button"
+											onClick={() => setEditorView("write")}
+											className={cn(
+												"rounded-md px-2.5 py-1 text-xs font-medium transition",
+												editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
+											)}
+										>
+											{copy.write}
+										</button>
+										<button
+											type="button"
+											onClick={() => setEditorView("preview")}
+											className={cn(
+												"rounded-md px-2.5 py-1 text-xs font-medium transition",
+												editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
+											)}
+										>
+											{copy.previewOnly}
+										</button>
+									</div>
+								</div>
+								<div className="grid gap-3 md:grid-cols-2">
+									<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
+										<Textarea
+											id="project-content"
+											placeholder={language === "FR" ? "Ecrivez le contenu detaille en Markdown." : "Write detailed content in Markdown."}
+											rows={14}
+											className="min-h-60 md:min-h-72"
+											value={markdownDetails}
+											onChange={(event) => setMarkdownDetails(event.target.value)}
+										/>
+									</div>
+									<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
+										<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
+										<div className="max-h-[48vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
+											<MarkdownRenderer
+												content={markdownDetails}
+												emptyState={language === "FR" ? "Aucun contenu pour le moment." : "No content yet."}
+												className="text-sm"
+											/>
+										</div>
+									</div>
 								</div>
 							</div>
 							<div className="space-y-1.5">
@@ -344,7 +383,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 						</div>
 					</div>
 
-					<DialogFooter>
+					<DialogFooter className="sticky bottom-0 mt-auto">
 						{error ? <p className="w-full text-sm text-destructive">{error}</p> : null}
 						<Button variant="outline" type="submit" name="intent" value="draft" disabled={isSubmitting}>
 							{copy.saveDraft}

@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, ExternalLink, Github } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import type { LabProject } from "@/lib/definitions";
 
 type ProjectSpecProps = {
@@ -35,7 +34,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 	const publishedOn = formatDate(project.publishedAt);
 
 	return (
-		<article className="space-y-8">
+		<article className="space-y-6 sm:space-y-8">
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
@@ -52,14 +51,14 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{project.summary}</p>
 			</header>
 
-			<div className="grid gap-8 md:grid-cols-3">
-				<aside className="space-y-5 md:col-span-1">
-					<div className="relative h-64 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-72 md:h-80">
+			<div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
+				<aside className="space-y-5 lg:col-span-4">
+					<div className="relative h-56 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-72 lg:h-80">
 						<Image
 							src={project.coverImageUrl}
 							alt={`${project.title} cover image`}
 							fill
-							sizes="(min-width: 1024px) 30vw, 100vw"
+							sizes="(min-width: 1024px) 33vw, 100vw"
 							className="object-cover"
 							priority
 						/>
@@ -85,14 +84,14 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 							) : null}
 							<div className="flex flex-col gap-2">
 								{project.demoUrl ? (
-									<Button asChild>
+									<Button asChild className="w-full justify-between">
 										<Link href={project.demoUrl} target="_blank" rel="noreferrer noopener">
 											Live Demo <ExternalLink className="size-3.5" />
 										</Link>
 									</Button>
 								) : null}
 								{project.repoUrl ? (
-									<Button asChild variant="outline">
+									<Button asChild variant="outline" className="w-full justify-between">
 										<Link href={project.repoUrl} target="_blank" rel="noreferrer noopener">
 											Source Code <Github className="size-3.5" />
 										</Link>
@@ -103,10 +102,10 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					</Card>
 				</aside>
 
-				<section className="space-y-5 md:col-span-2">
+				<section className="space-y-5 lg:col-span-8">
 					<Card className="border-border/80">
-						<CardContent className="prose prose-sm max-w-none pt-4 text-muted-foreground dark:prose-invert sm:prose-base">
-							<ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
+						<CardContent className="pt-4">
+							<MarkdownRenderer content={project.content} />
 						</CardContent>
 					</Card>
 
@@ -128,7 +127,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<div className="grid gap-3 sm:grid-cols-2">
 						{project.screenshotUrls.map((screenshot, index) => (
 							<div key={screenshot} className="space-y-2">
-								<div className="relative h-52 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-64">
+								<div className="relative h-44 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-56 lg:h-64">
 									<Image
 										src={screenshot}
 										alt={`${project.title} screenshot ${index + 1}`}

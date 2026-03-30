@@ -1,20 +1,13 @@
-import { mkdir, writeFile } from "fs/promises";
-import os from "os";
 import path from "path";
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { ApiError, createApiHandler } from "@/lib/api-utils";
 import { requireRole } from "@/lib/auth";
+import { createSupabaseAdminClient, STORAGE_BUCKET } from "@/lib/supabase";
 
-export const runtime = "nodejs";
 
-const PUBLIC_ROOT = path.join(process.cwd(), "public");
-const PUBLIC_UPLOADS_ROOT = path.join(PUBLIC_ROOT, "uploads");
-const PUBLIC_PROFILE_DIR = path.join(PUBLIC_ROOT, "images");
-const FALLBACK_UPLOADS_ROOT = path.join(os.tmpdir(), "mance-uploads");
-
-const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/jpg",
@@ -101,6 +94,17 @@ function extensionFromMimeType(type: string, fallbackName: string) {
 async function handlePost(request: NextRequest) {
   await requireRole(request, "admin");
 
+  let supabase;
+  try {
+    supabase = createSupabaseAdminClient();
+  } catch (configError) {
+    console.error("Supabase configuration error:", configError);
+    throw new ApiError(
+      "Supabase admin key is missing. Set SUPABASE_SERVICE_ROLE_KEY in .env.",
+      500
+    );
+  }
+
   const form = await request.formData();
   const file = asUploadedFile(form.get("file"));
   const kind = sanitizeKind(String(form.get("kind") ?? "generic"));
@@ -124,77 +128,47 @@ async function handlePost(request: NextRequest) {
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
-
-  // Profile image keeps a stable path so existing UI can read it without DB schema changes.
-  if (kind === "profile") {
-    try {
-      await mkdir(PUBLIC_PROFILE_DIR, { recursive: true });
-      const profilePath = path.join(PUBLIC_PROFILE_DIR, "Profile.jpg");
-      await writeFile(profilePath, bytes);
-
-      return NextResponse.json({
-        ok: true,
-        data: { url: "/images/Profile.jpg" },
-      });
-    } catch (error) {
-      console.error("Profile upload to public directory failed:", error);
-    }
-
-    try {
-      const fallbackProfileDir = path.join(FALLBACK_UPLOADS_ROOT, "profile");
-      await mkdir(fallbackProfileDir, { recursive: true });
-      const fallbackProfilePath = path.join(fallbackProfileDir, "Profile.jpg");
-      await writeFile(fallbackProfilePath, bytes);
-
-      return NextResponse.json({
-        ok: true,
-        data: { url: "/api/uploads/files/profile/Profile.jpg" },
-      });
-    } catch (error) {
-      console.error("Profile upload fallback write failed:", error);
-      throw new ApiError(
-        "Unable to store profile image. Configure writable storage for uploads.",
-        503
-      );
-    }
-  }
-
   const baseName = sanitizeFileName(path.basename(file.name || "image"));
   const ext = extensionFromMimeType(file.type, baseName);
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 8);
   const fileName = `${timestamp}-${random}${ext}`;
 
+  // Upload to Supabase Storage
+  const filePath = `${kind}/${fileName}`;
+
   try {
-    const uploadDir = path.join(PUBLIC_UPLOADS_ROOT, kind);
-    await mkdir(uploadDir, { recursive: true });
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, bytes);
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filePath, new Uint8Array(bytes), {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Supabase upload error:", error);
+      throw new ApiError(
+        `Supabase upload failed: ${error.message}. Check that bucket \"${STORAGE_BUCKET}\" exists and is accessible.`,
+        500
+      );
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filePath);
 
     return NextResponse.json({
       ok: true,
-      data: { url: `/uploads/${kind}/${fileName}` },
+      data: { url: urlData.publicUrl },
     });
   } catch (error) {
-    console.error("Upload write to public directory failed:", error);
-  }
+    if (error instanceof ApiError) {
+      throw error;
+    }
 
-  try {
-    const fallbackDir = path.join(FALLBACK_UPLOADS_ROOT, kind);
-    await mkdir(fallbackDir, { recursive: true });
-    const fallbackPath = path.join(fallbackDir, fileName);
-    await writeFile(fallbackPath, bytes);
-
-    return NextResponse.json({
-      ok: true,
-      data: { url: `/api/uploads/files/${kind}/${fileName}` },
-    });
-  } catch (error) {
-    console.error("Upload fallback write failed:", error);
-    throw new ApiError(
-      "Unable to store uploaded image. Configure writable storage for uploads.",
-      503
-    );
+    console.error("Upload error:", error);
+    throw new ApiError("Unable to upload file to Supabase Storage.", 500);
   }
 }
 

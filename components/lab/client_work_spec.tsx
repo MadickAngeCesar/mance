@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ClientWorkItem } from "@/lib/definitions";
@@ -14,10 +15,10 @@ export function ClientWorkSpec({ clientWorkItem }: ClientWorkSpecProps) {
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
-						Client Work
+						<Tx en="Client Work" fr="Travail client" />
 					</Badge>
 					<Badge variant="secondary" className="rounded-full">
-						Placeholder Preview
+						<Tx en="Placeholder Preview" fr="Apercu temporaire" />
 					</Badge>
 				</div>
 				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{clientWorkItem.title}</h1>
@@ -46,7 +47,7 @@ export function ClientWorkSpec({ clientWorkItem }: ClientWorkSpecProps) {
 				<CardContent className="pt-1">
 					<p className="text-sm leading-7 text-muted-foreground sm:text-base">
 						{clientWorkItem.content ??
-							"Placeholder client-work body. Replace this with real project background, implementation details, and outcomes."}
+							<Tx en="Placeholder client-work body. Replace this with real project background, implementation details, and outcomes." fr="Contenu temporaire du travail client. Remplacez par le contexte reel du projet, les details d'implementation et les resultats." />}
 					</p>
 				</CardContent>
 			</Card>

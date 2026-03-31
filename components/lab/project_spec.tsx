@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, ExternalLink, Github } from "lucide-react";
 
+import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,7 @@ type ProjectSpecProps = {
 	project: LabProject;
 };
 
-function formatDate(value?: string) {
+function formatDate(value: string | undefined, locale: "en-US" | "fr-FR") {
 	if (!value) {
 		return null;
 	}
@@ -22,7 +23,7 @@ function formatDate(value?: string) {
 		return null;
 	}
 
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(locale, {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -31,21 +32,22 @@ function formatDate(value?: string) {
 
 export function ProjectSpec({ project }: ProjectSpecProps) {
 	const isPlaceholder = project.tags.includes("placeholder");
-	const publishedOn = formatDate(project.publishedAt);
+	const publishedOnEn = formatDate(project.publishedAt, "en-US");
+	const publishedOnFr = formatDate(project.publishedAt, "fr-FR");
 
 	return (
 		<article className="space-y-6 sm:space-y-8">
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
-						Project
+						<Tx en="Project" fr="Projet" />
 					</Badge>
 					{isPlaceholder ? (
 						<Badge variant="secondary" className="rounded-full">
-							Placeholder Preview
+							<Tx en="Placeholder Preview" fr="Apercu temporaire" />
 						</Badge>
 					) : null}
-					{project.featured ? <Badge className="rounded-full">Featured</Badge> : null}
+					{project.featured ? <Badge className="rounded-full"><Tx en="Featured" fr="En vedette" /></Badge> : null}
 				</div>
 				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.title}</h1>
 				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{project.summary}</p>
@@ -67,7 +69,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<Card className="border-border/80">
 						<CardContent className="space-y-4 pt-4">
 							<div>
-								<p className="text-xs uppercase tracking-wide text-muted-foreground">Tech stack</p>
+								<p className="text-xs uppercase tracking-wide text-muted-foreground"><Tx en="Tech stack" fr="Stack technique" /></p>
 								<div className="mt-2 flex flex-wrap gap-1.5">
 									{project.stack.map((tech) => (
 										<Badge key={`${project.id}-${tech}`} variant="secondary" className="rounded-full">
@@ -76,24 +78,24 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 									))}
 								</div>
 							</div>
-							{publishedOn ? (
+							{publishedOnEn ? (
 								<div className="flex items-center gap-2 text-xs text-muted-foreground">
 									<CalendarDays className="size-3.5" />
-									Published {publishedOn}
+									<Tx en={`Published ${publishedOnEn}`} fr={`Publie le ${publishedOnFr ?? publishedOnEn}`} />
 								</div>
 							) : null}
 							<div className="flex flex-col gap-2">
 								{project.demoUrl ? (
 									<Button asChild className="w-full justify-between">
 										<Link href={project.demoUrl} target="_blank" rel="noreferrer noopener">
-											Live Demo <ExternalLink className="size-3.5" />
+											<Tx en="Live Demo" fr="Demo en ligne" /> <ExternalLink className="size-3.5" />
 										</Link>
 									</Button>
 								) : null}
 								{project.repoUrl ? (
 									<Button asChild variant="outline" className="w-full justify-between">
 										<Link href={project.repoUrl} target="_blank" rel="noreferrer noopener">
-											Source Code <Github className="size-3.5" />
+											<Tx en="Source Code" fr="Code source" /> <Github className="size-3.5" />
 										</Link>
 									</Button>
 								) : null}
@@ -123,7 +125,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 
 			{project.screenshotUrls.length ? (
 				<section className="space-y-3">
-					<h2 className="text-xl font-semibold tracking-tight">Screenshots</h2>
+					<h2 className="text-xl font-semibold tracking-tight"><Tx en="Screenshots" fr="Captures d'ecran" /></h2>
 					<div className="grid gap-3 sm:grid-cols-2">
 						{project.screenshotUrls.map((screenshot, index) => (
 							<div key={screenshot} className="space-y-2">
@@ -136,7 +138,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 										className="object-cover"
 									/>
 								</div>
-								<p className="text-xs text-muted-foreground">Screenshot {index + 1}</p>
+								<p className="text-xs text-muted-foreground"><Tx en={`Screenshot ${index + 1}`} fr={`Capture ${index + 1}`} /></p>
 							</div>
 						))}
 					</div>

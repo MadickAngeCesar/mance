@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useLanguage } from "@/components/i18n/language-provider";
 import { LabCard } from "@/components/lab/lab_card";
 import { Input } from "@/components/ui/input";
 import {
@@ -83,14 +84,8 @@ async function fetchAllPages<T>(basePath: string) {
 	return [...firstData, ...pageData];
 }
 
-const filterOptions: Array<{ value: LabFilter; label: string }> = [
-	{ value: "all", label: "All" },
-	{ value: "projects", label: "Projects" },
-	{ value: "articles", label: "Articles" },
-	{ value: "case-studies", label: "Case Studies" },
-];
-
 export function LabList() {
+	const { language } = useLanguage();
 	const [projects, setProjects] = useState<ProjectItem[]>([]);
 	const [articles, setArticles] = useState<ArticleItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -181,6 +176,24 @@ export function LabList() {
 	}, []);
 
 	const itemsPerPage = isDesktop ? 6 : 4;
+
+	const filterOptions: Array<{ value: LabFilter; label: string }> = useMemo(
+		() =>
+			language === "FR"
+				? [
+						{ value: "all", label: "Tous" },
+						{ value: "projects", label: "Projets" },
+						{ value: "articles", label: "Articles" },
+						{ value: "case-studies", label: "Etudes de cas" },
+					]
+				: [
+						{ value: "all", label: "All" },
+						{ value: "projects", label: "Projects" },
+						{ value: "articles", label: "Articles" },
+						{ value: "case-studies", label: "Case Studies" },
+					],
+		[language]
+	);
 
 	const featuredProjects = useMemo(
 		() => projects.filter((project) => Boolean(project.featured)),
@@ -294,14 +307,14 @@ export function LabList() {
 
 	return (
 		<section className="space-y-8">
-			{isLoading ? <p className="text-sm text-muted-foreground">Loading lab content...</p> : null}
+			{isLoading ? <p className="text-sm text-muted-foreground">{language === "FR" ? "Chargement du contenu du Lab..." : "Loading lab content..."}</p> : null}
 			{loadError ? (
 				<p className="text-sm text-destructive">{loadError}</p>
 			) : null}
 			<div className="grid items-start gap-6 sm:grid-cols-2">
 				{featuredProject ? (
 					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Project</h3>
+						<h3 className="text-xl text-center font-semibold tracking-tight">{language === "FR" ? "Projet en vedette" : "Featured Project"}</h3>
 						<LabCard
 							title={featuredProject.title}
 							summary={featuredProject.summary}
@@ -319,7 +332,7 @@ export function LabList() {
 
 				{featuredArticle ? (
 					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Article</h3>
+						<h3 className="text-xl text-center font-semibold tracking-tight">{language === "FR" ? "Article en vedette" : "Featured Article"}</h3>
 						<LabCard
 							title={featuredArticle.title}
 							summary={featuredArticle.excerpt}
@@ -340,9 +353,11 @@ export function LabList() {
 
 			<div className="space-y-5">
 				<div className="text-center">
-					<h2 className="text-2xl font-semibold tracking-tight">Browse Projects and Articles</h2>
+					<h2 className="text-2xl font-semibold tracking-tight">{language === "FR" ? "Parcourir les projets et articles" : "Browse Projects and Articles"}</h2>
 					<p className="mt-1 text-sm text-muted-foreground">
-						Use search, filters, and sorting to navigate case studies, projects, and technical writing.
+						{language === "FR"
+							? "Utilisez la recherche, les filtres et le tri pour naviguer entre etudes de cas, projets et redaction technique."
+							: "Use search, filters, and sorting to navigate case studies, projects, and technical writing."}
 					</p>
 				</div>
 
@@ -350,16 +365,16 @@ export function LabList() {
 					<Input
 						value={query}
 						onChange={(event) => onQueryChange(event.target.value)}
-						placeholder="Search title, tags, or excerpt"
+						placeholder={language === "FR" ? "Rechercher titre, tags ou extrait" : "Search title, tags, or excerpt"}
 					/>
 					<select
 						value={sortBy}
 						onChange={(event) => onSortChange(event.target.value as LabSort)}
 						className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 					>
-						<option value="recent">Sort: Recent</option>
-						<option value="views">Sort: Most viewed</option>
-						<option value="alpha">Sort: Alphabetical</option>
+						<option value="recent">{language === "FR" ? "Tri : Recent" : "Sort: Recent"}</option>
+						<option value="views">{language === "FR" ? "Tri : Plus vus" : "Sort: Most viewed"}</option>
+						<option value="alpha">{language === "FR" ? "Tri : Alphabetique" : "Sort: Alphabetical"}</option>
 					</select>
 				</div>
 
@@ -407,7 +422,7 @@ export function LabList() {
 				</div>
 
 				{!isLoading && paginatedItems.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No items match your current search and filters.</p>
+					<p className="text-sm text-muted-foreground">{language === "FR" ? "Aucun element ne correspond a la recherche et aux filtres actuels." : "No items match your current search and filters."}</p>
 				) : null}
 
 				<Pagination className={isLoading ? "opacity-50 pointer-events-none" : ""}>

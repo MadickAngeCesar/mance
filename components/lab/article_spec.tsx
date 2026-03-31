@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { CalendarDays } from "lucide-react";
 
+import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
@@ -10,7 +11,7 @@ type ArticleSpecProps = {
 	article: LabArticle;
 };
 
-function formatDate(value?: string) {
+function formatDate(value: string | undefined, locale: "en-US" | "fr-FR") {
 	if (!value) {
 		return null;
 	}
@@ -20,7 +21,7 @@ function formatDate(value?: string) {
 		return null;
 	}
 
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(locale, {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -29,7 +30,8 @@ function formatDate(value?: string) {
 
 export function ArticleSpec({ article }: ArticleSpecProps) {
 	const isPlaceholder = article.tags.includes("placeholder") || article.category.toLowerCase() === "placeholder";
-	const publishedOn = formatDate(article.publishedAt);
+	const publishedOnEn = formatDate(article.publishedAt, "en-US");
+	const publishedOnFr = formatDate(article.publishedAt, "fr-FR");
 	const readingTimeMinutes = Math.ceil(article.content.split(/\s+/).length / 200);
 
 	return (
@@ -37,11 +39,11 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
-						Article
+						<Tx en="Article" fr="Article" />
 					</Badge>
 					{isPlaceholder ? (
 						<Badge variant="secondary" className="rounded-full">
-							Placeholder Preview
+							<Tx en="Placeholder Preview" fr="Apercu temporaire" />
 						</Badge>
 					) : null}
 					<Badge variant="secondary" className="rounded-full">
@@ -67,14 +69,14 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 
 					<Card className="border-border/80">
 						<CardContent className="space-y-3 pt-4">
-							{publishedOn ? (
+							{publishedOnEn ? (
 								<div className="flex items-center gap-2 text-xs text-muted-foreground">
 									<CalendarDays className="size-3.5" />
-									{publishedOn}
+									<Tx en={publishedOnEn} fr={publishedOnFr ?? publishedOnEn} />
 								</div>
 							) : null}
 							<div className="text-xs text-muted-foreground">
-								~{readingTimeMinutes} min read • {article.views.toLocaleString()} views
+								<Tx en={`~${readingTimeMinutes} min read`} fr={`~${readingTimeMinutes} min de lecture`} /> • {article.views.toLocaleString()} <Tx en="views" fr="vues" />
 							</div>
 						</CardContent>
 					</Card>

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tx } from "@/components/i18n/tx";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -50,19 +51,19 @@ export async function About() {
 		<section className="space-y-5">
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div>
-					<h2 className="text-2xl font-semibold tracking-tight">About</h2>
-					<p className="mt-1 text-sm text-muted-foreground">Professional summary, education, and experience.</p>
+					<h2 className="text-2xl font-semibold tracking-tight"><Tx en="About" fr="A propos" /></h2>
+					<p className="mt-1 text-sm text-muted-foreground"><Tx en="Professional summary, education, and experience." fr="Resume professionnel, education et experience." /></p>
 				</div>
 				<Button asChild variant="outline">
 					<a href={aboutSummary.cvDownloadUrl} download>
-						Download CV
+						<Tx en="Download CV" fr="Telecharger le CV" />
 					</a>
 				</Button>
 			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Biography</CardTitle>
+					<CardTitle><Tx en="Biography" fr="Biographie" /></CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-2 text-sm leading-7 text-muted-foreground">
 					<p>{aboutSummary.biography}</p>
@@ -72,10 +73,10 @@ export async function About() {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Education and Certification</CardTitle>
+						<CardTitle><Tx en="Education and Certification" fr="Education et certifications" /></CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{education.length === 0 ? <p className="text-sm text-muted-foreground">No education entries yet.</p> : null}
+						{education.length === 0 ? <p className="text-sm text-muted-foreground"><Tx en="No education entries yet." fr="Aucune entree education pour le moment." /></p> : null}
 						{education.map((item) => (
 							<div key={`${item.title}-${item.institution}`} className="space-y-1">
 								<p className="font-medium">{item.title}</p>
@@ -90,10 +91,10 @@ export async function About() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Work Experience</CardTitle>
+						<CardTitle><Tx en="Work Experience" fr="Experience professionnelle" /></CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{experience.length === 0 ? <p className="text-sm text-muted-foreground">No work experience entries yet.</p> : null}
+						{experience.length === 0 ? <p className="text-sm text-muted-foreground"><Tx en="No work experience entries yet." fr="Aucune experience professionnelle pour le moment." /></p> : null}
 						{experience.map((item) => (
 							<div key={`${item.role}-${item.company}`} className="space-y-1">
 								<p className="font-medium">{item.role}</p>
@@ -113,7 +114,7 @@ export async function About() {
 						{interest}
 					</Badge>
 				))}
-				{aboutSummary.interests.length === 0 ? <p className="text-sm text-muted-foreground">No interests configured yet.</p> : null}
+				{aboutSummary.interests.length === 0 ? <p className="text-sm text-muted-foreground"><Tx en="No interests configured yet." fr="Aucun centre d'interet configure pour le moment." /></p> : null}
 			</div>
 		</section>
 	);

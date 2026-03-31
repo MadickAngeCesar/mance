@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Tx } from "@/components/i18n/tx";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -27,8 +28,8 @@ export async function Skills() {
 	return (
 		<section className="space-y-5">
 			<div>
-				<h2 className="text-2xl font-semibold tracking-tight">Technical Skills</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Resume-style skill highlights grouped by specialization.</p>
+				<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Technical Skills" fr="Competences techniques" /></h2>
+				<p className="mt-1 text-sm text-muted-foreground"><Tx en="Resume-style skill highlights grouped by specialization." fr="Points forts de competences, groupes par specialisation." /></p>
 			</div>
 
 			<div className="space-y-4 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

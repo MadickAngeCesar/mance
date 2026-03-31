@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Github, Linkedin, MessageCircle } from "lucide-react";
 
+import { Tx } from "@/components/i18n/tx";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -69,7 +70,7 @@ export async function Footer() {
 						/>
 						<p className="text-base font-semibold">MAC TECH</p>
 					</div>
-					<p className="text-sm text-muted-foreground">Building digital solutions for modern organizations.</p>
+					<p className="text-sm text-muted-foreground"><Tx en="Building digital solutions for modern organizations." fr="Creation de solutions digitales pour les organisations modernes." /></p>
 					<div className="pt-2">
 						<div className="flex items-center gap-2">
 							{(contact?.socialLinks ?? []).map((link) => {
@@ -95,19 +96,19 @@ export async function Footer() {
 				</div>
 
 				<div className="space-y-2 lg:justify-self-end lg:text-right">
-					<p className="text-sm font-semibold">Resources</p>
+					<p className="text-sm font-semibold"><Tx en="Resources" fr="Ressources" /></p>
 					<div className="grid gap-1 text-sm text-muted-foreground">
 						<a href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_Resume_EN.pdf"} download className="transition-colors hover:text-foreground">
-							Resume (PDF)
+							<Tx en="Resume (PDF)" fr="CV (PDF)" />
 						</a>
-						<Link href="/sign-in" className="transition-colors hover:text-foreground">Dashboard</Link>
-						<Link href="/lab" className="transition-colors hover:text-foreground">Portfolio Lab</Link>
-						<Link href="/services" className="transition-colors hover:text-foreground">Service Details</Link>
+						<Link href="/sign-in" className="transition-colors hover:text-foreground"><Tx en="Dashboard" fr="Tableau de bord" /></Link>
+						<Link href="/lab" className="transition-colors hover:text-foreground"><Tx en="Portfolio Lab" fr="Lab portfolio" /></Link>
+						<Link href="/services" className="transition-colors hover:text-foreground"><Tx en="Service Details" fr="Details des services" /></Link>
 					</div>
 				</div>
 			</div>
 			<div className="border-t border-border/70 px-4 py-4 text-center text-xs text-muted-foreground sm:px-6 lg:px-8">
-				© {year} MAC TECH. All rights reserved.
+				© {year} MAC TECH. <Tx en="All rights reserved." fr="Tous droits reserves." />
 			</div>
 		</footer>
 	);

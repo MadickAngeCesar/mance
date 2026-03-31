@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 
+import { Tx } from "@/components/i18n/tx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
@@ -28,13 +29,13 @@ export async function Testimonials() {
 	return (
 		<section className="space-y-5" id="testimonials">
 			<div className="text-center">
-				<h2 className="text-2xl font-semibold tracking-tight">Client Testimonials</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Feedback from founders, operations teams, and product leaders.</p>
+				<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Client Testimonials" fr="Temoignages clients" /></h2>
+				<p className="mt-1 text-sm text-muted-foreground"><Tx en="Feedback from founders, operations teams, and product leaders." fr="Retours de fondateurs, equipes operations et responsables produit." /></p>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
 				{testimonials.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3">No testimonials published yet.</p>
+					<p className="text-sm text-muted-foreground md:col-span-3"><Tx en="No testimonials published yet." fr="Aucun temoignage publie pour le moment." /></p>
 				) : null}
 				{testimonials.map((item) => (
 					<Card key={item.id} className="h-full border-border/80">

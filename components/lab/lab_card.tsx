@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { useLanguage } from "@/components/i18n/language-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -19,6 +22,8 @@ type LabCardProps = {
 };
 
 export function LabCard({ title, summary, href, coverImageUrl, tags, kind, featured = false, views, meta, publishedAt }: LabCardProps) {
+	const { language } = useLanguage();
+
 	const normalizedCoverImageUrl = (() => {
 		if (!coverImageUrl) {
 			return "/images/Profile.jpg";
@@ -46,7 +51,7 @@ export function LabCard({ title, summary, href, coverImageUrl, tags, kind, featu
 	})();
 
 	const formattedDate = publishedAt
-		? new Date(publishedAt).toLocaleDateString("en-US", {
+		? new Date(publishedAt).toLocaleDateString(language === "FR" ? "fr-FR" : "en-US", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -68,14 +73,14 @@ export function LabCard({ title, summary, href, coverImageUrl, tags, kind, featu
 			<CardHeader className="space-y-2">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full capitalize">
-						{kind}
+						{kind === "project" ? (language === "FR" ? "projet" : "project") : language === "FR" ? "article" : "article"}
 					</Badge>
-					{featured ? <Badge className="rounded-full">Featured</Badge> : null}
+					{featured ? <Badge className="rounded-full">{language === "FR" ? "En vedette" : "Featured"}</Badge> : null}
 				</div>
 				<CardTitle className="text-lg">{title}</CardTitle>
 				<p className="text-xs text-muted-foreground">
 					{meta}
-					{formattedDate ? ` · ${formattedDate}` : ""} · {views.toLocaleString()} views
+					{formattedDate ? ` · ${formattedDate}` : ""} · {views.toLocaleString()} {language === "FR" ? "vues" : "views"}
 				</p>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -88,7 +93,7 @@ export function LabCard({ title, summary, href, coverImageUrl, tags, kind, featu
 					))}
 				</div>
 				<Link href={href} className="inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline">
-					Read details <ArrowUpRight className="size-3.5" />
+					{language === "FR" ? "Lire les details" : "Read details"} <ArrowUpRight className="size-3.5" />
 				</Link>
 			</CardContent>
 		</Card>

@@ -217,13 +217,16 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	return (
 		<Dialog open={open} onOpenChange={(newOpen) => {
 			setOpen(newOpen);
-			if (!newOpen && !isEditMode) {
-				setUploadedScreenshots([]);
-			}
 			if (!newOpen) {
 				setEditorView("write");
+				setMarkdownDetails(initialProject?.content ?? "");
+				setUploadedCoverUrl(null);
+				if (!isEditMode) {
+					setUploadedScreenshots([]);
+				}
+				setError(null);
 			}
-		}}>
+		}}
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">

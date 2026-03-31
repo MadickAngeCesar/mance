@@ -180,6 +180,9 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				setOpen(newOpen);
 				if (!newOpen) {
 					setEditorView("write");
+					setMarkdownContent(initialArticle?.content ?? "");
+					setUploadedCoverUrl(null);
+					setError(null);
 				}
 			}}
 		>

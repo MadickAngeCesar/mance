@@ -29,7 +29,10 @@ export async function ClientWork() {
 	try {
 		[clientWork, fallbackProjects] = await Promise.all([
 			prisma.clientWork.findMany({
-				where: { publishedAt: { not: null } },
+				where: {
+					publishedAt: { not: null },
+					testimonials: { some: {} },
+				},
 				orderBy: { publishedAt: "desc" },
 			}),
 			prisma.labProject.findMany({

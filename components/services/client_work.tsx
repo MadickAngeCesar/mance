@@ -7,37 +7,106 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 
 export async function ClientWork() {
-	let clientWork: Array<{
+	let projects: Array<{
 		id: string;
 		title: string;
-		description: string;
-		imageUrl: string;
+		summary: string;
+		coverImageUrl: string;
 		stack: string[];
-		projectUrl: string | null;
-		slug: string | null;
+		slug: string;
 	}> = [];
 
 	try {
-		clientWork = await prisma.clientWork.findMany({
+		const testimonials = await prisma.testimonial.findMany({
 			where: {
-				publishedAt: { not: null },
-				testimonials: { some: {} },
+				projectReference: {
+					not: "",
+				},
 			},
-			orderBy: { publishedAt: "desc" },
-			include: { testimonials: true },
+			select: {
+				projectReference: true,
+			},
 		});
+
+		const normalizeReference = (value: string) =>
+			value
+				.trim()
+				.replace(/^project\s*:\s*/i, "")
+				.trim();
+
+		const referencedTitles = Array.from(
+			new Set(
+				testimonials
+					.map((item) => normalizeReference(item.projectReference))
+					.filter(Boolean),
+			),
+		);
+
+		if (referencedTitles.length > 0) {
+			projects = await prisma.labProject.findMany({
+				where: {
+					publishedAt: { not: null },
+					title: { in: referencedTitles },
+				},
+				orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+				take: 12,
+			});
+		}
+
+		if (projects.length === 0) {
+			const referencedSlugs = Array.from(
+				new Set(
+					testimonials
+						.map((item) => normalizeReference(item.projectReference).toLowerCase().replace(/\s+/g, "-"))
+						.filter(Boolean),
+				),
+			);
+
+			if (referencedSlugs.length > 0) {
+				projects = await prisma.labProject.findMany({
+					where: {
+						publishedAt: { not: null },
+						slug: { in: referencedSlugs },
+					},
+					orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+					take: 12,
+				});
+			}
+		}
+
+		if (projects.length === 0) {
+			const linkedClientWork = await prisma.clientWork.findMany({
+				where: {
+					publishedAt: { not: null },
+					testimonials: { some: {} },
+				},
+				orderBy: { publishedAt: "desc" },
+				take: 12,
+			});
+
+			projects = linkedClientWork
+				.filter((item) => Boolean(item.slug))
+				.map((item) => ({
+					id: item.id,
+					title: item.title,
+					summary: item.description,
+					coverImageUrl: item.imageUrl,
+					stack: item.stack,
+					slug: item.slug as string,
+				}));
+		}
 	} catch (error) {
 		console.error("Client work query failed:", error);
-		clientWork = [];
+		projects = [];
 	}
 
-	const items = clientWork.map((item) => ({
+	const items = projects.map((item) => ({
 		id: item.id,
 		title: item.title,
-		description: item.description,
-		imageUrl: item.imageUrl || "/images/Profile.jpg",
+		description: item.summary,
+		imageUrl: item.coverImageUrl || "/images/Profile.jpg",
 		stack: item.stack,
-		projectUrl: item.projectUrl ?? (item.slug ? `/lab/${item.slug}` : undefined),
+		projectUrl: `/lab/${item.slug}`,
 	}));
 
 	return (

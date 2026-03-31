@@ -226,7 +226,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				}
 				setError(null);
 			}
-		}}
+		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
 					<Button type="button">

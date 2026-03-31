@@ -34,6 +34,7 @@ export async function ClientWork() {
 					testimonials: { some: {} },
 				},
 				orderBy: { publishedAt: "desc" },
+				include: { testimonials: true },
 			}),
 			prisma.labProject.findMany({
 				where: { publishedAt: { not: null } },
@@ -42,9 +43,9 @@ export async function ClientWork() {
 			}),
 		]);
 	} catch (error) {
-		if (!isDatabaseUnavailableError(error)) {
-			console.error("Client work query failed, rendering fallback state:", error);
-		}
+		console.error("Client work query failed, rendering fallback state:", error);
+		// Silently fall back to labProject if clientWork query fails
+		clientWork = [];
 	}
 
 	const items =

@@ -1,30 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 
-function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
+function getFreelanceAvailabilityText(label: string) {
 	const now = new Date();
 	const day = now.getDay();
-	const dayNames =
-		language === "FR"
-			? ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
-			: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 	if (day >= 1 && day <= 5) {
-		return language === "FR" ? `${label} : Disponible aujourd'hui` : `${label}: Available today`;
+		return `${label}: Available today`;
 	}
 
 	const nextBusinessDay = 8 - day;
 	const nextDate = new Date(now);
 	nextDate.setDate(now.getDate() + nextBusinessDay);
-	return language === "FR"
-		? `${label} : Disponible ${dayNames[nextDate.getDay()]}`
-		: `${label}: Available ${dayNames[nextDate.getDay()]}`;
+	return `${label}: Available ${dayNames[nextDate.getDay()]}`;
 }
 
 export async function Hero() {
@@ -96,30 +90,24 @@ export async function Hero() {
 					</p>
 					<div className="hidden sm:flex sm:flex-wrap items-center justify-center gap-3">
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
-							<Tx
-								en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
-								fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "FR")}
-							/>
+							{getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel)}
 						</Badge>
 						<Button asChild>
-							<Link href="/lab"><Tx en="Explore my work" fr="Explorer mes travaux" /></Link>
+							<Link href="/lab">Explore my work</Link>
 						</Button>
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
-							<Tx en={`${brand.jobAvailabilityLabel}: Open to interviews`} fr={`${brand.jobAvailabilityLabel} : Ouvert aux entretiens`} />
+							{brand.jobAvailabilityLabel}: Open to interviews
 						</Badge>
 					</div>
                     <div className="sm:hidden flex flex-wrap items-center justify-center gap-3">
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
-							<Tx
-								en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
-								fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "FR")}
-							/>
+							{getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel)}
 						</Badge>
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
-							<Tx en={`${brand.jobAvailabilityLabel}: Open to interviews`} fr={`${brand.jobAvailabilityLabel} : Ouvert aux entretiens`} />
+							{brand.jobAvailabilityLabel}: Open to interviews
 						</Badge>
 						<Button asChild>
-							<Link href="/lab"><Tx en="Explore my work" fr="Explorer mes travaux" /></Link>
+							<Link href="/lab">Explore my work</Link>
 						</Button>
 					</div>
 				</div>

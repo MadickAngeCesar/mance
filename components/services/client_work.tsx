@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
@@ -113,13 +112,13 @@ export async function ClientWork() {
 	return (
 		<section className="space-y-5" id="client-work">
 			<div className="text-center">
-				<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Selected Client Work" fr="Realisations clients selectionnees" /></h2>
-				<p className="mt-1 text-sm text-muted-foreground"><Tx en="Recent builds and internal platforms delivered for teams." fr="Developpements recents et plateformes internes livrees pour des equipes." /></p>
+				<h2 className="text-2xl font-semibold tracking-tight">Selected Client Work</h2>
+				<p className="mt-1 text-sm text-muted-foreground">Recent builds and internal platforms delivered for teams.</p>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
 				{items.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3"><Tx en="No client work linked to testimonials has been published yet." fr="Aucune realisation client liee aux temoignages n'a encore ete publiee." /></p>
+					<p className="text-sm text-muted-foreground md:col-span-3">No client work linked to testimonials has been published yet.</p>
 				) : null}
 				{items.map((item) => (
 					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
@@ -149,7 +148,7 @@ export async function ClientWork() {
 									href={item.projectUrl}
 									className="inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
 								>
-									<Tx en="View project" fr="Voir le projet" /> <ArrowUpRight className="size-3.5" />
+									View project <ArrowUpRight className="size-3.5" />
 								</Link>
 							) : null}
 						</CardContent>

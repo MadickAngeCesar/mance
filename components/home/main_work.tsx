@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
@@ -108,13 +107,13 @@ export async function MainWork() {
 	return (
 		<section className="space-y-5">
 			<div>
-				<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Main Work" fr="Travaux principaux" /></h2>
-				<p className="mt-1 text-sm text-muted-foreground"><Tx en="Featured projects, client work, and articles." fr="Projets en vedette, realisations clients et articles." /></p>
+				<h2 className="text-2xl font-semibold tracking-tight">Main Work</h2>
+				<p className="mt-1 text-sm text-muted-foreground">Featured projects, client work, and articles.</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
 				{items.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3"><Tx en="No featured work has been published yet." fr="Aucun travail en vedette n'a encore ete publie." /></p>
+					<p className="text-sm text-muted-foreground md:col-span-3">No featured work has been published yet.</p>
 				) : null}
 				{items.map((item, index) => (
 					<Card
@@ -135,14 +134,14 @@ export async function MainWork() {
 								<Badge variant="outline" className="rounded-full capitalize">
 									{item.kind.replace("_", " ").toLowerCase()}
 								</Badge>
-								{item.featured ? <Badge className="rounded-full"><Tx en="Featured" fr="En vedette" /></Badge> : null}
+								{item.featured ? <Badge className="rounded-full">Featured</Badge> : null}
 							</div>
 							<CardTitle className="pt-2 text-lg">{item.title}</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<p className="text-sm leading-6 text-muted-foreground">{item.summary}</p>
 							<Link className="text-sm font-medium underline-offset-4 hover:underline" href={item.href}>
-								<Tx en="Open details" fr="Voir les details" />
+								Open details
 							</Link>
 						</CardContent>
 					</Card>

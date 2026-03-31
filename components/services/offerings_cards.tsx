@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,15 +36,15 @@ export async function OfferingsCards() {
 	return (
 		<section className="space-y-5" id="offerings">
 			<div className="text-center">
-				<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Service Offerings" fr="Offres de services" /></h2>
+				<h2 className="text-2xl font-semibold tracking-tight">Service Offerings</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					<Tx en="Web development, IT support and consulting, digital transformation, and technical writing." fr="Developpement web, support et conseil IT, transformation digitale et redaction technique." />
+					Web development, IT support and consulting, digital transformation, and technical writing.
 				</p>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-3">
 				{offerings.length === 0 ? (
-					<p className="text-sm text-muted-foreground sm:col-span-3"><Tx en="No offerings published yet." fr="Aucune offre publiee pour le moment." /></p>
+					<p className="text-sm text-muted-foreground sm:col-span-3">No offerings published yet.</p>
 				) : null}
 				{offerings.map((offering) => (
 					<Card key={offering.id} className="h-full border-border/80">

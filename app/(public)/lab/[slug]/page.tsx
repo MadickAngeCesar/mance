@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Tx } from "@/components/i18n/tx";
 import { ArticleSpec } from "@/components/lab/article_spec";
 import { ClientWorkSpec } from "@/components/lab/client_work_spec";
 import { ProjectSpec } from "@/components/lab/project_spec";
@@ -218,13 +217,13 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
         <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
           {navigation.previous ? (
             <Link href={`/lab/${navigation.previous.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40">
-              <span className="block text-xs text-muted-foreground"><Tx en="Previous" fr="Precedent" /></span>
+              <span className="block text-xs text-muted-foreground">Previous</span>
               <span className="font-medium leading-6 wrap-break-word">{navigation.previous.title}</span>
             </Link>
           ) : <div className="hidden sm:block" />}
           {navigation.next ? (
             <Link href={`/lab/${navigation.next.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40 sm:text-right">
-              <span className="block text-xs text-muted-foreground"><Tx en="Next" fr="Suivant" /></span>
+              <span className="block text-xs text-muted-foreground">Next</span>
               <span className="font-medium leading-6 wrap-break-word">{navigation.next.title}</span>
             </Link>
           ) : null}
@@ -245,13 +244,13 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
         <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
           {navigation.previous ? (
             <Link href={`/lab/${navigation.previous.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40">
-              <span className="block text-xs text-muted-foreground"><Tx en="Previous" fr="Precedent" /></span>
+              <span className="block text-xs text-muted-foreground">Previous</span>
               <span className="font-medium leading-6 wrap-break-word">{navigation.previous.title}</span>
             </Link>
           ) : <div className="hidden sm:block" />}
           {navigation.next ? (
             <Link href={`/lab/${navigation.next.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40 sm:text-right">
-              <span className="block text-xs text-muted-foreground"><Tx en="Next" fr="Suivant" /></span>
+              <span className="block text-xs text-muted-foreground">Next</span>
               <span className="font-medium leading-6 wrap-break-word">{navigation.next.title}</span>
             </Link>
           ) : null}
@@ -275,13 +274,13 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
         <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
           {navigation.previous ? (
             <Link href={`/lab/${navigation.previous.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40">
-              <span className="block text-xs text-muted-foreground"><Tx en="Previous" fr="Precedent" /></span>
+              <span className="block text-xs text-muted-foreground">Previous</span>
               <span className="font-medium">{navigation.previous.title}</span>
             </Link>
           ) : <div />}
           {navigation.next ? (
             <Link href={`/lab/${navigation.next.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40 sm:text-right">
-              <span className="block text-xs text-muted-foreground"><Tx en="Next" fr="Suivant" /></span>
+              <span className="block text-xs text-muted-foreground">Next</span>
               <span className="font-medium">{navigation.next.title}</span>
             </Link>
           ) : null}

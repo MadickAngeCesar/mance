@@ -5,20 +5,28 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
+import { Tx } from "@/components/i18n/tx";
 
-function getFreelanceAvailabilityText(label: string) {
+function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 	const now = new Date();
 	const day = now.getDay();
-	const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	const dayNames = language === "EN"
+        ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        : ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
 	if (day >= 1 && day <= 5) {
-		return `${label}: Available today`;
+		return language === "EN" ? `${label}: Available today` : `${label} : Disponible aujourd'hui`;
 	}
 
 	const nextBusinessDay = 8 - day;
 	const nextDate = new Date(now);
 	nextDate.setDate(now.getDate() + nextBusinessDay);
-	return `${label}: Available ${dayNames[nextDate.getDay()]}`;
+
+    if (language === "EN") {
+        return `${label}: Available ${dayNames[nextDate.getDay()]}`;
+    } else {
+        return `${label} : Disponible ${dayNames[nextDate.getDay()]}`;
+    }
 }
 
 export async function Hero() {
@@ -26,10 +34,15 @@ export async function Hero() {
 		currentName: string;
 		ownerName: string;
 		roleTagline: string;
+		roleTaglineFr: string | null;
 		headline: string;
+		headlineFr: string | null;
 		subTagline: string;
+		subTaglineFr: string | null;
 		freelanceAvailabilityLabel: string;
+		freelanceAvailabilityLabelFr: string | null;
 		jobAvailabilityLabel: string;
+		jobAvailabilityLabelFr: string | null;
 	} | null = null;
 
 	try {
@@ -38,10 +51,15 @@ export async function Hero() {
 				currentName: true,
 				ownerName: true,
 				roleTagline: true,
+				roleTaglineFr: true,
 				headline: true,
+				headlineFr: true,
 				subTagline: true,
+				subTaglineFr: true,
 				freelanceAvailabilityLabel: true,
+				freelanceAvailabilityLabelFr: true,
 				jobAvailabilityLabel: true,
+				jobAvailabilityLabelFr: true,
 			},
 		});
 	} catch (error) {
@@ -54,12 +72,19 @@ export async function Hero() {
 		currentName: profile?.currentName ?? "MAC TECH",
 		ownerName: profile?.ownerName ?? "MAC TECH",
 		roleTagline: profile?.roleTagline ?? "Technology and digital solutions",
+		roleTaglineFr: profile?.roleTaglineFr ?? "Solutions technologiques et numériques",
 		headline: profile?.headline ?? "Building practical digital products",
+		headlineFr: profile?.headlineFr ?? "Construire des produits numériques pratiques",
 		subTagline:
 			profile?.subTagline ??
 			"We design and deliver modern web solutions for organizations and founders.",
+		subTaglineFr:
+			profile?.subTaglineFr ??
+			"Nous concevons et livrons des solutions web modernes pour les organisations et les fondateurs.",
 		freelanceAvailabilityLabel: profile?.freelanceAvailabilityLabel ?? "Freelance",
+		freelanceAvailabilityLabelFr: profile?.freelanceAvailabilityLabelFr ?? "Freelance",
 		jobAvailabilityLabel: profile?.jobAvailabilityLabel ?? "Career",
+		jobAvailabilityLabelFr: profile?.jobAvailabilityLabelFr ?? "Carrière",
 	};
 
 	return (
@@ -83,31 +108,51 @@ export async function Hero() {
 					<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
 						{brand.ownerName}
 					</h1>
-					<p className="text-sm font-medium text-muted-foreground">{brand.roleTagline}</p>
-					<p className="text-base font-semibold text-foreground">{brand.headline}</p>
+					<p className="text-sm font-medium text-muted-foreground">
+                        <Tx en={brand.roleTagline} fr={brand.roleTaglineFr} />
+                    </p>
+					<p className="text-base font-semibold text-foreground">
+                        <Tx en={brand.headline} fr={brand.headlineFr} />
+                    </p>
 					<p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-						{brand.subTagline}
+						<Tx en={brand.subTagline} fr={brand.subTaglineFr} />
 					</p>
 					<div className="hidden sm:flex sm:flex-wrap items-center justify-center gap-3">
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
-							{getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel)}
+                            <Tx
+                                en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
+                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr, "FR")}
+                            />
 						</Badge>
 						<Button asChild>
-							<Link href="/lab">Explore my work</Link>
+							<Link href="/lab">
+                                <Tx en="Explore my work" fr="Explorer mon travail" />
+                            </Link>
 						</Button>
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
-							{brand.jobAvailabilityLabel}: Open to interviews
+                            <Tx
+                                en={`${brand.jobAvailabilityLabel}: Open to interviews`}
+                                fr={`${brand.jobAvailabilityLabelFr} : Ouvert aux entretiens`}
+                            />
 						</Badge>
 					</div>
                     <div className="sm:hidden flex flex-wrap items-center justify-center gap-3">
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
-							{getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel)}
+                            <Tx
+                                en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
+                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr, "FR")}
+                            />
 						</Badge>
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
-							{brand.jobAvailabilityLabel}: Open to interviews
+                            <Tx
+                                en={`${brand.jobAvailabilityLabel}: Open to interviews`}
+                                fr={`${brand.jobAvailabilityLabelFr} : Ouvert aux entretiens`}
+                            />
 						</Badge>
 						<Button asChild>
-							<Link href="/lab">Explore my work</Link>
+							<Link href="/lab">
+                                <Tx en="Explore my work" fr="Explorer mon travail" />
+                            </Link>
 						</Button>
 					</div>
 				</div>

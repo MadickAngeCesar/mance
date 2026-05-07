@@ -1,0 +1,64 @@
+
+> madick@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+- Environments: .env
+
+✓ Starting...
+✓ Ready in 1640ms
+○ Compiling / ...
+⨯ Error [PrismaClientKnownRequestError]:
+Invalid `{imported module ./lib/prisma.ts}["prisma"].teamMember.findMany()` invocation in
+/app/.next/dev/server/chunks/ssr/[root-of-the-server]__6d09868d._.js:1505:162
+
+  1502 ;
+  1503 ;
+  1504 async function TeamSection() {
+→ 1505     const teamMembers = await {imported module ./lib/prisma.ts}["prisma"].teamMember.findMany(
+
+    at <unknown> (components/home/team.tsx:8:47)
+    at async TeamSection (components/home/team.tsx:8:23)
+   6 |
+   7 | export async function TeamSection() {
+>  8 |   const teamMembers = await prisma.teamMember.findMany({
+     |                                               ^
+   9 |     orderBy: { displayOrder: "asc" },
+  10 |   });
+  11 | {
+  code: 'ECONNREFUSED',
+  meta: [Object],
+  clientVersion: '7.5.0',
+  digest: '834400953'
+}
+ GET / 500 in 7.5s (compile: 4.7s, render: 2.8s)
+⨯ Error [PrismaClientKnownRequestError]:
+Invalid `{imported module ./lib/prisma.ts}["prisma"].teamMember.findMany()` invocation in
+/app/.next/dev/server/chunks/ssr/[root-of-the-server]__6d09868d._.js:1505:162
+
+  1502 ;
+  1503 ;
+  1504 async function TeamSection() {
+→ 1505     const teamMembers = await {imported module ./lib/prisma.ts}["prisma"].teamMember.findMany(
+
+    at <unknown> (components/home/team.tsx:8:47)
+    at async TeamSection (components/home/team.tsx:8:23)
+   6 |
+   7 | export async function TeamSection() {
+>  8 |   const teamMembers = await prisma.teamMember.findMany({
+     |                                               ^
+   9 |     orderBy: { displayOrder: "asc" },
+  10 |   });
+  11 | {
+  code: 'ECONNREFUSED',
+  meta: [Object],
+  clientVersion: '7.5.0',
+  digest: '834400953'
+}
+ GET / 500 in 535ms (compile: 6ms, render: 529ms)
+✓ Compiled in 931ms
+ GET / 200 in 3.7s (compile: 975ms, render: 2.7s)
+○ Compiling /api/profile ...
+[2026-05-07T12:52:49.748Z] GET /api/profile 503 40ms

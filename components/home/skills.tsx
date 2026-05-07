@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
+import { Tx } from "@/components/i18n/tx";
 
 const categories = ["Frontend", "Backend", "DevOps", "IT Support", "Tools", "Languages"] as const;
 
@@ -14,7 +15,7 @@ const categoryMap: Record<(typeof categories)[number], string> = {
 };
 
 export async function Skills() {
-	let skills: Array<{ name: string; category: string }> = [];
+	let skills: Array<{ name: string; nameFr: string | null; category: string }> = [];
 
 	try {
 		skills = await prisma.skill.findMany({ orderBy: { displayOrder: "asc" } });
@@ -27,8 +28,15 @@ export async function Skills() {
 	return (
 		<section className="space-y-5">
 			<div>
-				<h2 className="text-2xl font-semibold tracking-tight">Technical Skills</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Resume-style skill highlights grouped by specialization.</p>
+				<h2 className="text-2xl font-semibold tracking-tight">
+                    <Tx en="Technical Skills" fr="Compétences Techniques" />
+                </h2>
+				<p className="mt-1 text-sm text-muted-foreground">
+                    <Tx
+                        en="Resume-style skill highlights grouped by specialization."
+                        fr="Points forts des compétences de style CV regroupés par spécialisation."
+                    />
+                </p>
 			</div>
 
 			<div className="space-y-4 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -42,11 +50,20 @@ export async function Skills() {
 
 					return (
 						<div key={category} className="space-y-2 rounded-xl border border-border bg-card p-4">
-							<h3 className="text-sm font-semibold tracking-wide text-primary">{category}</h3>
+							<h3 className="text-sm font-semibold tracking-wide text-primary">
+                                <Tx
+                                    en={category}
+                                    fr={
+                                        category === "IT Support" ? "Support IT" :
+                                        category === "Tools" ? "Outils" :
+                                        category === "Languages" ? "Langues" : category
+                                    }
+                                />
+                            </h3>
 							<div className="flex flex-wrap gap-2">
 								{items.map((skill) => (
 									<Badge key={skill.name} variant="secondary" className="flex text-wrap rounded-full">
-										{skill.name}
+										<Tx en={skill.name} fr={skill.nameFr || skill.name} />
 									</Badge>
 								))}
 							</div>

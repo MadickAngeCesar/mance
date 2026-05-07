@@ -24,6 +24,7 @@ const navLinks = [
 	{ label: { EN: "Home", FR: "Accueil" }, href: "/" },
 	{ label: { EN: "Services", FR: "Services" }, href: "/services" },
 	{ label: { EN: "Lab", FR: "Lab" }, href: "/lab" },
+	{ label: { EN: "Academy", FR: "Académie" }, href: "/academy" },
 	{ label: { EN: "Contact", FR: "Contact" }, href: "/#contact" },
 ];
 

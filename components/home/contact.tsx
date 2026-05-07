@@ -15,12 +15,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/client-api";
+import { useLanguage } from "@/components/i18n/language-provider";
 
 const subjects = [
-  "Web Development",
-  "IT Support",
-  "Technical Consulting",
-  "Other",
+  { EN: "Web Development", FR: "Développement Web" },
+  { EN: "IT Support", FR: "Support IT" },
+  { EN: "Technical Consulting", FR: "Conseil Technique" },
+  { EN: "Other", FR: "Autre" },
 ];
 
 const socialIcons = {
@@ -79,6 +80,7 @@ type ContactInfo = {
   email: string;
   phone: string;
   location: string;
+  locationFr: string;
   socialLinks: Array<{ platform: "GitHub" | "LinkedIn" | "WhatsApp" | "Facebook"; label: string; url: string }>;
   freelancePlatforms: Array<{ name: "Upwork" | "Freelancer" | "Fiverr"; url: string; handle?: string }>;
 };
@@ -87,6 +89,7 @@ const fallbackContact: ContactInfo = {
   email: "",
   phone: "",
   location: "",
+  locationFr: "",
   socialLinks: [],
   freelancePlatforms: [],
 };
@@ -109,6 +112,7 @@ function normalizeFreelanceName(value: string): ContactInfo["freelancePlatforms"
 }
 
 export function Contact() {
+  const { language } = useLanguage();
   const [contact, setContact] = useState<ContactInfo>(fallbackContact);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -157,6 +161,7 @@ export function Contact() {
           email: String(details.email ?? fallbackContact.email),
           phone: String(details.phone ?? fallbackContact.phone),
           location: String(details.location ?? fallbackContact.location),
+          locationFr: String(details.locationFr ?? details.location ?? fallbackContact.locationFr),
           socialLinks,
           freelancePlatforms,
         });
@@ -213,24 +218,24 @@ export function Contact() {
   return (
     <section className="space-y-5" id="contact">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Contact</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">{language === "FR" ? "Contact" : "Contact"}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Send a message or connect through your preferred platform.
+          {language === "FR" ? "Envoyez un message ou connectez-vous via votre plateforme préférée." : "Send a message or connect through your preferred platform."}
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Send a Message</CardTitle>
+            <CardTitle>{language === "FR" ? "Envoyer un Message" : "Send a Message"}</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="flex h-full flex-col justify-between gap-4" onSubmit={handleSubmit}>
-              <Input name="name" placeholder="Your name" required />
+              <Input name="name" placeholder={language === "FR" ? "Votre nom" : "Your name"} required />
               <Input
                 name="email"
                 type="email"
-                placeholder="Your email"
+                placeholder={language === "FR" ? "Votre email" : "Your email"}
                 required
               />
               <select
@@ -244,32 +249,35 @@ export function Contact() {
                   disabled
                   className="bg-background text-foreground"
                 >
-                  Select a subject
+                  {language === "FR" ? "Choisir un sujet" : "Select a subject"}
                 </option>
                 {subjects.map((subject) => (
                   <option
-                    key={subject}
-                    value={subject}
+                    key={subject.EN}
+                    value={subject.EN}
                     className="bg-background text-foreground"
                   >
-                    {subject}
+                    {language === "FR" ? subject.FR : subject.EN}
                   </option>
                 ))}
               </select>
               <Textarea
                 name="message"
-                placeholder="Tell me about your project"
+                placeholder={language === "FR" ? "Parlez-moi de votre projet" : "Tell me about your project"}
                 required
                 rows={4}
               />
               <Button type="submit" className="w-full">
-                {submitState === "submitting" ? "Sending..." : "Send message"}
+                {submitState === "submitting"
+                    ? (language === "FR" ? "Envoi en cours..." : "Sending...")
+                    : (language === "FR" ? "Envoyer le message" : "Send message")
+                }
               </Button>
               {submitState === "success" ? (
-                <p className="text-sm text-green-600">Message sent successfully.</p>
+                <p className="text-sm text-green-600">{language === "FR" ? "Message envoyé avec succès." : "Message sent successfully."}</p>
               ) : null}
               {submitState === "error" ? (
-                <p className="text-sm text-destructive">{submitError ?? "Unable to send message."}</p>
+                <p className="text-sm text-destructive">{submitError ?? (language === "FR" ? "Impossible d'envoyer le message." : "Unable to send message.")}</p>
               ) : null}
             </form>
           </CardContent>
@@ -278,29 +286,29 @@ export function Contact() {
         <div className="grid content-start gap-3 sm:grid-cols-3 xl:grid-cols-1">
           <Card>
             <CardHeader>
-              <CardTitle>Contact Details</CardTitle>
+              <CardTitle>{language === "FR" ? "Coordonnées" : "Contact Details"}</CardTitle>
             </CardHeader>
             <CardContent className="grid xl:grid-cols-3 gap-1.5 text-sm">
-              {isLoading ? <p className="text-muted-foreground">Loading contact details...</p> : null}
+              {isLoading ? <p className="text-muted-foreground">{language === "FR" ? "Chargement des coordonnées..." : "Loading contact details..."}</p> : null}
               {loadError ? <p className="text-destructive">{loadError}</p> : null}
               <p>
                 <span className="font-medium">Email:</span>{" "} <br/>
-                {contact.email || "Not configured"}
+                {contact.email || (language === "FR" ? "Non configuré" : "Not configured")}
               </p>
               <p>
-                <span className="font-medium">Phone:</span>{" "} <br/>
-                {contact.phone || "Not configured"}
+                <span className="font-medium">{language === "FR" ? "Téléphone" : "Phone"}:</span>{" "} <br/>
+                {contact.phone || (language === "FR" ? "Non configuré" : "Not configured")}
               </p>
               <p>
-                <span className="font-medium">Location:</span>{" "} <br/>
-                {contact.location || "Not configured"}
+                <span className="font-medium">{language === "FR" ? "Lieu" : "Location"}:</span>{" "} <br/>
+                {(language === "FR" ? contact.locationFr : contact.location) || (language === "FR" ? "Non configuré" : "Not configured")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Social Links</CardTitle>
+              <CardTitle>{language === "FR" ? "Réseaux Sociaux" : "Social Links"}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 sm:grid-cols-1 xl:grid-cols-2 gap-2">
               {socialLinks.map((social) => {
@@ -325,14 +333,14 @@ export function Contact() {
                 );
               })}
               {socialLinks.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No social links available.</p>
+                <p className="text-xs text-muted-foreground">{language === "FR" ? "Aucun lien social disponible." : "No social links available."}</p>
               ) : null}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Freelance Platforms</CardTitle>
+              <CardTitle>{language === "FR" ? "Plateformes Freelance" : "Freelance Platforms"}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2  xl:grid-cols-3">
               {freelancePlatforms.map((platform) => (
@@ -354,7 +362,7 @@ export function Contact() {
                 </Link>
               ))}
               {freelancePlatforms.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No freelance links available.</p>
+                <p className="text-xs text-muted-foreground">{language === "FR" ? "Aucun lien freelance disponible." : "No freelance links available."}</p>
               ) : null}
             </CardContent>
           </Card>

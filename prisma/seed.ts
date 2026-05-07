@@ -7,6 +7,7 @@ import {
   WorkKind,
   CampaignStatus,
   DeliveryStatus,
+  AcademyResourceType,
 } from "../lib/generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import {
@@ -26,6 +27,8 @@ import {
   subscriberPreviews,
   testimonials,
   workflowStages,
+  academyResources,
+  teamMembers,
 } from "../lib/placeholder-data";
 
 // Parse CLI arguments to support partial seeding
@@ -114,6 +117,8 @@ async function seedCore(options: SeedOptions) {
       prisma.contactDetails.deleteMany(),
       prisma.aboutSummary.deleteMany(),
       prisma.brandProfile.deleteMany(),
+      prisma.academyResource.deleteMany(),
+      prisma.teamMember.deleteMany(),
     ]);
   }
 
@@ -141,6 +146,7 @@ async function seedCore(options: SeedOptions) {
       email: contactDetails.email,
       phone: contactDetails.phone,
       location: contactDetails.location,
+      locationFr: contactDetails.locationFr,
       brandProfileId,
     },
   });
@@ -173,9 +179,12 @@ async function seedCore(options: SeedOptions) {
   await prisma.education.createMany({
     data: education.map((item, index) => ({
       title: item.title,
+      titleFr: item.titleFr,
       institution: item.institution,
+      institutionFr: item.institutionFr,
       period: item.period,
       location: item.location,
+      locationFr: item.locationFr,
       displayOrder: index + 1,
     })),
   });
@@ -185,9 +194,12 @@ async function seedCore(options: SeedOptions) {
   await prisma.experience.createMany({
     data: experience.map((item, index) => ({
       role: item.role,
+      roleFr: item.roleFr,
       company: item.company,
+      companyFr: item.companyFr,
       period: item.period,
       summary: item.summary,
+      summaryFr: item.summaryFr,
       displayOrder: index + 1,
     })),
   });
@@ -197,6 +209,7 @@ async function seedCore(options: SeedOptions) {
   await prisma.skill.createMany({
     data: skills.map((item) => ({
       name: item.name,
+      nameFr: item.nameFr,
       category: mapSkillCategory(item.category),
       proficiency: item.proficiency,
       iconSlug: item.iconSlug,
@@ -210,8 +223,10 @@ async function seedCore(options: SeedOptions) {
     data: mainWorkHighlights.map((item) => ({
       externalId: item.id,
       title: item.title,
+      titleFr: item.titleFr,
       kind: mapWorkKind(item.kind),
       summary: item.summary,
+      summaryFr: item.summaryFr,
       href: item.href,
       featured: item.featured,
       imageUrl: item.imageUrl,
@@ -225,9 +240,13 @@ async function seedCore(options: SeedOptions) {
     data: offerings.map((item) => ({
       externalId: item.id,
       title: item.title,
+      titleFr: item.titleFr,
       description: item.description,
+      descriptionFr: item.descriptionFr,
       features: item.features,
+      featuresFr: item.featuresFr,
       ctaText: item.ctaText,
+      ctaTextFr: item.ctaTextFr,
       ctaUrl: item.ctaUrl,
       brandProfileId,
     })),
@@ -239,8 +258,11 @@ async function seedCore(options: SeedOptions) {
     data: workflowStages.map((item) => ({
       step: item.step,
       title: item.title,
+      titleFr: item.titleFr,
       subtitle: item.subtitle,
+      subtitleFr: item.subtitleFr,
       details: item.details,
+      detailsFr: item.detailsFr,
       brandProfileId,
     })),
   });
@@ -297,22 +319,28 @@ async function seedPortfolioContent(options: SeedOptions) {
         update: {
           slug: item.slug,
           title: item.title,
+          titleFr: item.titleFr,
           description: item.description,
+          descriptionFr: item.descriptionFr,
           imageUrl: item.imageUrl,
           projectUrl: item.projectUrl,
           stack: item.stack,
           content: item.content,
+          contentFr: item.contentFr,
           publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
         },
         create: {
           externalId: item.id,
           slug: item.slug,
           title: item.title,
+          titleFr: item.titleFr,
           description: item.description,
+          descriptionFr: item.descriptionFr,
           imageUrl: item.imageUrl,
           projectUrl: item.projectUrl,
           stack: item.stack,
           content: item.content,
+          contentFr: item.contentFr,
           publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
         },
       })
@@ -327,9 +355,12 @@ async function seedPortfolioContent(options: SeedOptions) {
         where: { externalId: item.id },
         update: {
           title: item.title,
+          titleFr: item.titleFr,
           slug: item.slug,
           summary: item.summary,
+          summaryFr: item.summaryFr,
           content: item.content,
+          contentFr: item.contentFr,
           stack: item.stack,
           coverImageUrl: item.coverImageUrl,
           screenshotUrls: item.screenshotUrls,
@@ -343,9 +374,12 @@ async function seedPortfolioContent(options: SeedOptions) {
         create: {
           externalId: item.id,
           title: item.title,
+          titleFr: item.titleFr,
           slug: item.slug,
           summary: item.summary,
+          summaryFr: item.summaryFr,
           content: item.content,
+          contentFr: item.contentFr,
           stack: item.stack,
           coverImageUrl: item.coverImageUrl,
           screenshotUrls: item.screenshotUrls,
@@ -368,10 +402,14 @@ async function seedPortfolioContent(options: SeedOptions) {
         where: { externalId: item.id },
         update: {
           title: item.title,
+          titleFr: item.titleFr,
           slug: item.slug,
           category: item.category,
+          categoryFr: item.categoryFr,
           excerpt: item.excerpt,
+          excerptFr: item.excerptFr,
           content: item.content,
+          contentFr: item.contentFr,
           coverImageUrl: item.coverImageUrl,
           tags: item.tags,
           views: item.views,
@@ -381,10 +419,14 @@ async function seedPortfolioContent(options: SeedOptions) {
         create: {
           externalId: item.id,
           title: item.title,
+          titleFr: item.titleFr,
           slug: item.slug,
           category: item.category,
+          categoryFr: item.categoryFr,
           excerpt: item.excerpt,
+          excerptFr: item.excerptFr,
           content: item.content,
+          contentFr: item.contentFr,
           coverImageUrl: item.coverImageUrl,
           tags: item.tags,
           views: item.views,
@@ -404,28 +446,93 @@ async function seedPortfolioContent(options: SeedOptions) {
         update: {
           clientName: item.clientName,
           clientRoleCompany: item.clientRoleCompany,
+          clientRoleCompanyFr: item.clientRoleCompanyFr,
           text: item.text,
+          textFr: item.textFr,
           avatarUrl: item.avatarUrl,
           rating: item.rating,
           projectReference: item.projectReference,
+          projectReferenceFr: item.projectReferenceFr,
           dateLabel: item.date,
+          dateLabelFr: item.dateFr,
           clientWorkId: createdClientWorks[index % createdClientWorks.length]?.id,
         },
         create: {
           externalId: item.id,
           clientName: item.clientName,
           clientRoleCompany: item.clientRoleCompany,
+          clientRoleCompanyFr: item.clientRoleCompanyFr,
           text: item.text,
+          textFr: item.textFr,
           avatarUrl: item.avatarUrl,
           rating: item.rating,
           projectReference: item.projectReference,
+          projectReferenceFr: item.projectReferenceFr,
           dateLabel: item.date,
+          dateLabelFr: item.dateFr,
           clientWorkId: createdClientWorks[index % createdClientWorks.length]?.id,
         },
       })
     )
   );
   console.log("✓ Testimonials created/updated");
+
+  // Create academy resources
+  await Promise.all(
+    academyResources.map((item) =>
+      prisma.academyResource.upsert({
+        where: { externalId: item.id },
+        update: {
+          title: item.title,
+          titleFr: item.titleFr,
+          description: item.description,
+          descriptionFr: item.descriptionFr,
+          content: item.content,
+          contentFr: item.contentFr,
+          type: item.type as AcademyResourceType,
+          slug: item.slug,
+          coverImageUrl: item.coverImageUrl,
+          tags: item.tags,
+          views: item.views,
+          publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
+        },
+        create: {
+          externalId: item.id,
+          title: item.title,
+          titleFr: item.titleFr,
+          description: item.description,
+          descriptionFr: item.descriptionFr,
+          content: item.content,
+          contentFr: item.contentFr,
+          type: item.type as AcademyResourceType,
+          slug: item.slug,
+          coverImageUrl: item.coverImageUrl,
+          tags: item.tags,
+          views: item.views,
+          publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
+        },
+      })
+    )
+  );
+  console.log("✓ Academy resources created/updated");
+
+  // Create team members
+  await prisma.teamMember.createMany({
+    data: teamMembers.map((item) => ({
+      name: item.name,
+      role: item.role,
+      roleFr: item.roleFr,
+      speciality: item.speciality,
+      specialityFr: item.specialityFr,
+      imageUrl: item.imageUrl,
+      linkedIn: item.linkedIn,
+      whatsApp: item.whatsApp,
+      email: item.email,
+      website: item.website,
+      displayOrder: item.displayOrder,
+    })),
+  });
+  console.log("✓ Team members created");
 }
 
 /**

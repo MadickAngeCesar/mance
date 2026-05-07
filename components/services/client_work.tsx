@@ -5,12 +5,15 @@ import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { Tx } from "@/components/i18n/tx";
 
 export async function ClientWork() {
 	let projects: Array<{
 		id: string;
 		title: string;
+		titleFr: string | null;
 		summary: string;
+		summaryFr: string | null;
 		coverImageUrl: string;
 		stack: string[];
 		slug: string;
@@ -89,7 +92,9 @@ export async function ClientWork() {
 				.map((item) => ({
 					id: item.id,
 					title: item.title,
+					titleFr: item.titleFr,
 					summary: item.description,
+					summaryFr: item.descriptionFr,
 					coverImageUrl: item.imageUrl,
 					stack: item.stack,
 					slug: item.slug as string,
@@ -103,7 +108,9 @@ export async function ClientWork() {
 	const items = projects.map((item) => ({
 		id: item.id,
 		title: item.title,
+		titleFr: item.titleFr,
 		description: item.summary,
+		descriptionFr: item.summaryFr,
 		imageUrl: item.coverImageUrl || "/images/Profile.jpg",
 		stack: item.stack,
 		projectUrl: `/lab/${item.slug}`,
@@ -112,13 +119,22 @@ export async function ClientWork() {
 	return (
 		<section className="space-y-5" id="client-work">
 			<div className="text-center">
-				<h2 className="text-2xl font-semibold tracking-tight">Selected Client Work</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Recent builds and internal platforms delivered for teams.</p>
+				<h2 className="text-2xl font-semibold tracking-tight">
+                    <Tx en="Selected Client Work" fr="Travaux Clients Sélectionnés" />
+                </h2>
+				<p className="mt-1 text-sm text-muted-foreground">
+                    <Tx
+                        en="Recent builds and internal platforms delivered for teams."
+                        fr="Réalisations récentes et plateformes internes livrées pour les équipes."
+                    />
+                </p>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
 				{items.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3">No client work linked to testimonials has been published yet.</p>
+					<p className="text-sm text-muted-foreground md:col-span-3">
+                        <Tx en="No client work linked to testimonials has been published yet." fr="Aucun travail client lié à des témoignages n'a encore été publié." />
+                    </p>
 				) : null}
 				{items.map((item) => (
 					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
@@ -132,10 +148,14 @@ export async function ClientWork() {
 							/>
 						</div>
 						<CardHeader className="space-y-2">
-							<CardTitle className="text-lg">{item.title}</CardTitle>
+							<CardTitle className="text-lg">
+                                <Tx en={item.title} fr={item.titleFr || item.title} />
+                            </CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<p className="text-sm leading-6 text-muted-foreground">{item.description}</p>
+							<p className="text-sm leading-6 text-muted-foreground">
+                                <Tx en={item.description} fr={item.descriptionFr || item.description} />
+                            </p>
 							<div className="flex flex-wrap gap-1.5">
 								{item.stack.map((tech) => (
 									<Badge key={`${item.id}-${tech}`} variant="outline" className="rounded-full text-[11px]">
@@ -148,7 +168,7 @@ export async function ClientWork() {
 									href={item.projectUrl}
 									className="inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
 								>
-									View project <ArrowUpRight className="size-3.5" />
+									<Tx en="View project" fr="Voir le projet" /> <ArrowUpRight className="size-3.5" />
 								</Link>
 							) : null}
 						</CardContent>

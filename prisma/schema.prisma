@@ -66,6 +66,13 @@ enum DeliveryStatus {
   BOUNCED
 }
 
+enum AcademyResourceType {
+  ARTICLE
+  GUIDE
+  BOOK
+  COURSE
+}
+
 model BrandProfile {
   id                        String              @id @default(cuid())
   currentName               String
@@ -74,10 +81,15 @@ model BrandProfile {
   previousDomain            String
   ownerName                 String
   roleTagline               String
+  roleTaglineFr             String?
   headline                  String
+  headlineFr                String?
   subTagline                String
+  subTaglineFr              String?
   freelanceAvailabilityLabel String
+  freelanceAvailabilityLabelFr String?
   jobAvailabilityLabel      String
+  jobAvailabilityLabelFr    String?
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
@@ -91,9 +103,11 @@ model BrandProfile {
 model AboutSummary {
   id                    String      @id @default(cuid())
   biography             String
+  biographyFr           String?
   cvDownloadUrl         String
   linkedinResumeSource  String
   interests             String[]
+  interestsFr           String[]
   brandProfileId        String      @unique
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
@@ -104,9 +118,12 @@ model AboutSummary {
 model Education {
   id          String   @id @default(cuid())
   title       String
+  titleFr     String?
   institution String
+  institutionFr String?
   period      String
   location    String?
+  locationFr  String?
   displayOrder Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -115,9 +132,12 @@ model Education {
 model Experience {
   id          String   @id @default(cuid())
   role        String
+  roleFr      String?
   company     String
+  companyFr   String?
   period      String
   summary     String
+  summaryFr   String?
   displayOrder Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -126,6 +146,7 @@ model Experience {
 model Skill {
   id          String       @id @default(cuid())
   name        String
+  nameFr      String?
   category    SkillCategory
   proficiency Int
   iconSlug    String
@@ -139,6 +160,7 @@ model ContactDetails {
   email         String
   phone         String
   location      String
+  locationFr    String?
   brandProfileId String            @unique
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
@@ -178,8 +200,10 @@ model MainWorkHighlight {
   id             String      @id @default(cuid())
   externalId     String      @unique
   title          String
+  titleFr        String?
   kind           WorkKind
   summary        String
+  summaryFr      String?
   href           String
   featured       Boolean     @default(false)
   imageUrl       String
@@ -194,9 +218,13 @@ model Offering {
   id             String      @id @default(cuid())
   externalId     String      @unique
   title          String
+  titleFr        String?
   description    String
+  descriptionFr  String?
   features       String[]
+  featuresFr     String[]
   ctaText        String
+  ctaTextFr      String?
   ctaUrl         String
   brandProfileId String
   createdAt      DateTime    @default(now())
@@ -209,8 +237,11 @@ model WorkflowStage {
   id             String      @id @default(cuid())
   step           Int         @unique
   title          String
+  titleFr        String?
   subtitle       String
+  subtitleFr     String?
   details        String
+  detailsFr      String?
   brandProfileId String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -223,11 +254,14 @@ model ClientWork {
   externalId   String   @unique
   slug         String?  @unique
   title        String
+  titleFr      String?
   description  String
+  descriptionFr String?
   imageUrl     String
   projectUrl   String?
   stack        String[]
   content      String?
+  contentFr    String?
   publishedAt  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -240,11 +274,15 @@ model Testimonial {
   externalId        String    @unique
   clientName        String
   clientRoleCompany String
+  clientRoleCompanyFr String?
   text              String
+  textFr            String?
   avatarUrl         String?
   rating            Int
   projectReference  String
+  projectReferenceFr String?
   dateLabel         String
+  dateLabelFr       String?
   clientWorkId      String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -253,22 +291,28 @@ model Testimonial {
 }
 
 model BookingCta {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  ctaText     String
-  ctaUrl      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  titleFr       String?
+  description   String
+  descriptionFr String?
+  ctaText       String
+  ctaTextFr     String?
+  ctaUrl        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model LabProject {
   id             String   @id @default(cuid())
   externalId     String   @unique
   title          String
+  titleFr        String?
   slug           String   @unique
   summary        String
+  summaryFr      String?
   content        String
+  contentFr      String?
   stack          String[]
   coverImageUrl  String
   screenshotUrls String[]
@@ -286,15 +330,55 @@ model LabArticle {
   id            String   @id @default(cuid())
   externalId    String   @unique
   title         String
+  titleFr       String?
   slug          String   @unique
   category      String
+  categoryFr    String?
   excerpt       String
+  excerptFr     String?
   content       String
+  contentFr     String?
   coverImageUrl String
   tags          String[]
   views         Int      @default(0)
   featured      Boolean  @default(false)
   publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AcademyResource {
+  id            String              @id @default(cuid())
+  externalId    String              @unique
+  title         String
+  titleFr       String?
+  description   String
+  descriptionFr String?
+  content       String
+  contentFr     String?
+  type          AcademyResourceType
+  slug          String              @unique
+  coverImageUrl String
+  tags          String[]
+  views         Int                 @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+model TeamMember {
+  id            String   @id @default(cuid())
+  name          String
+  role          String
+  roleFr        String?
+  speciality    String
+  specialityFr  String?
+  imageUrl      String
+  linkedIn      String?
+  whatsApp      String?
+  email         String?
+  website       String?
+  displayOrder  Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

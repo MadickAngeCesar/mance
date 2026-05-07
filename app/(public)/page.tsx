@@ -5,6 +5,7 @@ import { Contact } from "@/components/home/contact";
 import { Hero } from "@/components/home/hero";
 import { MainWork } from "@/components/home/main_work";
 import { Skills } from "@/components/home/skills";
+import { TeamSection } from "@/components/home/team";
 
 export const metadata: Metadata = {
   title: "Home | MAC TECH",
@@ -19,6 +20,7 @@ export default function Home() {
       <About />
       <MainWork />
       <Skills />
+      <TeamSection />
       <Contact />
     </main>
   );

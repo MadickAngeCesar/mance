@@ -294,7 +294,7 @@ export const offerings: Offering[] = [
 		ctaTextFr: "Planifier une transformation numérique",
 		ctaUrl: "/services#booking",
 	},
-	{
+    {
 		id: "technical-writing",
 		title: "Technical Writing",
 		titleFr: "Rédaction Technique",

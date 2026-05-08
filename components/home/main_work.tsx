@@ -140,7 +140,7 @@ export async function MainWork() {
 				{items.map((item, index) => (
 					<Card
 						key={item.id}
-						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 ${index >= 3 ? "hidden lg:flex" : "flex flex-col"}`}
+						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 ${index >= 3 ? "hidden lg:flex flex-col" : "flex flex-col"}`}
 					>
 						<div className="relative h-40 w-full border-b border-border/60 bg-muted/40">
 							<Image

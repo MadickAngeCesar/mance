@@ -23,9 +23,9 @@ function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 	nextDate.setDate(now.getDate() + nextBusinessDay);
 
     if (language === "EN") {
-        return `${label}: Available ${dayNames[nextDate.getDay()]}`;
+        return `${label}: Available ${dayNames[nextBusinessDay % 7]}`;
     } else {
-        return `${label} : Disponible ${dayNames[nextDate.getDay()]}`;
+        return `${label} : Disponible ${dayNames[nextBusinessDay % 7]}`;
     }
 }
 

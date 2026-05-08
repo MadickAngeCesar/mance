@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { brandProfile as fallbackBrand } from "@/lib/placeholder-data";
 
 function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 	const now = new Date();
@@ -30,20 +31,7 @@ function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 }
 
 export async function Hero() {
-	let profile: {
-		currentName: string;
-		ownerName: string;
-		roleTagline: string;
-		roleTaglineFr: string | null;
-		headline: string;
-		headlineFr: string | null;
-		subTagline: string;
-		subTaglineFr: string | null;
-		freelanceAvailabilityLabel: string;
-		freelanceAvailabilityLabelFr: string | null;
-		jobAvailabilityLabel: string;
-		jobAvailabilityLabelFr: string | null;
-	} | null = null;
+	let profile: any = null;
 
 	try {
 		profile = await prisma.brandProfile.findFirst({
@@ -69,22 +57,18 @@ export async function Hero() {
 	}
 
 	const brand = {
-		currentName: profile?.currentName ?? "MAC TECH",
-		ownerName: profile?.ownerName ?? "MAC TECH",
-		roleTagline: profile?.roleTagline ?? "Technology and digital solutions",
-		roleTaglineFr: profile?.roleTaglineFr ?? "Solutions technologiques et numériques",
-		headline: profile?.headline ?? "Building practical digital products",
-		headlineFr: profile?.headlineFr ?? "Construire des produits numériques pratiques",
-		subTagline:
-			profile?.subTagline ??
-			"We design and deliver modern web solutions for organizations and founders.",
-		subTaglineFr:
-			profile?.subTaglineFr ??
-			"Nous concevons et livrons des solutions web modernes pour les organisations et les fondateurs.",
-		freelanceAvailabilityLabel: profile?.freelanceAvailabilityLabel ?? "Freelance",
-		freelanceAvailabilityLabelFr: profile?.freelanceAvailabilityLabelFr ?? "Freelance",
-		jobAvailabilityLabel: profile?.jobAvailabilityLabel ?? "Career",
-		jobAvailabilityLabelFr: profile?.jobAvailabilityLabelFr ?? "Carrière",
+		currentName: profile?.currentName ?? fallbackBrand.currentName,
+		ownerName: profile?.ownerName ?? fallbackBrand.ownerName,
+		roleTagline: profile?.roleTagline ?? fallbackBrand.roleTagline,
+		roleTaglineFr: profile?.roleTaglineFr ?? fallbackBrand.roleTaglineFr,
+		headline: profile?.headline ?? fallbackBrand.headline,
+		headlineFr: profile?.headlineFr ?? fallbackBrand.headlineFr,
+		subTagline: profile?.subTagline ?? fallbackBrand.subTagline,
+		subTaglineFr: profile?.subTaglineFr ?? fallbackBrand.subTaglineFr,
+		freelanceAvailabilityLabel: profile?.freelanceAvailabilityLabel ?? fallbackBrand.freelanceAvailabilityLabel,
+		freelanceAvailabilityLabelFr: profile?.freelanceAvailabilityLabelFr ?? fallbackBrand.freelanceAvailabilityLabelFr,
+		jobAvailabilityLabel: profile?.jobAvailabilityLabel ?? fallbackBrand.jobAvailabilityLabel,
+		jobAvailabilityLabelFr: profile?.jobAvailabilityLabelFr ?? fallbackBrand.jobAvailabilityLabelFr,
 	};
 
 	return (
@@ -121,7 +105,7 @@ export async function Hero() {
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
                             <Tx
                                 en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
-                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr, "FR")}
+                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr || brand.freelanceAvailabilityLabel, "FR")}
                             />
 						</Badge>
 						<Button asChild>
@@ -132,7 +116,7 @@ export async function Hero() {
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
                             <Tx
                                 en={`${brand.jobAvailabilityLabel}: Open to interviews`}
-                                fr={`${brand.jobAvailabilityLabelFr} : Ouvert aux entretiens`}
+                                fr={`${brand.jobAvailabilityLabelFr || brand.jobAvailabilityLabel} : Ouvert aux entretiens`}
                             />
 						</Badge>
 					</div>
@@ -140,13 +124,13 @@ export async function Hero() {
 						<Badge variant="outline" className="rounded-full border-primary/40 text-primary">
                             <Tx
                                 en={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabel, "EN")}
-                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr, "FR")}
+                                fr={getFreelanceAvailabilityText(brand.freelanceAvailabilityLabelFr || brand.freelanceAvailabilityLabel, "FR")}
                             />
 						</Badge>
 						<Badge variant="outline" className="rounded-full border-cyan-500/50 text-cyan-700">
                             <Tx
                                 en={`${brand.jobAvailabilityLabel}: Open to interviews`}
-                                fr={`${brand.jobAvailabilityLabelFr} : Ouvert aux entretiens`}
+                                fr={`${brand.jobAvailabilityLabelFr || brand.jobAvailabilityLabel} : Ouvert aux entretiens`}
                             />
 						</Badge>
 						<Button asChild>

@@ -6,18 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { clientWork as fallbackClientWork } from "@/lib/placeholder-data";
 
 export async function ClientWork() {
-	let projects: Array<{
-		id: string;
-		title: string;
-		titleFr: string | null;
-		summary: string;
-		summaryFr: string | null;
-		coverImageUrl: string;
-		stack: string[];
-		slug: string;
-	}> = [];
+	let projects: any[] = [];
 
 	try {
 		const testimonials = await prisma.testimonial.findMany({
@@ -105,16 +97,25 @@ export async function ClientWork() {
 		projects = [];
 	}
 
-	const items = projects.map((item) => ({
-		id: item.id,
-		title: item.title,
-		titleFr: item.titleFr,
-		description: item.summary,
-		descriptionFr: item.summaryFr,
-		imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-		stack: item.stack,
-		projectUrl: `/lab/${item.slug}`,
-	}));
+	const items = projects.length > 0
+        ? projects.map((item) => ({
+            id: item.id,
+            title: item.title,
+            titleFr: item.titleFr,
+            description: item.summary,
+            descriptionFr: item.summaryFr,
+            imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+            stack: item.stack,
+            projectUrl: `/lab/${item.slug}`,
+        }))
+        : fallbackClientWork.map(item => ({
+            ...item,
+            titleFr: item.titleFr || item.title,
+            description: item.description,
+            descriptionFr: item.descriptionFr || item.description,
+            imageUrl: item.imageUrl || "/images/Profile.jpg",
+            projectUrl: item.projectUrl
+        }));
 
 	return (
 		<section className="space-y-5" id="client-work">
@@ -131,11 +132,6 @@ export async function ClientWork() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-				{items.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3">
-                        <Tx en="No client work linked to testimonials has been published yet." fr="Aucun travail client lié à des témoignages n'a encore été publié." />
-                    </p>
-				) : null}
 				{items.map((item) => (
 					<Card key={item.id} className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10">
 						<div className="relative h-44 w-full border-b border-border/60 bg-muted/40">
@@ -157,7 +153,7 @@ export async function ClientWork() {
                                 <Tx en={item.description} fr={item.descriptionFr || item.description} />
                             </p>
 							<div className="flex flex-wrap gap-1.5">
-								{item.stack.map((tech) => (
+								{item.stack.map((tech: string) => (
 									<Badge key={`${item.id}-${tech}`} variant="outline" className="rounded-full text-[11px]">
 										{tech}
 									</Badge>

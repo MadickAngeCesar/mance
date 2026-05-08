@@ -6,17 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { bookingCta as fallbackCta } from "@/lib/placeholder-data";
 
 export async function BookingCta() {
-	let bookingCta: {
-		title: string;
-		titleFr: string | null;
-		description: string;
-		descriptionFr: string | null;
-		ctaText: string;
-		ctaTextFr: string | null;
-		ctaUrl: string;
-	} | null = null;
+	let bookingCta: any = null;
 
 	try {
 		bookingCta = await prisma.bookingCta.findFirst({
@@ -28,17 +21,19 @@ export async function BookingCta() {
 		}
 	}
 
+    const ctaData = bookingCta || fallbackCta;
+
 	return (
 		<section id="booking">
 			<Card className="border-border/80 bg-muted/20">
 				<CardHeader className="text-center space-y-2">
 					<CardTitle className="text-xl sm:text-2xl">
-                        <Tx en={bookingCta?.title ?? "Book a discovery call"} fr={bookingCta?.titleFr || bookingCta?.title || "Réserver un appel de découverte"} />
+                        <Tx en={ctaData.title} fr={ctaData.titleFr || ctaData.title} />
                     </CardTitle>
 					<p className="text-sm leading-6 text-muted-foreground">
                         <Tx
-                            en={bookingCta?.description ?? "Let's discuss your goals, scope, and delivery timeline."}
-                            fr={bookingCta?.descriptionFr || bookingCta?.description || "Discutons de vos objectifs, de la portée et du calendrier de livraison."}
+                            en={ctaData.description}
+                            fr={ctaData.descriptionFr || ctaData.description}
                         />
                     </p>
 				</CardHeader>
@@ -55,8 +50,8 @@ export async function BookingCta() {
 					</div>
 					<div className="flex flex-col sm:justify-center gap-2 sm:flex-row">
 						<Button asChild>
-							<Link href={bookingCta?.ctaUrl?.startsWith("/") ? bookingCta.ctaUrl : "/#contact"}>
-                                <Tx en={bookingCta?.ctaText ?? "Start a project"} fr={bookingCta?.ctaTextFr || bookingCta?.ctaText || "Démarrer un projet"} />
+							<Link href={ctaData.ctaUrl?.startsWith("/") ? ctaData.ctaUrl : "/#contact"}>
+                                <Tx en={ctaData.ctaText} fr={ctaData.ctaTextFr || ctaData.ctaText} />
                             </Link>
 						</Button>
 						<Button asChild variant="outline">

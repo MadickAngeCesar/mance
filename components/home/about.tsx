@@ -4,36 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { aboutSummary as fallbackAbout, education as fallbackEducation, experience as fallbackExperience } from "@/lib/placeholder-data";
 
 export async function About() {
-	let profile: {
-		aboutSummary: {
-			biography: string;
-			biographyFr: string | null;
-			cvDownloadUrl: string;
-			linkedinResumeSource: string;
-			interests: string[];
-			interestsFr: string[];
-		} | null;
-	} | null = null;
-	let education: Array<{
-        title: string;
-        titleFr: string | null;
-        institution: string;
-        institutionFr: string | null;
-        period: string;
-        location: string | null;
-        locationFr: string | null;
-    }> = [];
-	let experience: Array<{
-        role: string;
-        roleFr: string | null;
-        company: string;
-        companyFr: string | null;
-        period: string;
-        summary: string;
-        summaryFr: string | null;
-    }> = [];
+	let profile: any = null;
+	let education: any[] = [];
+	let experience: any[] = [];
 
 	try {
 		[profile, education, experience] = await Promise.all([
@@ -61,13 +37,16 @@ export async function About() {
 	}
 
 	const aboutSummary = {
-		biography: profile?.aboutSummary?.biography ?? "Biography is not available yet.",
-		biographyFr: profile?.aboutSummary?.biographyFr ?? "La biographie n'est pas encore disponible.",
-		cvDownloadUrl: profile?.aboutSummary?.cvDownloadUrl ?? "/MadickAngeCesar_FullStack_Resume_EN.pdf",
-		linkedinResumeSource: profile?.aboutSummary?.linkedinResumeSource ?? "",
-		interests: profile?.aboutSummary?.interests ?? [],
-		interestsFr: profile?.aboutSummary?.interestsFr ?? [],
+		biography: profile?.aboutSummary?.biography ?? fallbackAbout.biography,
+		biographyFr: profile?.aboutSummary?.biographyFr ?? fallbackAbout.biographyFr,
+		cvDownloadUrl: profile?.aboutSummary?.cvDownloadUrl ?? fallbackAbout.cvDownloadUrl,
+		linkedinResumeSource: profile?.aboutSummary?.linkedinResumeSource ?? fallbackAbout.linkedinResumeSource,
+		interests: (profile?.aboutSummary?.interests && profile.aboutSummary.interests.length > 0) ? profile.aboutSummary.interests : fallbackAbout.interests,
+		interestsFr: (profile?.aboutSummary?.interestsFr && profile.aboutSummary.interestsFr.length > 0) ? profile.aboutSummary.interestsFr : fallbackAbout.interestsFr,
 	};
+
+    const educationData = education.length > 0 ? education : fallbackEducation;
+    const experienceData = experience.length > 0 ? experience : fallbackExperience;
 
 	return (
 		<section className="space-y-5">
@@ -105,12 +84,7 @@ export async function About() {
 						<CardTitle><Tx en="Education and Certification" fr="Éducation et Certification" /></CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{education.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">
-                                <Tx en="No education entries yet." fr="Aucune entrée d'éducation pour l'instant." />
-                            </p>
-                        ) : null}
-						{education.map((item) => (
+						{educationData.map((item) => (
 							<div key={`${item.title}-${item.institution}`} className="space-y-1">
 								<p className="font-medium">
                                     <Tx en={item.title} fr={item.titleFr || item.title} />
@@ -133,12 +107,7 @@ export async function About() {
 						<CardTitle><Tx en="Work Experience" fr="Expérience Professionnelle" /></CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{experience.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">
-                                <Tx en="No work experience entries yet." fr="Aucune expérience professionnelle pour l'instant." />
-                            </p>
-                        ) : null}
-						{experience.map((item) => (
+						{experienceData.map((item) => (
 							<div key={`${item.role}-${item.company}`} className="space-y-1">
 								<p className="font-medium">
                                     <Tx en={item.role} fr={item.roleFr || item.role} />
@@ -158,7 +127,7 @@ export async function About() {
 			<div className="flex flex-wrap items-center justify-center gap-2">
 				<Tx
                     en={
-                        aboutSummary.interests.map((interest) => (
+                        aboutSummary.interests.map((interest: string) => (
                             <Badge key={interest} variant="secondary" className="rounded-full">
                                 {interest}
                             </Badge>
@@ -166,23 +135,18 @@ export async function About() {
                     }
                     fr={
                         aboutSummary.interestsFr.length > 0
-                        ? aboutSummary.interestsFr.map((interest) => (
+                        ? aboutSummary.interestsFr.map((interest: string) => (
                             <Badge key={interest} variant="secondary" className="rounded-full">
                                 {interest}
                             </Badge>
                         ))
-                        : aboutSummary.interests.map((interest) => (
+                        : aboutSummary.interests.map((interest: string) => (
                             <Badge key={interest} variant="secondary" className="rounded-full">
                                 {interest}
                             </Badge>
                         ))
                     }
                 />
-				{(aboutSummary.interests.length === 0 && aboutSummary.interestsFr.length === 0) ? (
-                    <p className="text-sm text-muted-foreground">
-                        <Tx en="No interests configured yet." fr="Aucun intérêt configuré pour l'instant." />
-                    </p>
-                ) : null}
 			</div>
 		</section>
 	);

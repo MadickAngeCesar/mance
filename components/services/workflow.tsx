@@ -3,17 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { workflowStages as fallbackStages } from "@/lib/placeholder-data";
 
 export async function Workflow() {
-	let workflowStages: Array<{
-        step: number;
-        title: string;
-        titleFr: string | null;
-        subtitle: string;
-        subtitleFr: string | null;
-        details: string;
-        detailsFr: string | null;
-    }> = [];
+	let workflowStages: any[] = [];
 
 	try {
 		workflowStages = await prisma.workflowStage.findMany({
@@ -24,6 +17,8 @@ export async function Workflow() {
 			console.error("Workflow query failed, rendering empty state:", error);
 		}
 	}
+
+    const workflowData = workflowStages.length > 0 ? workflowStages : fallbackStages;
 
 	return (
 		<section className="space-y-5" id="workflow">
@@ -40,12 +35,7 @@ export async function Workflow() {
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-3 md:grid-cols-5">
-				{workflowStages.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-5">
-                        <Tx en="No workflow stages configured yet." fr="Aucune étape de workflow configurée pour l'instant." />
-                    </p>
-				) : null}
-				{workflowStages.map((stage) => (
+				{workflowData.map((stage) => (
 					<Card key={stage.step} className="h-full border-border/80">
 						<CardHeader className="space-y-2">
 							<Badge variant="secondary" className="w-fit rounded-full">

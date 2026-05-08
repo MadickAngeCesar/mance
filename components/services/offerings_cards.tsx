@@ -6,20 +6,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { offerings as fallbackOfferings } from "@/lib/placeholder-data";
 
 export async function OfferingsCards() {
-	let offerings: Array<{
-		id: string;
-		title: string;
-		titleFr: string | null;
-		description: string;
-		descriptionFr: string | null;
-		features: string[];
-		featuresFr: string[];
-		ctaUrl: string;
-		ctaText: string;
-		ctaTextFr: string | null;
-	}> = [];
+	let offerings: any[] = [];
 
 	try {
 		offerings = await prisma.offering.findMany({
@@ -30,6 +20,8 @@ export async function OfferingsCards() {
 			console.error("Offerings query failed, rendering empty state:", error);
 		}
 	}
+
+    const offeringsData = offerings.length > 0 ? offerings : fallbackOfferings;
 
 	return (
 		<section className="space-y-5" id="offerings">
@@ -46,12 +38,7 @@ export async function OfferingsCards() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-3">
-				{offerings.length === 0 ? (
-					<p className="text-sm text-muted-foreground sm:col-span-3">
-                        <Tx en="No offerings published yet." fr="Aucune offre publiée pour l'instant." />
-                    </p>
-				) : null}
-				{offerings.map((offering) => (
+				{offeringsData.map((offering) => (
 					<Card key={offering.id} className="h-full border-border/80">
 						<CardHeader className="space-y-2 text-center">
 							<CardTitle>
@@ -65,7 +52,7 @@ export async function OfferingsCards() {
 							<ul className="space-y-1 text-sm text-muted-foreground">
                                 <Tx
                                     en={
-                                        offering.features.map((feature) => (
+                                        offering.features.map((feature: string) => (
                                             <li key={`${offering.id}-${feature}`} className="flex items-start gap-2">
                                                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary/70" aria-hidden />
                                                 <span>{feature}</span>
@@ -73,14 +60,14 @@ export async function OfferingsCards() {
                                         ))
                                     }
                                     fr={
-                                        offering.featuresFr.length > 0
-                                        ? offering.featuresFr.map((feature) => (
+                                        (offering.featuresFr && offering.featuresFr.length > 0)
+                                        ? offering.featuresFr.map((feature: string) => (
                                             <li key={`${offering.id}-${feature}`} className="flex items-start gap-2">
                                                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary/70" aria-hidden />
                                                 <span>{feature}</span>
                                             </li>
                                         ))
-                                        : offering.features.map((feature) => (
+                                        : offering.features.map((feature: string) => (
                                             <li key={`${offering.id}-${feature}`} className="flex items-start gap-2">
                                                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary/70" aria-hidden />
                                                 <span>{feature}</span>

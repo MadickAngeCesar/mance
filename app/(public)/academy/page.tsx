@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
+import { academyResources as fallbackResources } from "@/lib/placeholder-data";
 
 export const metadata: Metadata = {
   title: "Academy | MAC TECH",
@@ -24,6 +25,8 @@ export default async function AcademyPage() {
     }
   }
 
+  const resourcesData = resources.length > 0 ? resources : fallbackResources;
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <section className="space-y-4 text-center rounded-2xl border border-border/70 bg-card/40 p-6 sm:p-8">
@@ -42,7 +45,7 @@ export default async function AcademyPage() {
       </section>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {resources.map((resource) => (
+        {resourcesData.map((resource) => (
           <Card key={resource.id} className="overflow-hidden border-border/80">
             <div className="relative aspect-video">
                <Image
@@ -68,7 +71,7 @@ export default async function AcademyPage() {
             </CardHeader>
           </Card>
         ))}
-        {resources.length === 0 && (
+        {resourcesData.length === 0 && (
            <p className="text-center text-muted-foreground col-span-full">
             <Tx en="No resources found." fr="Aucune ressource trouvée." />
            </p>

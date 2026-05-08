@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { skills as fallbackSkills } from "@/lib/placeholder-data";
 
 const categories = ["Frontend", "Backend", "DevOps", "IT Support", "Tools", "Languages"] as const;
 
@@ -15,7 +16,7 @@ const categoryMap: Record<(typeof categories)[number], string> = {
 };
 
 export async function Skills() {
-	let skills: Array<{ name: string; nameFr: string | null; category: string }> = [];
+	let skills: any[] = [];
 
 	try {
 		skills = await prisma.skill.findMany({ orderBy: { displayOrder: "asc" } });
@@ -24,6 +25,11 @@ export async function Skills() {
 			console.error("Skills section query failed, rendering fallback content:", error);
 		}
 	}
+
+    const skillsData = skills.length > 0 ? skills : fallbackSkills.map(s => ({
+        ...s,
+        category: categoryMap[s.category as keyof typeof categoryMap] || s.category.toUpperCase()
+    }));
 
 	return (
 		<section className="space-y-5">
@@ -41,7 +47,7 @@ export async function Skills() {
 
 			<div className="space-y-4 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{categories.map((category) => {
-					const items = skills
+					const items = skillsData
 						.filter((skill) => skill.category === categoryMap[category]);
 
 					if (!items.length) {

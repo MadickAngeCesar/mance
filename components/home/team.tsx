@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Tx } from "@/components/i18n/tx";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
+import { teamMembers as fallbackTeam } from "@/lib/placeholder-data";
 
 export async function TeamSection() {
   let teamMembers: any[] = [];
@@ -17,7 +18,9 @@ export async function TeamSection() {
     }
   }
 
-  if (teamMembers.length === 0) return null;
+  const teamData = teamMembers.length > 0 ? teamMembers : fallbackTeam;
+
+  if (teamData.length === 0) return null;
 
   return (
     <section className="space-y-8" id="team">
@@ -34,7 +37,7 @@ export async function TeamSection() {
       </div>
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {teamMembers.map((member) => (
+        {teamData.map((member) => (
           <div key={member.name} className="flex flex-col items-center text-center space-y-4 p-6 rounded-2xl border border-border/70 bg-card/40">
             <div className="relative size-32 overflow-hidden rounded-full border-2 border-primary/20">
               <Image

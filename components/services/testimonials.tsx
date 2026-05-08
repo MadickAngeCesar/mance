@@ -4,21 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { testimonials as fallbackTestimonials } from "@/lib/placeholder-data";
 
 export async function Testimonials() {
-	let testimonials: Array<{
-		id: string;
-		rating: number;
-		clientName: string;
-		clientRoleCompany: string;
-		clientRoleCompanyFr: string | null;
-		text: string;
-		textFr: string | null;
-		projectReference: string;
-		projectReferenceFr: string | null;
-		dateLabel: string;
-		dateLabelFr: string | null;
-	}> = [];
+	let testimonials: any[] = [];
 
 	try {
 		testimonials = await prisma.testimonial.findMany({
@@ -29,6 +18,15 @@ export async function Testimonials() {
 			console.error("Testimonials query failed, rendering empty state:", error);
 		}
 	}
+
+    const testimonialsData = testimonials.length > 0 ? testimonials : fallbackTestimonials.map(t => ({
+        ...t,
+        clientRoleCompanyFr: t.clientRoleCompanyFr || t.clientRoleCompany,
+        textFr: t.textFr || t.text,
+        projectReferenceFr: t.projectReferenceFr || t.projectReference,
+        dateLabel: t.date,
+        dateLabelFr: t.dateFr || t.date
+    }));
 
 	return (
 		<section className="space-y-5" id="testimonials">
@@ -45,12 +43,7 @@ export async function Testimonials() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-				{testimonials.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3">
-                        <Tx en="No testimonials published yet." fr="Aucun témoignage publié pour l'instant." />
-                    </p>
-				) : null}
-				{testimonials.map((item) => (
+				{testimonialsData.map((item) => (
 					<Card key={item.id} className="h-full border-border/80">
 						<CardHeader className="space-y-2">
 							<div className="flex items-center gap-1 text-amber-500" aria-label={`${item.rating} out of 5 stars`}>

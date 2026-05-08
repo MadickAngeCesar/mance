@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
+import { mainWorkHighlights as fallbackWork, labProjects as fallbackProjects, labArticles as fallbackArticles } from "@/lib/placeholder-data";
 
 type MainWorkItem = {
 	id: string;
@@ -43,28 +44,7 @@ export async function MainWork() {
 		}
 	}
 
-	let fallbackItems: [
-		Array<{
-			id: string;
-			title: string;
-			titleFr: string | null;
-			summary: string;
-			summaryFr: string | null;
-			slug: string;
-			featured: boolean;
-			coverImageUrl: string;
-		}>,
-		Array<{
-			id: string;
-			title: string;
-			titleFr: string | null;
-			excerpt: string;
-			excerptFr: string | null;
-			slug: string;
-			featured: boolean;
-			coverImageUrl: string;
-		}>
-	] = [[], []];
+	let fallbackItems: [any[], any[]] = [[], []];
 
 	if (mainWorkHighlights.length === 0) {
 		try {
@@ -87,35 +67,44 @@ export async function MainWork() {
 		}
 	}
 
-	const [fallbackProjects, fallbackArticles] = fallbackItems;
+	const [labProjects, labArticles] = fallbackItems;
 
-	const items: MainWorkItem[] =
-		mainWorkHighlights.length > 0
-			? mainWorkHighlights
-			: [
-					...fallbackProjects.map((item) => ({
-						id: item.id,
-						title: item.title,
-						titleFr: item.titleFr,
-						kind: "PROJECT",
-						summary: item.summary,
-						summaryFr: item.summaryFr,
-						href: `/lab/${item.slug}`,
-						featured: item.featured,
-						imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-					})),
-					...fallbackArticles.map((item) => ({
-						id: item.id,
-						title: item.title,
-						titleFr: item.titleFr,
-						kind: "ARTICLE",
-						summary: item.excerpt,
-						summaryFr: item.excerptFr,
-						href: `/lab/${item.slug}`,
-						featured: item.featured,
-						imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-					})),
-				].sort((a, b) => Number(b.featured) - Number(a.featured));
+	let items: MainWorkItem[] = mainWorkHighlights;
+
+    if (items.length === 0 && labProjects.length === 0 && labArticles.length === 0) {
+        // Full fallback to placeholder-data
+        items = fallbackWork.map(item => ({
+            ...item,
+            titleFr: item.titleFr || item.title,
+            summaryFr: item.summaryFr || item.summary,
+            kind: item.kind.toUpperCase()
+        }));
+    } else if (items.length === 0) {
+        items = [
+            ...labProjects.map((item) => ({
+                id: item.id,
+                title: item.title,
+                titleFr: item.titleFr,
+                kind: "PROJECT",
+                summary: item.summary,
+                summaryFr: item.summaryFr,
+                href: `/lab/${item.slug}`,
+                featured: item.featured,
+                imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+            })),
+            ...labArticles.map((item) => ({
+                id: item.id,
+                title: item.title,
+                titleFr: item.titleFr,
+                kind: "ARTICLE",
+                summary: item.excerpt,
+                summaryFr: item.excerptFr,
+                href: `/lab/${item.slug}`,
+                featured: item.featured,
+                imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+            })),
+        ].sort((a, b) => Number(b.featured) - Number(a.featured));
+    }
 
 	return (
 		<section className="space-y-5">
@@ -132,11 +121,6 @@ export async function MainWork() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
-				{items.length === 0 ? (
-					<p className="text-sm text-muted-foreground md:col-span-3">
-                        <Tx en="No featured work has been published yet." fr="Aucun travail mis en avant n'a encore été publié." />
-                    </p>
-				) : null}
 				{items.map((item, index) => (
 					<Card
 						key={item.id}

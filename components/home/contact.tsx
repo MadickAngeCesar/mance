@@ -86,10 +86,10 @@ type ContactInfo = {
 };
 
 const fallbackContact: ContactInfo = {
-  email: "",
-  phone: "",
-  location: "",
-  locationFr: "",
+  email: "hello@mance.dev",
+  phone: "+237687635233",
+  location: "Yaounde, Cameroon",
+  locationFr: "Yaoundé, Cameroun",
   socialLinks: [],
   freelancePlatforms: [],
 };

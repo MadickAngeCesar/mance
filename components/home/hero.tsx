@@ -7,6 +7,7 @@ import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
 import { brandProfile as fallbackBrand } from "@/lib/placeholder-data";
+import { ThreeBackground } from "./three-background";
 
 function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 	const now = new Date();
@@ -29,7 +30,6 @@ function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
         return `${label} : Disponible ${dayNames[nextBusinessDay % 7]}`;
     }
 }
-
 export async function Hero() {
 	let profile: any = null;
 
@@ -72,7 +72,8 @@ export async function Hero() {
 	};
 
 	return (
-		<section className="rounded-2xl border border-primary/20 bg-linear-to-br from-card via-card to-accent/30 p-6 sm:p-10">
+		<section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-linear-to-br from-card via-card to-accent/30 p-6 sm:p-10">
+			<ThreeBackground />
 			<div className="grid items-center gap-8 md:grid-cols-[130px_1fr_130px]">
 				<div className="mx-auto size-28 overflow-hidden rounded-2xl ring-2 ring-border md:size-32">
 					<Image

@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/client-api";
+import { Tx } from "@/components/i18n/tx";
 
 export function NewsLetter() {
 	const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -40,10 +41,10 @@ export function NewsLetter() {
 			<div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
 			<div className="relative grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-6">
 				<div className="space-y-2">
-					<p className="text-xs font-medium uppercase tracking-wide text-primary">Newsletter</p>
-					<h2 className="text-2xl font-semibold tracking-tight">Get New Lab Posts in Your Inbox</h2>
+					<p className="text-xs font-medium uppercase tracking-wide text-primary"><Tx en="Newsletter" fr="Newsletter" /></p>
+					<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Get New Lab Posts in Your Inbox" fr="Recevez de nouveaux articles du labo dans votre boîte de réception" /></h2>
 					<p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-						A short update when I publish a new case study, technical article, or implementation note.
+						<Tx en="A short update when I publish a new case study, technical article, or implementation note." fr="Une courte mise à jour lorsque je publie une nouvelle étude de cas, un article technique ou une note de mise en œuvre." />
 					</p>
 				</div>
 
@@ -57,10 +58,10 @@ export function NewsLetter() {
 						className="h-11"
 					/>
 					<Button type="submit" className="h-11 px-6" disabled={status === "submitting"}>
-						{status === "submitting" ? "Subscribing..." : "Subscribe"}
+						{status === "submitting" ? <Tx en="Subscribing..." fr="Inscription..." /> : <Tx en="Subscribe" fr="S'abonner" />}
 					</Button>
 					{status === "success" ? (
-						<p className="text-sm text-green-600 sm:col-span-2">You are subscribed. Thank you.</p>
+						<p className="text-sm text-green-600 sm:col-span-2"><Tx en="You are subscribed. Thank you." fr="Vous êtes inscrit. Merci." /></p>
 					) : null}
 					{status === "error" ? (
 						<p className="text-sm text-destructive sm:col-span-2">{error ?? "Unable to subscribe."}</p>

@@ -15,6 +15,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/client-api";
 import { cn } from "@/lib/utils";
+import { Tx } from "@/components/i18n/tx";
 
 type LabFilter = "all" | "projects" | "articles" | "case-studies";
 type LabSort = "recent" | "views" | "alpha";
@@ -22,7 +23,9 @@ type LabSort = "recent" | "views" | "alpha";
 type CombinedLabItem = {
 	id: string;
 	title: string;
+	titleFr?: string;
 	summary: string;
+	summaryFr?: string;
 	href: string;
 	coverImageUrl: string;
 	tags: string[];
@@ -37,7 +40,9 @@ type CombinedLabItem = {
 type ProjectItem = {
 	id: string;
 	title: string;
+	titleFr?: string;
 	summary: string;
+	summaryFr?: string;
 	slug: string;
 	coverImageUrl: string;
 	tags: string[];
@@ -49,7 +54,9 @@ type ProjectItem = {
 type ArticleItem = {
 	id: string;
 	title: string;
+	titleFr?: string;
 	excerpt: string;
+	excerptFr?: string;
 	slug: string;
 	coverImageUrl: string;
 	tags: string[];
@@ -211,7 +218,9 @@ export function LabList() {
 		const projectItems = projects.map((project) => ({
 			id: project.id,
 			title: project.title,
+			titleFr: project.titleFr,
 			summary: project.summary,
+			summaryFr: project.summaryFr,
 			href: `/lab/${project.slug}`,
 			coverImageUrl: project.coverImageUrl,
 			tags: project.tags,
@@ -226,7 +235,9 @@ export function LabList() {
 		const articleItems = articles.map((article) => ({
 			id: article.id,
 			title: article.title,
+			titleFr: article.titleFr,
 			summary: article.excerpt,
+			summaryFr: article.excerptFr,
 			href: `/lab/${article.slug}`,
 			coverImageUrl: article.coverImageUrl,
 			tags: article.tags,
@@ -294,17 +305,19 @@ export function LabList() {
 
 	return (
 		<section className="space-y-8">
-			{isLoading ? <p className="text-sm text-muted-foreground">Loading lab content...</p> : null}
+			{isLoading ? <p className="text-sm text-muted-foreground"><Tx en="Loading lab content..." fr="Chargement du contenu du laboratoire..." /></p> : null}
 			{loadError ? (
 				<p className="text-sm text-destructive">{loadError}</p>
 			) : null}
 			<div className="grid items-start gap-6 sm:grid-cols-2">
 				{featuredProject ? (
 					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Project</h3>
+						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Project" fr="Projet en vedette" /></h3>
 						<LabCard
 							title={featuredProject.title}
+							titleFr={featuredProject.titleFr}
 							summary={featuredProject.summary}
+							summaryFr={featuredProject.summaryFr}
 							href={`/lab/${featuredProject.slug}`}
 							coverImageUrl={featuredProject.coverImageUrl}
 							tags={featuredProject.tags}
@@ -319,10 +332,12 @@ export function LabList() {
 
 				{featuredArticle ? (
 					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight">Featured Article</h3>
+						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Article" fr="Article en vedette" /></h3>
 						<LabCard
 							title={featuredArticle.title}
+							titleFr={featuredArticle.titleFr}
 							summary={featuredArticle.excerpt}
+							summaryFr={featuredArticle.excerptFr}
 							href={`/lab/${featuredArticle.slug}`}
 							coverImageUrl={featuredArticle.coverImageUrl}
 							tags={featuredArticle.tags}
@@ -340,9 +355,9 @@ export function LabList() {
 
 			<div className="space-y-5">
 				<div className="text-center">
-					<h2 className="text-2xl font-semibold tracking-tight">Browse Projects and Articles</h2>
+					<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Browse Projects and Articles" fr="Parcourir les projets et articles" /></h2>
 					<p className="mt-1 text-sm text-muted-foreground">
-						Use search, filters, and sorting to navigate case studies, projects, and technical writing.
+						<Tx en="Use search, filters, and sorting to navigate case studies, projects, and technical writing." fr="Utilisez la recherche, les filtres et le tri pour parcourir les études de cas, les projets et la rédaction technique." />
 					</p>
 				</div>
 
@@ -393,7 +408,9 @@ export function LabList() {
 								<LabCard
 									key={item.id}
 									title={item.title}
+									titleFr={item.titleFr}
 									summary={item.summary}
+									summaryFr={item.summaryFr}
 									href={item.href}
 									coverImageUrl={item.coverImageUrl}
 									tags={item.tags}
@@ -407,7 +424,7 @@ export function LabList() {
 				</div>
 
 				{!isLoading && paginatedItems.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No items match your current search and filters.</p>
+					<p className="text-sm text-muted-foreground"><Tx en="No items match your current search and filters." fr="Aucun élément ne correspond à votre recherche et à vos filtres actuels." /></p>
 				) : null}
 
 				<Pagination className={isLoading ? "opacity-50 pointer-events-none" : ""}>

@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Facebook,
   Github,
+  Loader2,
   Linkedin,
   MessageCircle,
 } from "lucide-react";
@@ -126,7 +127,7 @@ export function Contact() {
       setIsLoading(true);
       setLoadError(null);
       try {
-        const response = await apiRequest<any>("/api/profile");
+        const response = await apiRequest<{ data?: { contactDetails?: { email?: string; phone?: string; location?: string; locationFr?: string; socialLinks?: { platform?: string; label?: string; url?: string }[]; freelancePlatforms?: { name?: string; handle?: string; url?: string }[] } } }>("/api/profile");
         const details = response.data?.contactDetails;
 
         if (!details || !isMounted) {
@@ -134,7 +135,7 @@ export function Contact() {
         }
 
         const socialLinks = (details.socialLinks ?? [])
-          .map((entry: any) => {
+          .map((entry: { platform?: string; label?: string; url?: string; name?: string; handle?: string }) => {
             const platform = normalizePlatform(String(entry.platform ?? ""));
             if (!platform) return null;
             return {
@@ -146,7 +147,7 @@ export function Contact() {
           .filter(Boolean) as ContactInfo["socialLinks"];
 
         const freelancePlatforms = (details.freelancePlatforms ?? [])
-          .map((entry: any) => {
+          .map((entry: { platform?: string; label?: string; url?: string; name?: string; handle?: string }) => {
             const name = normalizeFreelanceName(String(entry.name ?? ""));
             if (!name) return null;
             return {
@@ -231,15 +232,17 @@ export function Contact() {
           </CardHeader>
           <CardContent>
             <form className="flex h-full flex-col justify-between gap-4" onSubmit={handleSubmit}>
-              <Input name="name" placeholder={language === "FR" ? "Votre nom" : "Your name"} required />
+              <Input name="name" aria-label={language === "FR" ? "Votre nom" : "Your name"} placeholder={language === "FR" ? "Votre nom" : "Your name"} required />
               <Input
                 name="email"
+                aria-label={language === "FR" ? "Votre email" : "Your email"}
                 type="email"
                 placeholder={language === "FR" ? "Votre email" : "Your email"}
                 required
               />
               <select
                 name="subject"
+                aria-label={language === "FR" ? "Sujet" : "Subject"}
                 className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 defaultValue=""
                 required
@@ -263,11 +266,13 @@ export function Contact() {
               </select>
               <Textarea
                 name="message"
+                aria-label={language === "FR" ? "Message" : "Message"}
                 placeholder={language === "FR" ? "Parlez-moi de votre projet" : "Tell me about your project"}
                 required
                 rows={4}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={submitState === "submitting"}>
+                {submitState === "submitting" && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {submitState === "submitting"
                     ? (language === "FR" ? "Envoi en cours..." : "Sending...")
                     : (language === "FR" ? "Envoyer le message" : "Send message")

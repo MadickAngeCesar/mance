@@ -121,6 +121,7 @@ async function handleDelete(
   request: NextRequest,
   context: RouteContext
 ) {
+  await requireRole(request, "admin");
   const id = await resolveId(context);
 
   await prisma.labArticle.delete({

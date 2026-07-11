@@ -10,7 +10,7 @@ param(
 
 # Colors for output
 $Success = "Green"
-$Error = "Red"
+$ErrColor = "Red"
 $Warning = "Yellow"
 $Info = "Cyan"
 
@@ -30,7 +30,7 @@ function Invoke-APITest {
         [hashtable]$Headers = @{}
     )
     
-    Write-Host "`n→ Test: $Name" -ForegroundColor $Info
+    Write-Host "`n-> Test: $Name" -ForegroundColor $Info
     Write-Host "  $Method $Endpoint" -ForegroundColor Gray
     
     try {
@@ -50,7 +50,7 @@ function Invoke-APITest {
         $response = Invoke-RestMethod @params
         
         if ($response.ok -or $true) {
-            Write-Host "✓ PASS - Status: Success" -ForegroundColor $Success
+            Write-Host "[PASS] - Status: Success" -ForegroundColor $Success
             $script:passed++
             return $response
         }
@@ -58,27 +58,27 @@ function Invoke-APITest {
     catch {
         $statusCode = $_.Exception.Response.StatusCode.Value__
         if ($statusCode -eq $ExpectedStatus) {
-            Write-Host "✓ PASS - Expected error status: $statusCode" -ForegroundColor $Success
+            Write-Host "[PASS] - Expected error status: $statusCode" -ForegroundColor $Success
             $script:passed++
         } else {
-            Write-Host "✗ FAIL - Status: $statusCode (Expected $ExpectedStatus)" -ForegroundColor $Error
-            Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor $Error
+            Write-Host "[FAIL] - Status: $statusCode (Expected $ExpectedStatus)" -ForegroundColor $ErrColor
+            Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor $ErrColor
             $script:failed++
         }
         return $null
     }
 }
 
-Write-Host "`n╔════════════════════════════════════════════════════════════════╗" -ForegroundColor $Info
-Write-Host "║         MANCE API TEST SUITE                                   ║" -ForegroundColor $Info
-Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor $Info
+Write-Host "`n+----------------------------------------------------------------+" -ForegroundColor $Info
+Write-Host "|         MANCE API TEST SUITE                                   |" -ForegroundColor $Info
+Write-Host "+----------------------------------------------------------------+" -ForegroundColor $Info
 Write-Host "Base URL: $BaseURL`n" -ForegroundColor Gray
 
 # ============================================================================
 # PHASE 1: Authentication Tests
 # ============================================================================
 
-Write-Host "`n╔═ PHASE 1: AUTHENTICATION (3 tests) ═════════════════════╗" -ForegroundColor $Info
+Write-Host "`n+- PHASE 1: AUTHENTICATION (3 tests) ----------------------------+" -ForegroundColor $Info
 
 # Test 1.1: Sign In
 $signInResponse = Invoke-APITest `
@@ -96,7 +96,7 @@ if ($signInResponse) {
     $token = $signInResponse.data.token.accessToken
     Write-Host "  Token: $($token.Substring(0,20))..." -ForegroundColor Gray
 } else {
-    Write-Host "  ⚠ Could not get token - subsequent admin tests will be skipped" -ForegroundColor $Warning
+    Write-Host "  [WARN] Could not get token - subsequent admin tests will be skipped" -ForegroundColor $Warning
 }
 
 # Test 1.2: Sign In with Invalid Password
@@ -123,16 +123,16 @@ $rememberResponse = Invoke-APITest `
     -ExpectedStatus 200
 
 if ($rememberResponse -and $rememberResponse.data.token.refreshToken) {
-    Write-Host "  ✓ Refresh token included" -ForegroundColor $Success
+    Write-Host "  [PASS] Refresh token included" -ForegroundColor $Success
 } else {
-    Write-Host "  ℹ Refresh token not in response" -ForegroundColor $Warning
+    Write-Host "  [INFO] Refresh token not in response" -ForegroundColor $Warning
 }
 
 # ============================================================================
 # PHASE 2: Public Content Access Tests
 # ============================================================================
 
-Write-Host "`n╔═ PHASE 2: PUBLIC CONTENT ACCESS (4 tests) ═══════════════╗" -ForegroundColor $Info
+Write-Host "`n+- PHASE 2: PUBLIC CONTENT ACCESS (4 tests) --------------------+" -ForegroundColor $Info
 
 # Test 2.1: List Published Articles
 $articlesResponse = Invoke-APITest `
@@ -143,7 +143,7 @@ $articlesResponse = Invoke-APITest `
 
 if ($articlesResponse) {
     $count = ($articlesResponse.data | Measure-Object).Count
-    Write-Host "  ✓ Found $count articles" -ForegroundColor $Success
+    Write-Host "  [PASS] Found $count articles" -ForegroundColor $Success
 }
 
 # Test 2.2: Subscribe to Newsletter
@@ -159,7 +159,7 @@ $subscriberResponse = Invoke-APITest `
 
 if ($subscriberResponse) {
     $subscriberId = $subscriberResponse.data.id
-    Write-Host "  ✓ Subscriber created: $subscriberId" -ForegroundColor $Success
+    Write-Host "  [PASS] Subscriber created: $subscriberId" -ForegroundColor $Success
 }
 
 # Test 2.3: Submit Contact Form
@@ -178,7 +178,7 @@ $contactResponse = Invoke-APITest `
 
 if ($contactResponse) {
     $messageId = $contactResponse.data.id
-    Write-Host "  ✓ Message created: $messageId" -ForegroundColor $Success
+    Write-Host "  [PASS] Message created: $messageId" -ForegroundColor $Success
 }
 
 # Test 2.4: List Services
@@ -193,7 +193,7 @@ $servicesResponse = Invoke-APITest `
 # ============================================================================
 
 if ($token) {
-    Write-Host "`n╔═ PHASE 3: ADMIN OPERATIONS (6 tests) ════════════════════╗" -ForegroundColor $Info
+    Write-Host "`n+- PHASE 3: ADMIN OPERATIONS (6 tests) -----------------------+" -ForegroundColor $Info
     
     $adminHeaders = @{
         "Authorization" = "Bearer $token"
@@ -218,7 +218,7 @@ if ($token) {
     if ($messagesResponse.data -and $messagesResponse.data.Count -gt 0) {
         $firstMessage = $messagesResponse.data[0]
         $testMessageId = $firstMessage.id
-        Write-Host "  ✓ Found $($messagesResponse.data.Count) messages" -ForegroundColor $Success
+        Write-Host "  [PASS] Found $($messagesResponse.data.Count) messages" -ForegroundColor $Success
     }
     
     # Test 3.3: Mark Message as Read
@@ -256,7 +256,7 @@ if ($token) {
         -ExpectedStatus 200
     
 } else {
-    Write-Host "`n⚠ Skipping Phase 3 (Admin tests) - No valid token" -ForegroundColor $Warning
+    Write-Host "`n[WARN] Skipping Phase 3 (Admin tests) - No valid token" -ForegroundColor $Warning
     $skipped += 6
 }
 
@@ -264,20 +264,20 @@ if ($token) {
 # PHASE 4: Fixed Public Content Access Tests
 # ============================================================================
 
-Write-Host "`n╔═ PHASE 4: FIXED - PUBLIC ARTICLE/PROJECT ACCESS ════════────╗" -ForegroundColor $Info
+Write-Host "`n+- PHASE 4: FIXED - PUBLIC ARTICLE/PROJECT ACCESS --------------+" -ForegroundColor $Info
 
 # Test 4.1: View first available published article by slug
-$testArticleSlug = "test-article"  # Adjust based on your database
+$testArticleSlug = "reliable-form-pipelines-nextjs"
 $articleViewResponse = Invoke-APITest `
-    -Name "View Published Article by Slug (Public - FIXED)" `
+    -Name "View Published Article by Slug (Public)" `
     -Method "GET" `
     -Endpoint "/api/blogs/$testArticleSlug" `
     -ExpectedStatus 200
 
 # Test 4.2: View first available published project by slug
-$testProjectSlug = "test-project"  # Adjust based on your database
+$testProjectSlug = "portfolio-platform"
 $projectViewResponse = Invoke-APITest `
-    -Name "View Published Project by Slug (Public - FIXED)" `
+    -Name "View Published Project by Slug (Public)" `
     -Method "GET" `
     -Endpoint "/api/projects/$testProjectSlug" `
     -ExpectedStatus 200
@@ -286,7 +286,7 @@ $projectViewResponse = Invoke-APITest `
 # PHASE 5: Error Handling Tests
 # ============================================================================
 
-Write-Host "`n╔═ PHASE 5: ERROR HANDLING (3 tests) ══════════════════════╗" -ForegroundColor $Info
+Write-Host "`n+- PHASE 5: ERROR HANDLING (3 tests) --------------------------+" -ForegroundColor $Info
 
 # Test 5.1: Not Found
 Invoke-APITest `
@@ -316,30 +316,30 @@ Invoke-APITest `
 # Summary
 # ============================================================================
 
-Write-Host "`n╔════════════════════════════════════════════════════════════════╗" -ForegroundColor $Info
-Write-Host "║                      TEST SUMMARY                              ║" -ForegroundColor $Info
-Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor $Info
+Write-Host "`n+----------------------------------------------------------------+" -ForegroundColor $Info
+Write-Host "|                      TEST SUMMARY                              |" -ForegroundColor $Info
+Write-Host "+----------------------------------------------------------------+" -ForegroundColor $Info
 
 $total = $passed + $failed + $skipped
 $percentage = if ($total -gt 0) { [math]::Round(($passed / ($passed + $failed)) * 100, 1) } else { 0 }
 
 Write-Host "`nResults:" -ForegroundColor $Info
-Write-Host "  ✓ Passed:  $passed" -ForegroundColor $Success
-Write-Host "  ✗ Failed:  $failed" -ForegroundColor $(if ($failed -eq 0) { $Success } else { $Error })
-Write-Host "  ⊘ Skipped: $skipped" -ForegroundColor $Warning
-Write-Host "  ───────────────" -ForegroundColor Gray
+Write-Host "  [PASS] Passed:  $passed" -ForegroundColor $Success
+Write-Host "  [FAIL] Failed:  $failed" -ForegroundColor $(if ($failed -eq 0) { $Success } else { $ErrColor })
+Write-Host "  [SKIP] Skipped: $skipped" -ForegroundColor $Warning
+Write-Host "  ----------------" -ForegroundColor Gray
 Write-Host "  Total:   $total" -ForegroundColor $Info
 Write-Host "`nSuccess Rate: $percentage%" -ForegroundColor $(if ($failed -eq 0) { $Success } else { $Warning })
 
 if ($failed -eq 0) {
-    Write-Host "`n✓ All tests passed! API implementation is working correctly." -ForegroundColor $Success
+    Write-Host "`n[PASS] All tests passed! API implementation is working correctly." -ForegroundColor $Success
 } else {
-    Write-Host "`n✗ Some tests failed. Review the errors above." -ForegroundColor $Error
+    Write-Host "`n[FAIL] Some tests failed. Review the errors above." -ForegroundColor $ErrColor
 }
 
 Write-Host "`nKey Fixes Verified:" -ForegroundColor $Info
-Write-Host "  ✓ Public articles now accessible without authentication" -ForegroundColor $Success
-Write-Host "  ✓ Public projects now accessible without authentication" -ForegroundColor $Success
-Write-Host "  ✓ Message PATCH endpoint now validates input" -ForegroundColor $Success
+Write-Host "  [PASS] Public articles now accessible without authentication" -ForegroundColor $Success
+Write-Host "  [PASS] Public projects now accessible without authentication" -ForegroundColor $Success
+Write-Host "  [PASS] Message PATCH endpoint now validates input" -ForegroundColor $Success
 
 exit $(if ($failed -gt 0) { 1 } else { 0 })

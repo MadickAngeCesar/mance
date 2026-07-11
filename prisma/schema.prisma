@@ -259,6 +259,8 @@ model ClientWork {
   descriptionFr String?
   imageUrl     String
   projectUrl   String?
+  clientName   String?
+  clientNameFr String?
   stack        String[]
   content      String?
   contentFr    String?

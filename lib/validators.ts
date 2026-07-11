@@ -209,6 +209,8 @@ export const ClientWorkCreateSchema = z.object({
   description: z.string().max(1000),
   imageUrl: urlOrRootPath,
   projectUrl: optionalUrlOrRootPath,
+  clientName: z.string().optional().nullable(),
+  clientNameFr: z.string().optional().nullable(),
   stack: z.array(z.string()).default([]),
   content: z.string().optional(),
   publishedAt: optionalDate,

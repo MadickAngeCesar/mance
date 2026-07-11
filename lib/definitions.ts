@@ -117,6 +117,8 @@ export type ClientWorkItem = {
 	descriptionFr?: string | null;
 	imageUrl: string;
 	projectUrl?: string;
+	clientName?: string | null;
+	clientNameFr?: string | null;
 	stack: string[];
 	publishedAt?: string;
 	slug?: string | null;

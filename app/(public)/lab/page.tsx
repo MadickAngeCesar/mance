@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { LabList } from "@/components/lab/lab_list";
-import { NewsLetter } from "@/components/lab/news_letter";
+// import { NewsLetter } from "@/components/lab/news_letter";
 import { GsapSection } from "@/components/home/gsap-section";
 import { Tx } from "@/components/i18n/tx";
 import { CtaSection } from "@/components/lab/cta_section";
@@ -40,9 +40,9 @@ export default function LabPage() {
         <CtaSection />
       </GsapSection>
 
-      <GsapSection animation="slide-left" delay={0.1}>
+      {/*<GsapSection animation="slide-left" delay={0.1}>
         <NewsLetter />
-      </GsapSection>
+      </GsapSection>*/}
     </main>
   );
 }

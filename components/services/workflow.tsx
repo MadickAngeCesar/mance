@@ -18,41 +18,55 @@ export async function Workflow() {
 		}
 	}
 
-    const workflowData = workflowStages.length > 0 ? workflowStages : fallbackStages;
+	const workflowData = workflowStages.length > 0 ? workflowStages : fallbackStages;
 
 	return (
-		<section className="space-y-5" id="workflow">
-			<div className="text-center">
-				<h2 className="text-2xl font-semibold tracking-tight">
-                    <Tx en="Delivery Workflow" fr="Flux de Travail de Livraison" />
-                </h2>
-				<p className="mt-1 text-sm text-muted-foreground">
-                    <Tx
-                        en="A practical 5-step process from discovery to long-term support."
-                        fr="Un processus pratique en 5 étapes, de la découverte au support à long terme."
-                    />
-                </p>
+		<section className="space-y-6" id="workflow">
+			<div className="text-center space-y-2">
+				<h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+					<Tx en="Delivery Workflow" fr="Flux de Travail de Livraison" />
+				</h2>
+				<p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
+					<Tx
+						en="A structured, collaborative process designed to keep your project aligned, secure, and delivered on time."
+						fr="Un processus structuré et collaboratif conçu pour maintenir votre projet aligné, sécurisé et livré à temps."
+					/>
+				</p>
 			</div>
 
-			<div className="grid gap-3 sm:grid-cols-3 md:grid-cols-5">
-				{workflowData.map((stage) => (
-					<Card key={stage.step} className="h-full border-border/80">
-						<CardHeader className="space-y-2">
-							<Badge variant="secondary" className="w-fit rounded-full">
-								<Tx en={`Step ${stage.step}`} fr={`Étape ${stage.step}`} />
+			<div className="relative grid gap-4 sm:grid-cols-3 md:grid-cols-5">
+				{workflowData.map((stage, idx) => (
+					<Card
+						key={stage.step}
+						className="group relative h-full flex flex-col justify-between overflow-hidden border border-border/80 bg-card/20 backdrop-blur-md transition-all duration-350 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
+					>
+						{/* Background Giant Step Indicator */}
+						<div className="absolute top-2 right-4 -z-10 select-none font-mono text-5xl font-extrabold opacity-[0.05] transition-all group-hover:opacity-10 group-hover:scale-105 text-primary">
+							0{stage.step}
+						</div>
+
+						<CardHeader className="space-y-2 pb-2">
+							<Badge className="w-fit rounded-full px-2.5 py-0.5 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary uppercase tracking-wide">
+								<Tx en={`Step 0${stage.step}`} fr={`Étape 0${stage.step}`} />
 							</Badge>
-							<CardTitle>
-                                <Tx en={stage.title} fr={stage.titleFr || stage.title} />
-                            </CardTitle>
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                <Tx en={stage.subtitle} fr={stage.subtitleFr || stage.subtitle} />
-                            </p>
+							<CardTitle className="text-base font-bold tracking-tight text-foreground">
+								<Tx en={stage.title} fr={stage.titleFr || stage.title} />
+							</CardTitle>
+							<p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+								<Tx en={stage.subtitle} fr={stage.subtitleFr || stage.subtitle} />
+							</p>
 						</CardHeader>
-						<CardContent>
-							<p className="text-sm leading-6 text-muted-foreground">
-                                <Tx en={stage.details} fr={stage.detailsFr || stage.details} />
-                            </p>
+						
+						<CardContent className="pt-2 flex-1">
+							<p className="text-xs leading-relaxed text-muted-foreground">
+								<Tx en={stage.details} fr={stage.detailsFr || stage.details} />
+							</p>
 						</CardContent>
+
+						{/* Bottom connecting bar line */}
+						{idx < workflowData.length - 1 && (
+							<div className="absolute right-0 top-1/2 hidden h-px w-6 bg-border/50 md:block translate-x-full z-20" />
+						)}
 					</Card>
 				))}
 			</div>

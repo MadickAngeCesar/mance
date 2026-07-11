@@ -8,11 +8,13 @@ import { aboutSummary as fallbackAbout, education as fallbackEducation, experien
 
 export async function About() {
 	let profile: any = null;
+	const counts = { lab: 0, client: 0, academy: 0 };
 	let education: any[] = [];
 	let experience: any[] = [];
 
 	try {
-		[profile, education, experience] = await Promise.all([
+		const results = await Promise.all([
+
 			prisma.brandProfile.findFirst({
 				select: {
 					aboutSummary: {
@@ -29,7 +31,16 @@ export async function About() {
 			}),
 			prisma.education.findMany({ orderBy: { displayOrder: "asc" } }),
 			prisma.experience.findMany({ orderBy: { displayOrder: "asc" } }),
+			prisma.labProject.count(),
+			prisma.clientWork.count(),
+			prisma.academyResource.count(),
 		]);
+		profile = results[0];
+		education = results[1];
+		experience = results[2];
+		counts.lab = results[3] as number;
+		counts.client = results[4] as number;
+		counts.academy = results[5] as number;
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
 			console.error("About section query failed, rendering fallback content:", error);
@@ -147,6 +158,11 @@ export async function About() {
                         ))
                     }
                 />
+			</div>
+		<div className="flex justify-center gap-4 pt-4 border-t border-border/40 mt-6">
+				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.lab} <Tx en="Lab Cases" fr="Cas Labo" /></Badge>
+				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.client} <Tx en="Client Works" fr="Travaux Clients" /></Badge>
+				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.academy} <Tx en="Educational Content" fr="Contenu Éducatif" /></Badge>
 			</div>
 		</section>
 	);

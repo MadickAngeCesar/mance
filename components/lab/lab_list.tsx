@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -227,6 +228,9 @@ export function LabList() {
 			kind: "project" as const,
 			featured: project.featured,
 			views: project.views,
+
+
+
 			meta: "Project",
 			publishedAt: project.publishedAt,
 			isCaseStudy: project.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
@@ -244,6 +248,7 @@ export function LabList() {
 			kind: "article" as const,
 			featured: Boolean(article.featured),
 			views: article.views,
+
 			meta: article.category,
 			publishedAt: article.publishedAt,
 			isCaseStudy:
@@ -323,6 +328,9 @@ export function LabList() {
 							tags={featuredProject.tags}
 							kind="project"
 							featured={featuredProject.featured}
+
+
+
 							views={featuredProject.views}
 							meta="Project"
 							publishedAt={featuredProject.publishedAt}
@@ -343,6 +351,7 @@ export function LabList() {
 							tags={featuredArticle.tags}
 							kind="article"
 							featured={true}
+
 							views={featuredArticle.views}
 							meta={featuredArticle.category}
 							publishedAt={featuredArticle.publishedAt}
@@ -365,7 +374,7 @@ export function LabList() {
 					<Input
 						value={query}
 						onChange={(event) => onQueryChange(event.target.value)}
-						placeholder="Search title, tags, or excerpt"
+						placeholder="Vector search (Title, Tags, Summary)"
 					/>
 					<select
 						value={sortBy}
@@ -416,6 +425,9 @@ export function LabList() {
 									tags={item.tags}
 									kind={item.kind}
 									featured={item.featured}
+
+
+
 									views={item.views}
 									meta={item.meta}
 									publishedAt={item.publishedAt}

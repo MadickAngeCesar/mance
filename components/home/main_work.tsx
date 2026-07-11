@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { mainWorkHighlights as fallbackWork, labProjects as fallbackProjects, labArticles as fallbackArticles } from "@/lib/placeholder-data";
+import { labProjects as fallbackProjects, academyResources as fallbackResources, clientWork as fallbackClientWork } from "@/lib/placeholder-data";
 
 type MainWorkItem = {
 	id: string;
@@ -21,90 +21,97 @@ type MainWorkItem = {
 };
 
 export async function MainWork() {
-	let mainWorkHighlights: MainWorkItem[] = [];
+	const items: MainWorkItem[] = [];
 
 	try {
-		const rows = await prisma.mainWorkHighlight.findMany({
-			orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-		});
-		mainWorkHighlights = rows.map((item) => ({
-			id: item.id,
-			title: item.title,
-			titleFr: item.titleFr,
-			kind: item.kind,
-			summary: item.summary,
-			summaryFr: item.summaryFr,
-			href: item.href,
-			featured: item.featured,
-			imageUrl: item.imageUrl,
-		}));
+        const [labResult, clientWorkResult, academyResult] = await Promise.all([
+            prisma.labProject.findMany({ take: 1, orderBy: { createdAt: 'desc' } }),
+            prisma.clientWork.findMany({ take: 1, orderBy: { createdAt: 'desc' } }),
+            prisma.academyResource.findMany({ take: 1, orderBy: { createdAt: 'desc' } })
+        ]);
+
+        if (labResult[0]) {
+            items.push({
+                id: labResult[0].id,
+                title: labResult[0].title,
+                titleFr: labResult[0].titleFr,
+                kind: "PROJECT",
+                summary: labResult[0].summary,
+                summaryFr: labResult[0].summaryFr,
+                href: `/lab/${labResult[0].slug}`,
+                featured: labResult[0].featured,
+                imageUrl: labResult[0].coverImageUrl || "/images/Profile.jpg",
+            });
+        } else if (fallbackProjects[0]) {
+            items.push({
+                id: fallbackProjects[0].id,
+                title: fallbackProjects[0].title,
+                titleFr: fallbackProjects[0].titleFr || null,
+                kind: "PROJECT",
+                summary: fallbackProjects[0].summary,
+                summaryFr: fallbackProjects[0].summaryFr || null,
+                href: `/lab/${fallbackProjects[0].slug}`,
+                featured: fallbackProjects[0].featured,
+                imageUrl: fallbackProjects[0].coverImageUrl || "/images/Profile.jpg",
+            });
+        }
+
+        if (clientWorkResult[0]) {
+            items.push({
+                id: clientWorkResult[0].id,
+                title: clientWorkResult[0].title,
+                titleFr: clientWorkResult[0].titleFr,
+                kind: "CLIENT_WORK",
+                summary: clientWorkResult[0].description,
+                summaryFr: clientWorkResult[0].descriptionFr,
+                href: `/services`,
+                featured: false,
+                imageUrl: clientWorkResult[0].imageUrl || "/images/Profile.jpg",
+            });
+        } else if (fallbackClientWork[0]) {
+            items.push({
+                id: fallbackClientWork[0].id,
+                title: fallbackClientWork[0].title,
+                titleFr: fallbackClientWork[0].titleFr || null,
+                kind: "CLIENT_WORK",
+                summary: fallbackClientWork[0].description,
+                summaryFr: fallbackClientWork[0].descriptionFr || null,
+                href: `/services`,
+                featured: false,
+                imageUrl: fallbackClientWork[0].imageUrl || "/images/Profile.jpg",
+            });
+        }
+
+        if (academyResult[0]) {
+            items.push({
+                id: academyResult[0].id,
+                title: academyResult[0].title,
+                titleFr: academyResult[0].titleFr,
+                kind: "ARTICLE",
+                summary: academyResult[0].description,
+                summaryFr: academyResult[0].descriptionFr,
+                href: `/academy`,
+                featured: false,
+                imageUrl: academyResult[0].coverImageUrl || "/images/Profile.jpg",
+            });
+        } else if (fallbackResources[0]) {
+            items.push({
+                id: fallbackResources[0].id,
+                title: fallbackResources[0].title,
+                titleFr: fallbackResources[0].titleFr || null,
+                kind: "ARTICLE",
+                summary: fallbackResources[0].description,
+                summaryFr: fallbackResources[0].descriptionFr || null,
+                href: `/academy`,
+                featured: false,
+                imageUrl: fallbackResources[0].coverImageUrl || "/images/Profile.jpg",
+            });
+        }
 	} catch (error) {
 		if (!isDatabaseUnavailableError(error)) {
-			console.error("Main work highlights query failed, using fallback content:", error);
+			console.error("Main work query failed:", error);
 		}
 	}
-
-	let fallbackItems: [any[], any[]] = [[], []];
-
-	if (mainWorkHighlights.length === 0) {
-		try {
-			fallbackItems = await Promise.all([
-				prisma.labProject.findMany({
-					where: { publishedAt: { not: null } },
-					orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-					take: 3,
-				}),
-				prisma.labArticle.findMany({
-					where: { publishedAt: { not: null } },
-					orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-					take: 3,
-				}),
-			]);
-		} catch (error) {
-			if (!isDatabaseUnavailableError(error)) {
-				console.error("Main work fallback query failed:", error);
-			}
-		}
-	}
-
-	const [labProjects, labArticles] = fallbackItems;
-
-	let items: MainWorkItem[] = mainWorkHighlights;
-
-    if (items.length === 0 && labProjects.length === 0 && labArticles.length === 0) {
-        // Full fallback to placeholder-data
-        items = fallbackWork.map(item => ({
-            ...item,
-            titleFr: item.titleFr || item.title,
-            summaryFr: item.summaryFr || item.summary,
-            kind: item.kind.toUpperCase()
-        }));
-    } else if (items.length === 0) {
-        items = [
-            ...labProjects.map((item) => ({
-                id: item.id,
-                title: item.title,
-                titleFr: item.titleFr,
-                kind: "PROJECT",
-                summary: item.summary,
-                summaryFr: item.summaryFr,
-                href: `/lab/${item.slug}`,
-                featured: item.featured,
-                imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-            })),
-            ...labArticles.map((item) => ({
-                id: item.id,
-                title: item.title,
-                titleFr: item.titleFr,
-                kind: "ARTICLE",
-                summary: item.excerpt,
-                summaryFr: item.excerptFr,
-                href: `/lab/${item.slug}`,
-                featured: item.featured,
-                imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-            })),
-        ].sort((a, b) => Number(b.featured) - Number(a.featured));
-    }
 
 	return (
 		<section className="space-y-5">
@@ -124,7 +131,7 @@ export async function MainWork() {
 				{items.map((item, index) => (
 					<Card
 						key={item.id}
-						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 ${index >= 3 ? "hidden lg:flex flex-col" : "flex flex-col"}`}
+						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 flex flex-col`}
 					>
 						<div className="relative h-40 w-full border-b border-border/60 bg-muted/40">
 							<Image
@@ -132,7 +139,7 @@ export async function MainWork() {
 								alt={`${item.title} preview image`}
 								fill
 								sizes="(min-width: 768px) 33vw, 100vw"
-								className="object-contain p-4 transition-transform duration-300 group-hover/card:scale-[1.02]"
+								className="object-cover p-0 transition-transform duration-300 group-hover/card:scale-[1.02]"
 							/>
 						</div>
 						<CardHeader>
@@ -157,8 +164,8 @@ export async function MainWork() {
                                 <Tx en={item.title} fr={item.titleFr || item.title} />
                             </CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-4">
-							<p className="text-sm leading-6 text-muted-foreground">
+						<CardContent className="space-y-4 flex-1 flex flex-col justify-end">
+							<p className="text-sm leading-6 text-muted-foreground flex-1">
                                 <Tx en={item.summary} fr={item.summaryFr || item.summary} />
                             </p>
 							<Link className="text-sm font-medium underline-offset-4 hover:underline" href={item.href}>

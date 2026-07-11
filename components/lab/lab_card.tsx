@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, HeartPulse } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,11 +17,14 @@ type LabCardProps = {
 	kind: "project" | "article";
 	featured?: boolean;
 	views: number;
+	likes?: number;
 	meta: string;
 	publishedAt?: string;
+	problem?: string;
+	solution?: string;
 };
 
-export function LabCard({ title, titleFr, summary, summaryFr, href, coverImageUrl, tags, kind, featured = false, views, meta, publishedAt }: LabCardProps) {
+export function LabCard({ title, titleFr, summary, summaryFr, href, coverImageUrl, tags, kind, featured = false, views, likes = 0, meta, publishedAt, problem, solution }: LabCardProps) {
 	const normalizedCoverImageUrl = (() => {
 		if (!coverImageUrl) {
 			return "/images/Profile.jpg";
@@ -78,15 +81,32 @@ export function LabCard({ title, titleFr, summary, summaryFr, href, coverImageUr
 				<CardTitle className="text-lg">
 					<Tx en={title} fr={titleFr || title} />
 				</CardTitle>
-				<p className="text-xs text-muted-foreground">
-					{meta}
-					{formattedDate ? ` · ${formattedDate}` : ""} · {views.toLocaleString()} <Tx en="views" fr="vues" />
+				<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+					<span>{meta}</span>
+					{formattedDate ? <span>· {formattedDate}</span> : null}
+					<span>· {views.toLocaleString()} <Tx en="views" fr="vues" /></span>
+					<span className="flex items-center gap-1 ml-auto"><HeartPulse className="size-3 text-red-500" /> {likes.toLocaleString()}</span>
 				</p>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<p className="text-sm leading-6 text-muted-foreground">
-					<Tx en={summary} fr={summaryFr || summary} />
-				</p>
+				{(problem || solution) ? (
+					<div className="mt-2 text-sm leading-6 text-muted-foreground space-y-2">
+						{problem && (
+							<div>
+								<strong className="text-foreground"><Tx en="Problem:" fr="Problème :" /></strong> <Tx en={problem} fr={problem} />
+							</div>
+						)}
+						{solution && (
+							<div>
+								<strong className="text-foreground"><Tx en="Solution:" fr="Solution :" /></strong> <Tx en={solution} fr={solution} />
+							</div>
+						)}
+					</div>
+				) : (
+					<p className="text-sm leading-6 text-muted-foreground">
+						<Tx en={summary} fr={summaryFr || summary} />
+					</p>
+				)}
 				<div className="flex flex-wrap gap-1.5">
 					{tags.map((tag) => (
 						<Badge key={`${title}-${tag}`} variant="secondary" className="rounded-full text-[11px]">

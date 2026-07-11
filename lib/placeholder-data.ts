@@ -450,13 +450,13 @@ export const testimonials: TestimonialItem[] = [
 ];
 
 export const bookingCta: BookingCta = {
-	title: "Ready to Build with MAC TECH?",
-	titleFr: "Prêt à construire avec MAC TECH ?",
+	title: "Hire me for your next project",
+	titleFr: "Embauchez-moi pour votre prochain projet",
 	description:
 		"Book a call and we will map your idea into a practical delivery plan with timeline and milestones.",
 	descriptionFr: "Réservez un appel et nous transformerons votre idée en un plan de livraison pratique avec un calendrier et des jalons.",
-	ctaText: "Book a discovery call",
-	ctaTextFr: "Réserver un appel de découverte",
+	ctaText: "Hire me",
+	ctaTextFr: "Embauchez-moi",
 	ctaUrl: "/services#booking",
 };
 

@@ -25,7 +25,7 @@ async function handleGet(request: NextRequest) {
   });
 
   // Build filter
-  let where: any = {};
+  const where: any = {};
   if (query.isRead === "read") {
     where.isRead = true;
   } else if (query.isRead === "unread") {

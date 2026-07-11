@@ -46,6 +46,7 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -54,13 +55,30 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 		setError(null);
 
 		try {
+			let imageUrl = String(formData.get("imageUrl") ?? "") || "/images/Profile.jpg";
+			const imageFile = formData.get("imageFile");
+			if (imageFile instanceof File && imageFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", imageFile);
+				uploadFormData.append("kind", "collaborator");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				imageUrl = uploadResponse.data?.url ?? imageUrl;
+				setUploadedImageUrl(imageUrl);
+			}
+
 			const payload = {
 				name: String(formData.get("name") ?? ""),
 				role: String(formData.get("role") ?? ""),
 				roleFr: String(formData.get("roleFr") ?? "") || null,
 				speciality: String(formData.get("speciality") ?? ""),
 				specialityFr: String(formData.get("specialityFr") ?? "") || null,
-				imageUrl: String(formData.get("imageUrl") ?? "") || "/images/Profile.jpg",
+				imageUrl,
 				linkedIn: String(formData.get("linkedIn") ?? "") || null,
 				whatsApp: String(formData.get("whatsApp") ?? "") || null,
 				email: String(formData.get("email") ?? "") || null,
@@ -105,6 +123,7 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 				labelSpec: "Spécialité (EN)",
 				labelSpecFr: "Spécialité (FR)",
 				labelImage: "URL Image de profil",
+				labelImageUpload: "Téléverser l'image de profil",
 				labelLinkedIn: "Lien LinkedIn",
 				labelWhatsApp: "Lien WhatsApp / Numéro",
 				labelEmail: "Email",
@@ -123,6 +142,7 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 			labelSpec: "Speciality (EN)",
 			labelSpecFr: "Speciality (FR)",
 			labelImage: "Profile Image URL",
+			labelImageUpload: "Upload Profile Image",
 			labelLinkedIn: "LinkedIn Link",
 			labelWhatsApp: "WhatsApp Link / Number",
 			labelEmail: "Email Address",
@@ -135,7 +155,10 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 	return (
 		<Dialog open={open} onOpenChange={(newOpen) => {
 			setOpen(newOpen);
-			if (!newOpen) setError(null);
+			if (!newOpen) {
+				setError(null);
+				setUploadedImageUrl(null);
+			}
 		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
@@ -177,6 +200,9 @@ export function CollaboratorForm({ mode = "create", initialMember, trigger }: Co
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="collab-image" className="text-xs font-medium text-muted-foreground">{copy.labelImage}</label>
 								<Input id="collab-image" name="imageUrl" required placeholder="https://mance.dev/images/collabs/john.jpg" defaultValue={initialMember?.imageUrl} />
+								<label htmlFor="collab-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">{copy.labelImageUpload}</label>
+								<Input id="collab-image-file" name="imageFile" type="file" accept="image/*" />
+								{uploadedImageUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedImageUrl}</p> : null}
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="collab-linkedin" className="text-xs font-medium text-muted-foreground">{copy.labelLinkedIn}</label>

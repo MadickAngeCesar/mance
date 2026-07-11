@@ -47,6 +47,7 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -56,6 +57,23 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 		setError(null);
 
 		try {
+			let coverImageUrl = String(formData.get("coverImageUrl") ?? "");
+			const coverImageFile = formData.get("coverImageFile");
+			if (coverImageFile instanceof File && coverImageFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", coverImageFile);
+				uploadFormData.append("kind", "academy-cover");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				coverImageUrl = uploadResponse.data?.url ?? coverImageUrl;
+				setUploadedCoverUrl(coverImageUrl);
+			}
+
 			const payload = {
 				title: String(formData.get("title") ?? ""),
 				titleFr: String(formData.get("titleFr") ?? "") || null,
@@ -65,7 +83,7 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 				content: String(formData.get("content") ?? ""),
 				contentFr: String(formData.get("contentFr") ?? "") || null,
 				type: String(formData.get("type") ?? "ARTICLE"),
-				coverImageUrl: String(formData.get("coverImageUrl") ?? ""),
+				coverImageUrl,
 				tags: String(formData.get("tags") ?? "")
 					.split(",")
 					.map((t) => t.trim())
@@ -110,6 +128,7 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 				labelContent: "Contenu (Markdown)",
 				labelContentFr: "Contenu FR (Markdown)",
 				labelImage: "URL Image de couverture",
+				labelImageUpload: "Téléverser l'image de couverture",
 				labelTags: "Tags (séparés par virgule)",
 				saveDraft: "Brouillon", publish: isEditMode ? "Mettre à jour" : "Publier",
 			};
@@ -124,6 +143,7 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 			labelContent: "Content (Markdown)",
 			labelContentFr: "Content FR (Markdown)",
 			labelImage: "Cover Image URL",
+			labelImageUpload: "Upload Cover Image",
 			labelTags: "Tags (comma-separated)",
 			saveDraft: "Save Draft", publish: isEditMode ? "Update" : "Publish",
 		};
@@ -132,7 +152,10 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 	return (
 		<Dialog open={open} onOpenChange={(newOpen) => {
 			setOpen(newOpen);
-			if (!newOpen) setError(null);
+			if (!newOpen) {
+				setError(null);
+				setUploadedCoverUrl(null);
+			}
 		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
@@ -196,6 +219,9 @@ export function AcademyResourceForm({ mode = "create", initialResource, trigger 
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="ar-image" className="text-xs font-medium text-muted-foreground">{copy.labelImage}</label>
 								<Input id="ar-image" name="coverImageUrl" required placeholder="https://mance.dev/images/academy/typescript-guide.jpg" defaultValue={initialResource?.coverImageUrl} />
+								<label htmlFor="ar-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">{copy.labelImageUpload}</label>
+								<Input id="ar-image-file" name="coverImageFile" type="file" accept="image/*" />
+								{uploadedCoverUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedCoverUrl}</p> : null}
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="ar-tags" className="text-xs font-medium text-muted-foreground">{copy.labelTags}</label>

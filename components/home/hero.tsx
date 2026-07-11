@@ -16,18 +16,17 @@ function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
         ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         : ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
-	if (day >= 1 && day <= 5) {
+	if (day >= 1 && day <= 6) {
 		return language === "EN" ? `${label}: Available today` : `${label} : Disponible aujourd'hui`;
 	}
 
-	const nextBusinessDay = 8 - day;
-	const nextDate = new Date(now);
-	nextDate.setDate(now.getDate() + nextBusinessDay);
+	// Sunday -> Available Monday
+	const nextDayIndex = 1;
 
     if (language === "EN") {
-        return `${label}: Available ${dayNames[nextBusinessDay % 7]}`;
+        return `${label}: Available ${dayNames[nextDayIndex]}`;
     } else {
-        return `${label} : Disponible ${dayNames[nextBusinessDay % 7]}`;
+        return `${label} : Disponible ${dayNames[nextDayIndex]}`;
     }
 }
 export async function Hero() {

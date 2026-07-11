@@ -47,6 +47,7 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 	const [open, setOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -57,6 +58,23 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 		try {
 			const intent = formData.get("intent") === "draft" ? null : new Date().toISOString();
 
+			let imageUrl = String(formData.get("imageUrl") ?? "");
+			const imageFile = formData.get("imageFile");
+			if (imageFile instanceof File && imageFile.size > 0) {
+				const uploadFormData = new FormData();
+				uploadFormData.append("file", imageFile);
+				uploadFormData.append("kind", "client-work");
+
+				const uploadResponse = await apiRequest<{ url: string }>("/api/uploads", {
+					method: "POST",
+					auth: true,
+					body: uploadFormData,
+				});
+
+				imageUrl = uploadResponse.data?.url ?? imageUrl;
+				setUploadedImageUrl(imageUrl);
+			}
+
 			const payload = {
 				title: String(formData.get("title") ?? ""),
 				titleFr: String(formData.get("titleFr") ?? "") || null,
@@ -65,7 +83,7 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 				descriptionFr: String(formData.get("descriptionFr") ?? "") || null,
 				clientName: String(formData.get("clientName") ?? "") || null,
 				clientNameFr: String(formData.get("clientNameFr") ?? "") || null,
-				imageUrl: String(formData.get("imageUrl") ?? ""),
+				imageUrl,
 				projectUrl: String(formData.get("projectUrl") ?? "") || null,
 				stack: String(formData.get("stack") ?? "")
 					.split(",")
@@ -111,6 +129,7 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 				labelClient: "Nom du client (EN)",
 				labelClientFr: "Nom du client (FR)",
 				labelImage: "URL de l'image",
+				labelImageUpload: "Téléverser l'image de couverture",
 				labelProject: "URL du projet",
 				labelStack: "Stack technique",
 				saveDraft: "Enregistrer brouillon",
@@ -129,6 +148,7 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 			labelClient: "Client Name (EN)",
 			labelClientFr: "Client Name (FR)",
 			labelImage: "Cover Image URL",
+			labelImageUpload: "Upload Cover Image",
 			labelProject: "Project URL",
 			labelStack: "Tech Stack",
 			saveDraft: "Save Draft",
@@ -139,7 +159,10 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 	return (
 		<Dialog open={open} onOpenChange={(newOpen) => {
 			setOpen(newOpen);
-			if (!newOpen) setError(null);
+			if (!newOpen) {
+				setError(null);
+				setUploadedImageUrl(null);
+			}
 		}}>
 			<DialogTrigger asChild>
 				{trigger ?? (
@@ -189,6 +212,9 @@ export function ClientWorkForm({ mode = "create", initialWork, trigger }: Client
 							<div className="space-y-1.5">
 								<label htmlFor="cw-image" className="text-xs font-medium text-muted-foreground">{copy.labelImage}</label>
 								<Input id="cw-image" name="imageUrl" required placeholder="https://mance.dev/images/work/project.jpg" defaultValue={initialWork?.imageUrl} />
+								<label htmlFor="cw-image-file" className="mt-2 block text-xs font-medium text-muted-foreground">{copy.labelImageUpload}</label>
+								<Input id="cw-image-file" name="imageFile" type="file" accept="image/*" />
+								{uploadedImageUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedImageUrl}</p> : null}
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="cw-project-url" className="text-xs font-medium text-muted-foreground">{copy.labelProject}</label>

@@ -127,7 +127,7 @@ export function Contact() {
       setIsLoading(true);
       setLoadError(null);
       try {
-        const response = await apiRequest<{ data?: { contactDetails?: { email?: string; phone?: string; location?: string; locationFr?: string; socialLinks?: { platform?: string; label?: string; url?: string }[]; freelancePlatforms?: { name?: string; handle?: string; url?: string }[] } } }>("/api/profile");
+        const response = await apiRequest<{ contactDetails?: { email?: string; phone?: string; location?: string; locationFr?: string; socialLinks?: { platform?: string; label?: string; url?: string }[]; freelancePlatforms?: { name?: string; handle?: string; url?: string }[] } }>("/api/profile");
         const details = response.data?.contactDetails;
 
         if (!details || !isMounted) {

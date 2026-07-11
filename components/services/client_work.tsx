@@ -90,6 +90,7 @@ export async function ClientWork() {
 					coverImageUrl: item.imageUrl,
 					stack: item.stack,
 					slug: item.slug as string,
+
 				}));
 		}
 	} catch (error) {
@@ -113,6 +114,7 @@ export async function ClientWork() {
             titleFr: item.titleFr || item.title,
             description: item.description,
             descriptionFr: item.descriptionFr || item.description,
+
             imageUrl: item.imageUrl || "/images/Profile.jpg",
             projectUrl: item.projectUrl
         }));
@@ -145,6 +147,8 @@ export async function ClientWork() {
 						</div>
 						<CardHeader className="space-y-2">
 							<CardTitle className="text-lg">
+
+
                                 <Tx en={item.title} fr={item.titleFr || item.title} />
                             </CardTitle>
 						</CardHeader>

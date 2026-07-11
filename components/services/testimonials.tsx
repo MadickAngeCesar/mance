@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Star } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +56,10 @@ export async function Testimonials() {
 									/>
 								))}
 							</div>
-							<CardTitle className="text-base">{item.clientName}</CardTitle>
+							<div className="flex items-center gap-3">
+								<Image src={item.avatarUrl || "/images/Profile.jpg"} alt={item.clientName} width={32} height={32} className="rounded-full" />
+								<CardTitle className="text-base">{item.clientName}</CardTitle>
+							</div>
 							<p className="text-xs text-muted-foreground">
                                 <Tx en={item.clientRoleCompany} fr={item.clientRoleCompanyFr || item.clientRoleCompany} />
                             </p>

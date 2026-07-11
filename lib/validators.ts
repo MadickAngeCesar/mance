@@ -136,6 +136,7 @@ export const LabArticleCreateSchema = z.object({
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
   publishedAt: optionalDate,
+  likes: z.number().int().nonnegative().default(0),
 });
 
 export type LabArticleCreate = z.infer<typeof LabArticleCreateSchema>;
@@ -173,6 +174,11 @@ export const LabProjectCreateSchema = z.object({
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
   publishedAt: optionalDate,
+  likes: z.number().int().nonnegative().default(0),
+  problem: z.string().optional().nullable(),
+  problemFr: z.string().optional().nullable(),
+  solution: z.string().optional().nullable(),
+  solutionFr: z.string().optional().nullable(),
 });
 
 export type LabProjectCreate = z.infer<typeof LabProjectCreateSchema>;

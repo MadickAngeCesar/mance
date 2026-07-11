@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -17,9 +16,10 @@ import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/client-api";
 import { cn } from "@/lib/utils";
 import { Tx } from "@/components/i18n/tx";
+import { calculateVectorMatchScore } from "@/lib/vector-search";
 
 type LabFilter = "all" | "projects" | "articles" | "case-studies";
-type LabSort = "recent" | "views" | "alpha";
+type LabSort = "recent" | "views" | "alpha" | "likes";
 
 type CombinedLabItem = {
 	id: string;
@@ -33,6 +33,12 @@ type CombinedLabItem = {
 	kind: "project" | "article";
 	featured: boolean;
 	views: number;
+	likes: number;
+	problem?: string | null;
+	problemFr?: string | null;
+	solution?: string | null;
+	solutionFr?: string | null;
+	matchScore?: number;
 	meta: string;
 	publishedAt?: string;
 	isCaseStudy: boolean;
@@ -49,6 +55,11 @@ type ProjectItem = {
 	tags: string[];
 	featured: boolean;
 	views: number;
+	likes: number;
+	problem?: string | null;
+	problemFr?: string | null;
+	solution?: string | null;
+	solutionFr?: string | null;
 	publishedAt?: string;
 };
 
@@ -63,6 +74,7 @@ type ArticleItem = {
 	tags: string[];
 	featured: boolean;
 	views: number;
+	likes: number;
 	category: string;
 	publishedAt?: string;
 };
@@ -228,9 +240,11 @@ export function LabList() {
 			kind: "project" as const,
 			featured: project.featured,
 			views: project.views,
-
-
-
+			likes: project.likes ?? 0,
+			problem: project.problem,
+			problemFr: project.problemFr,
+			solution: project.solution,
+			solutionFr: project.solutionFr,
 			meta: "Project",
 			publishedAt: project.publishedAt,
 			isCaseStudy: project.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
@@ -248,7 +262,7 @@ export function LabList() {
 			kind: "article" as const,
 			featured: Boolean(article.featured),
 			views: article.views,
-
+			likes: article.likes ?? 0,
 			meta: article.category,
 			publishedAt: article.publishedAt,
 			isCaseStudy:
@@ -269,14 +283,50 @@ export function LabList() {
 			return true;
 		});
 
-		const bySearch = byFilter.filter((item) => {
-			if (!normalizedQuery) return true;
-			const haystack = `${item.title} ${item.summary} ${item.tags.join(" ")} ${item.meta}`.toLowerCase();
-			return haystack.includes(normalizedQuery);
+		if (!normalizedQuery) {
+			const resetItems = byFilter.map((item) => ({ ...item, matchScore: undefined }));
+			return resetItems.sort((a, b) => {
+				if (sortBy === "views") return b.views - a.views;
+				if (sortBy === "likes") return b.likes - a.likes;
+				if (sortBy === "alpha") return a.title.localeCompare(b.title);
+
+				const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+				const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+				return bTime - aTime;
+			});
+		}
+
+		// Calculate vector similarity score
+		const scoredItems = byFilter.map((item) => {
+			const score = calculateVectorMatchScore(normalizedQuery, {
+				id: item.id,
+				title: item.title,
+				titleFr: item.titleFr,
+				summary: item.summary,
+				summaryFr: item.summaryFr,
+				problem: item.problem,
+				problemFr: item.problemFr,
+				solution: item.solution,
+				solutionFr: item.solutionFr,
+				tags: item.tags,
+				stack: item.kind === "project" ? item.tags : undefined, // stack is mapped from tags in our query search
+				meta: item.meta,
+			});
+			return { ...item, matchScore: score };
 		});
 
-		return bySearch.sort((a, b) => {
+		// Filter out 0% match scores to keep results relevant
+		const matchedItems = scoredItems.filter((item) => item.matchScore > 0);
+
+		// Sort by match score first, then fallback to user selection
+		return matchedItems.sort((a, b) => {
+			const scoreDiff = b.matchScore - a.matchScore;
+			if (Math.abs(scoreDiff) > 2) {
+				return scoreDiff;
+			}
+
 			if (sortBy === "views") return b.views - a.views;
+			if (sortBy === "likes") return b.likes - a.likes;
 			if (sortBy === "alpha") return a.title.localeCompare(b.title);
 
 			const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
@@ -314,11 +364,13 @@ export function LabList() {
 			{loadError ? (
 				<p className="text-sm text-destructive">{loadError}</p>
 			) : null}
+			
 			<div className="grid items-start gap-6 sm:grid-cols-2">
 				{featuredProject ? (
 					<div className="space-y-3">
 						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Project" fr="Projet en vedette" /></h3>
 						<LabCard
+							id={featuredProject.id}
 							title={featuredProject.title}
 							titleFr={featuredProject.titleFr}
 							summary={featuredProject.summary}
@@ -328,10 +380,12 @@ export function LabList() {
 							tags={featuredProject.tags}
 							kind="project"
 							featured={featuredProject.featured}
-
-
-
 							views={featuredProject.views}
+							likes={featuredProject.likes}
+							problem={featuredProject.problem}
+							problemFr={featuredProject.problemFr}
+							solution={featuredProject.solution}
+							solutionFr={featuredProject.solutionFr}
 							meta="Project"
 							publishedAt={featuredProject.publishedAt}
 						/>
@@ -342,6 +396,7 @@ export function LabList() {
 					<div className="space-y-3">
 						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Article" fr="Article en vedette" /></h3>
 						<LabCard
+							id={featuredArticle.id}
 							title={featuredArticle.title}
 							titleFr={featuredArticle.titleFr}
 							summary={featuredArticle.excerpt}
@@ -351,8 +406,8 @@ export function LabList() {
 							tags={featuredArticle.tags}
 							kind="article"
 							featured={true}
-
 							views={featuredArticle.views}
+							likes={featuredArticle.likes}
 							meta={featuredArticle.category}
 							publishedAt={featuredArticle.publishedAt}
 						/>
@@ -374,7 +429,7 @@ export function LabList() {
 					<Input
 						value={query}
 						onChange={(event) => onQueryChange(event.target.value)}
-						placeholder="Vector search (Title, Tags, Summary)"
+						placeholder="Vector search (e.g. Next.js dashboard / operations)"
 					/>
 					<select
 						value={sortBy}
@@ -383,6 +438,7 @@ export function LabList() {
 					>
 						<option value="recent">Sort: Recent</option>
 						<option value="views">Sort: Most viewed</option>
+						<option value="likes">Sort: Most liked</option>
 						<option value="alpha">Sort: Alphabetical</option>
 					</select>
 				</div>
@@ -416,6 +472,7 @@ export function LabList() {
 						: paginatedItems.map((item) => (
 								<LabCard
 									key={item.id}
+									id={item.id}
 									title={item.title}
 									titleFr={item.titleFr}
 									summary={item.summary}
@@ -425,10 +482,13 @@ export function LabList() {
 									tags={item.tags}
 									kind={item.kind}
 									featured={item.featured}
-
-
-
 									views={item.views}
+									likes={item.likes}
+									problem={item.problem}
+									problemFr={item.problemFr}
+									solution={item.solution}
+									solutionFr={item.solutionFr}
+									matchScore={item.matchScore}
 									meta={item.meta}
 									publishedAt={item.publishedAt}
 								/>
@@ -436,7 +496,7 @@ export function LabList() {
 				</div>
 
 				{!isLoading && paginatedItems.length === 0 ? (
-					<p className="text-sm text-muted-foreground"><Tx en="No items match your current search and filters." fr="Aucun élément ne correspond à votre recherche et à vos filtres actuels." /></p>
+					<p className="text-sm text-muted-foreground text-center py-8"><Tx en="No items match your current search and filters." fr="Aucun élément ne correspond à votre recherche et à vos filtres actuels." /></p>
 				) : null}
 
 				<Pagination className={isLoading ? "opacity-50 pointer-events-none" : ""}>

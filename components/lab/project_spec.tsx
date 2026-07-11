@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
+import { Tx } from "@/components/i18n/tx";
 import type { LabProject } from "@/lib/definitions";
 
 type ProjectSpecProps = {
@@ -103,6 +104,31 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 				</aside>
 
 				<section className="space-y-5 lg:col-span-8">
+					{(project.problem || project.solution) ? (
+						<div className="grid gap-4 sm:grid-cols-2 rounded-xl border border-border/80 bg-card/10 p-5 leading-relaxed">
+							{project.problem && (
+								<div className="space-y-1.5 border-l-2 border-rose-500/40 pl-4">
+									<h3 className="text-xs font-bold uppercase tracking-wider text-rose-400">
+										<Tx en="Problem Context" fr="Contexte du Problème" />
+									</h3>
+									<p className="text-xs leading-relaxed text-muted-foreground">
+										<Tx en={project.problem} fr={project.problem} />
+									</p>
+								</div>
+							)}
+							{project.solution && (
+								<div className="space-y-1.5 border-l-2 border-emerald-500/40 pl-4">
+									<h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+										<Tx en="Solution Delivered" fr="Solution Livrée" />
+									</h3>
+									<p className="text-xs leading-relaxed text-muted-foreground">
+										<Tx en={project.solution} fr={project.solution} />
+									</p>
+								</div>
+							)}
+						</div>
+					) : null}
+
 					<Card className="border-border/80">
 						<CardContent className="pt-4">
 							<MarkdownRenderer content={project.content} />

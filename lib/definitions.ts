@@ -165,6 +165,11 @@ export type LabProject = {
 	repoUrl?: string;
 	featured: boolean;
 	views: number;
+	likes: number;
+	problem?: string | null;
+	problemFr?: string | null;
+	solution?: string | null;
+	solutionFr?: string | null;
 	tags: string[];
 	publishedAt?: string;
 };
@@ -183,6 +188,7 @@ export type LabArticle = {
 	coverImageUrl: string;
 	tags: string[];
 	views: number;
+	likes: number;
 	featured?: boolean | null;
 	publishedAt?: string;
 };

@@ -63,7 +63,7 @@ export function AcademyNewsletter() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-14 text-center sm:px-12 sm:py-16">
+      <div className="relative z-10 flex flex-col items-center gap-5 px-4 py-8 text-center sm:px-8 sm:py-10">
         {/* Icon badge */}
         <div
           className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30"

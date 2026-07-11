@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
@@ -114,9 +116,9 @@ export async function MainWork() {
 	}
 
 	return (
-		<section className="space-y-5">
+		<section className="space-y-6">
 			<div>
-				<h2 className="text-2xl font-semibold tracking-tight">
+				<h2 className="text-2xl font-semibold tracking-tight text-foreground">
                     <Tx en="Main Work" fr="Travail Principal" />
                 </h2>
 				<p className="mt-1 text-sm text-muted-foreground">
@@ -127,50 +129,63 @@ export async function MainWork() {
                 </p>
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-3">
-				{items.map((item, index) => (
+			<div className="grid gap-6 md:grid-cols-3">
+				{items.map((item) => (
 					<Card
 						key={item.id}
-						className={`overflow-hidden border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 flex flex-col`}
+						className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card/25 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5"
 					>
-						<div className="relative h-40 w-full border-b border-border/60 bg-muted/40">
+						<div className="relative h-44 w-full overflow-hidden border-b border-border/60 bg-muted/20">
 							<Image
 								src={item.imageUrl}
 								alt={`${item.title} preview image`}
 								fill
 								sizes="(min-width: 768px) 33vw, 100vw"
-								className="object-cover p-0 transition-transform duration-300 group-hover/card:scale-[1.02]"
+								className="object-cover transition-transform duration-500 group-hover:scale-105"
 							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent opacity-60" />
 						</div>
-						<CardHeader>
+
+						<CardHeader className="space-y-2 pb-2">
 							<div className="flex items-center justify-between gap-3">
-								<Badge variant="outline" className="rounded-full capitalize">
+								<Badge variant="outline" className="rounded-full capitalize text-[10px] bg-secondary/20 border-border/60">
 									<Tx
-                                        en={item.kind.replace("_", " ").toLowerCase()}
-                                        fr={
-                                            item.kind === "PROJECT" ? "Projet" :
-                                            item.kind === "CLIENT_WORK" ? "Travail Client" :
-                                            "Article"
-                                        }
-                                    />
+										en={item.kind.replace("_", " ").toLowerCase()}
+										fr={
+											item.kind === "PROJECT" ? "Projet" :
+											item.kind === "CLIENT_WORK" ? "Travail Client" :
+											"Article"
+										}
+									/>
 								</Badge>
-								{item.featured ? (
-                                    <Badge className="rounded-full">
-                                        <Tx en="Featured" fr="Mis en avant" />
-                                    </Badge>
-                                ) : null}
+								{item.featured && (
+									<Badge className="rounded-full text-[10px] bg-primary/10 border-primary/20 text-primary uppercase">
+										<Tx en="Featured" fr="Vedette" />
+									</Badge>
+								)}
 							</div>
-							<CardTitle className="pt-2 text-lg">
-                                <Tx en={item.title} fr={item.titleFr || item.title} />
-                            </CardTitle>
+							<CardTitle className="pt-1 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+								<Tx en={item.title} fr={item.titleFr || item.title} />
+							</CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-4 flex-1 flex flex-col justify-end">
-							<p className="text-sm leading-6 text-muted-foreground flex-1">
-                                <Tx en={item.summary} fr={item.summaryFr || item.summary} />
-                            </p>
-							<Link className="text-sm font-medium underline-offset-4 hover:underline" href={item.href}>
-								<Tx en="Open details" fr="Voir les détails" />
-							</Link>
+
+						<CardContent className="flex flex-1 flex-col justify-between space-y-4 pt-0">
+							<p className="text-xs leading-relaxed text-muted-foreground flex-1 line-clamp-3">
+								<Tx en={item.summary} fr={item.summaryFr || item.summary} />
+							</p>
+							<div className="pt-2">
+								<Button
+									asChild
+									className="w-full justify-between group/btn bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 transition-all duration-300"
+								>
+									<Link href={item.href}>
+										<span className="font-semibold text-xs tracking-wide uppercase">
+											<Tx en="Open details" fr="Voir les détails" />
+										</span>
+										<ChevronRight className="size-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
+									</Link>
+								</Button>
+							</div>
 						</CardContent>
 					</Card>
 				))}

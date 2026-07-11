@@ -57,7 +57,6 @@ export function AcademyHero() {
     <section
       id="academy-hero"
       className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card/60"
-      style={{ minHeight: "420px" }}
     >
       {/* Animated blobs */}
       <div
@@ -88,7 +87,7 @@ export function AcademyHero() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-6 py-16 text-center sm:px-10 sm:py-20">
+      <div className="relative z-10 flex flex-col items-center justify-center gap-5 px-6 py-10 text-center sm:px-10 sm:py-12">
         {/* Label */}
         <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
           <span className="relative flex h-2 w-2">

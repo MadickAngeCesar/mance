@@ -1,3 +1,4 @@
+import { Cpu, Building2, GraduationCap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -159,11 +160,38 @@ export async function About() {
                     }
                 />
 			</div>
-		<div className="flex justify-center gap-4 pt-4 border-t border-border/40 mt-6">
-				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.lab} <Tx en="Lab Cases" fr="Cas Labo" /></Badge>
-				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.client} <Tx en="Client Works" fr="Travaux Clients" /></Badge>
-				<Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full">{counts.academy} <Tx en="Educational Content" fr="Contenu Éducatif" /></Badge>
-			</div>
+		<div className="flex flex-wrap justify-center gap-3 pt-6 border-t border-border/40 mt-6">
+			<Badge
+				variant="outline"
+				className="flex items-center gap-2 text-xs font-semibold py-2 px-4 rounded-xl border-primary/20 bg-primary/5 text-primary transition-all duration-300 hover:scale-[1.02] hover:bg-primary/10"
+			>
+				<Cpu className="size-3.5" />
+				<span>{counts.lab}</span>
+				<span className="text-muted-foreground font-normal">
+					<Tx en="Lab Cases" fr="Cas Labo" />
+				</span>
+			</Badge>
+			<Badge
+				variant="outline"
+				className="flex items-center gap-2 text-xs font-semibold py-2 px-4 rounded-xl border-violet-500/20 bg-violet-500/5 text-violet-400 transition-all duration-300 hover:scale-[1.02] hover:bg-violet-500/10"
+			>
+				<Building2 className="size-3.5" />
+				<span>{counts.client}</span>
+				<span className="text-muted-foreground font-normal">
+					<Tx en="Client Works" fr="Travaux Clients" />
+				</span>
+			</Badge>
+			<Badge
+				variant="outline"
+				className="flex items-center gap-2 text-xs font-semibold py-2 px-4 rounded-xl border-cyan-500/20 bg-cyan-500/5 text-cyan-400 transition-all duration-300 hover:scale-[1.02] hover:bg-cyan-500/10"
+			>
+				<GraduationCap className="size-3.5" />
+				<span>{counts.academy}</span>
+				<span className="text-muted-foreground font-normal">
+					<Tx en="Educational Content" fr="Contenu Éducatif" />
+				</span>
+			</Badge>
+		</div>
 		</section>
 	);
 }

@@ -11,6 +11,7 @@ import {
 	Menu,
 	Settings,
 	Sparkles,
+	UserCheck,
 	Users,
 } from "lucide-react";
 
@@ -34,6 +35,7 @@ const dashboardNavItems = [
 	{ href: "/dashboard/services", label: { EN: "Services", FR: "Services" }, icon: Sparkles },
 	{ href: "/dashboard/academy", label: { EN: "Academy", FR: "Académie" }, icon: GraduationCap },
 	{ href: "/dashboard/subscribers", label: { EN: "Subscribers", FR: "Abonnes" }, icon: Users },
+	{ href: "/dashboard/collaborators", label: { EN: "Collaborators", FR: "Collaborateurs" }, icon: UserCheck },
 	{ href: "/dashboard/settings", label: { EN: "Settings", FR: "Parametres" }, icon: Settings },
 ];
 

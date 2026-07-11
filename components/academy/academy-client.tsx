@@ -192,7 +192,18 @@ function ResourceCard({
           </div>
 
           {/* CTA */}
-          {resource.isFree ? (
+          {resource.type === "ARTICLE" ? (
+            <a href={resource.downloadUrl || `/lab/${resource.slug}`}>
+              <Button
+                id={`read-${resource.id}`}
+                size="sm"
+                className="h-8 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <Tx en="Read" fr="Lire" />
+              </Button>
+            </a>
+          ) : resource.isFree ? (
             <a href={resource.downloadUrl ?? "#"} download>
               <Button
                 id={`download-${resource.id}`}

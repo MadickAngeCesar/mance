@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { Tx } from "@/components/i18n/tx";
 import { calculateVectorMatchScore } from "@/lib/vector-search";
 
-type LabFilter = "all" | "projects" | "articles" | "case-studies";
+type LabFilter = "all" | "projects" | "case-studies";
 type LabSort = "recent" | "views" | "alpha" | "likes";
 
 type CombinedLabItem = {
@@ -30,7 +30,7 @@ type CombinedLabItem = {
 	href: string;
 	coverImageUrl: string;
 	tags: string[];
-	kind: "project" | "article";
+	kind: "project";
 	featured: boolean;
 	views: number;
 	likes: number;
@@ -63,22 +63,6 @@ type ProjectItem = {
 	publishedAt?: string;
 };
 
-type ArticleItem = {
-	id: string;
-	title: string;
-	titleFr?: string;
-	excerpt: string;
-	excerptFr?: string;
-	slug: string;
-	coverImageUrl: string;
-	tags: string[];
-	featured: boolean;
-	views: number;
-	likes: number;
-	category: string;
-	publishedAt?: string;
-};
-
 type PaginatedMeta = {
 	pages?: number;
 };
@@ -103,16 +87,14 @@ async function fetchAllPages<T>(basePath: string) {
 	return [...firstData, ...pageData];
 }
 
-const filterOptions: Array<{ value: LabFilter; label: string }> = [
-	{ value: "all", label: "All" },
-	{ value: "projects", label: "Projects" },
-	{ value: "articles", label: "Articles" },
-	{ value: "case-studies", label: "Case Studies" },
+const filterOptions: Array<{ value: LabFilter; labelEn: string; labelFr: string }> = [
+	{ value: "all", labelEn: "All Projects", labelFr: "Tous les projets" },
+	{ value: "projects", labelEn: "Projects", labelFr: "Projets" },
+	{ value: "case-studies", labelEn: "Case Studies", labelFr: "Études de cas" },
 ];
 
 export function LabList() {
 	const [projects, setProjects] = useState<ProjectItem[]>([]);
-	const [articles, setArticles] = useState<ArticleItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
@@ -128,54 +110,21 @@ export function LabList() {
 			setIsLoading(true);
 			setLoadError(null);
 			try {
-				const [projectsResult, articlesResult] = await Promise.allSettled([
-					fetchAllPages<ProjectItem>("/api/projects?published=all&sort=newest&featured=all"),
-					fetchAllPages<ArticleItem>("/api/blogs?published=all&sort=newest&featured=all"),
-				]);
+				const projectsResult = await fetchAllPages<ProjectItem>("/api/projects?published=all&sort=newest&featured=all");
 
-				if (!isMounted) {
-					return;
-				}
+				if (!isMounted) return;
 
-				const loadedProjects =
-					projectsResult.status === "fulfilled"
-						? projectsResult.value
-								.filter((item) => Boolean(item.slug))
-								.map((item) => ({
-									...item,
-									coverImageUrl: item.coverImageUrl || "/images/Profile.jpg",
-								}))
-						: [];
-
-				const loadedArticles =
-					articlesResult.status === "fulfilled"
-						? articlesResult.value
-								.filter((item) => Boolean(item.slug))
-								.map((item) => ({
-									...item,
-									coverImageUrl: item.coverImageUrl || "/images/Profile.jpg",
-								}))
-						: [];
+				const loadedProjects = projectsResult
+					.filter((item) => Boolean(item.slug))
+					.map((item) => ({
+						...item,
+						coverImageUrl: item.coverImageUrl || "/images/Profile.jpg",
+					}));
 
 				setProjects(loadedProjects);
-				setArticles(loadedArticles);
-
-				if (projectsResult.status === "rejected" && articlesResult.status === "rejected") {
-					throw new Error("Unable to load projects and articles for lab page.");
-				}
-
-				if (projectsResult.status === "rejected") {
-					setLoadError("Projects could not be loaded. Showing available articles.");
-				}
-
-				if (articlesResult.status === "rejected") {
-					setLoadError("Articles could not be loaded. Showing available projects.");
-				}
 			} catch (error) {
-				if (!isMounted) {
-					return;
-				}
-				setLoadError(error instanceof Error ? error.message : "Unable to load lab content.");
+				if (!isMounted) return;
+				setLoadError(error instanceof Error ? error.message : "Unable to load lab projects.");
 			} finally {
 				if (isMounted) {
 					setIsLoading(false);
@@ -202,33 +151,18 @@ export function LabList() {
 
 	const itemsPerPage = isDesktop ? 6 : 4;
 
-	const featuredProjects = useMemo(
-		() => projects.filter((project) => Boolean(project.featured)),
-		[projects]
-	);
-
 	const featuredProject = useMemo(() => {
-		return [...featuredProjects].sort((a, b) => {
-			const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-			const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-			return bTime - aTime;
-		})[0];
-	}, [featuredProjects]);
-
-	const featuredArticle = useMemo(
-		() =>
-			[...articles]
-				.filter((article) => Boolean(article.featured))
-				.sort((a, b) => {
-					const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-					const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-					return bTime - aTime;
-				})[0],
-		[articles]
-	);
+		return [...projects]
+			.filter((project) => Boolean(project.featured))
+			.sort((a, b) => {
+				const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+				const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+				return bTime - aTime;
+			})[0];
+	}, [projects]);
 
 	const allItems = useMemo<CombinedLabItem[]>(() => {
-		const projectItems = projects.map((project) => ({
+		return projects.map((project) => ({
 			id: project.id,
 			title: project.title,
 			titleFr: project.titleFr,
@@ -249,51 +183,29 @@ export function LabList() {
 			publishedAt: project.publishedAt,
 			isCaseStudy: project.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
 		}));
-
-		const articleItems = articles.map((article) => ({
-			id: article.id,
-			title: article.title,
-			titleFr: article.titleFr,
-			summary: article.excerpt,
-			summaryFr: article.excerptFr,
-			href: `/lab/${article.slug}`,
-			coverImageUrl: article.coverImageUrl,
-			tags: article.tags,
-			kind: "article" as const,
-			featured: Boolean(article.featured),
-			views: article.views,
-			likes: article.likes ?? 0,
-			meta: article.category,
-			publishedAt: article.publishedAt,
-			isCaseStudy:
-				article.category.toLowerCase() === "case study" ||
-				article.tags.some((tag: string) => tag.toLowerCase() === "case-study"),
-		}));
-
-		return [...projectItems, ...articleItems];
-	}, [articles, projects]);
+	}, [projects]);
 
 	const filteredItems = useMemo(() => {
 		const normalizedQuery = query.trim().toLowerCase();
 
 		const byFilter = allItems.filter((item) => {
-			if (filter === "projects") return item.kind === "project";
-			if (filter === "articles") return item.kind === "article";
+			if (filter === "projects") return !item.isCaseStudy;
 			if (filter === "case-studies") return item.isCaseStudy;
 			return true;
 		});
 
 		if (!normalizedQuery) {
-			const resetItems = byFilter.map((item) => ({ ...item, matchScore: undefined }));
-			return resetItems.sort((a, b) => {
-				if (sortBy === "views") return b.views - a.views;
-				if (sortBy === "likes") return b.likes - a.likes;
-				if (sortBy === "alpha") return a.title.localeCompare(b.title);
+			return byFilter
+				.map((item) => ({ ...item, matchScore: undefined }))
+				.sort((a, b) => {
+					if (sortBy === "views") return b.views - a.views;
+					if (sortBy === "likes") return b.likes - a.likes;
+					if (sortBy === "alpha") return a.title.localeCompare(b.title);
 
-				const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-				const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-				return bTime - aTime;
-			});
+					const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+					const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+					return bTime - aTime;
+				});
 		}
 
 		// Calculate vector similarity score
@@ -309,7 +221,7 @@ export function LabList() {
 				solution: item.solution,
 				solutionFr: item.solutionFr,
 				tags: item.tags,
-				stack: item.kind === "project" ? item.tags : undefined, // stack is mapped from tags in our query search
+				stack: item.tags,
 				meta: item.meta,
 			});
 			return { ...item, matchScore: score };
@@ -360,68 +272,54 @@ export function LabList() {
 
 	return (
 		<section className="space-y-8">
-			{isLoading ? <p className="text-sm text-muted-foreground"><Tx en="Loading lab content..." fr="Chargement du contenu du laboratoire..." /></p> : null}
+			{isLoading ? <p className="text-sm text-muted-foreground"><Tx en="Loading projects..." fr="Chargement des projets..." /></p> : null}
 			{loadError ? (
 				<p className="text-sm text-destructive">{loadError}</p>
 			) : null}
-			
-			<div className="grid items-start gap-6 sm:grid-cols-2">
-				{featuredProject ? (
-					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Project" fr="Projet en vedette" /></h3>
-						<LabCard
-							id={featuredProject.id}
-							title={featuredProject.title}
-							titleFr={featuredProject.titleFr}
-							summary={featuredProject.summary}
-							summaryFr={featuredProject.summaryFr}
-							href={`/lab/${featuredProject.slug}`}
-							coverImageUrl={featuredProject.coverImageUrl}
-							tags={featuredProject.tags}
-							kind="project"
-							featured={featuredProject.featured}
-							views={featuredProject.views}
-							likes={featuredProject.likes}
-							problem={featuredProject.problem}
-							problemFr={featuredProject.problemFr}
-							solution={featuredProject.solution}
-							solutionFr={featuredProject.solutionFr}
-							meta="Project"
-							publishedAt={featuredProject.publishedAt}
-						/>
-					</div>
-				) : null}
 
-				{featuredArticle ? (
+			{featuredProject ? (
+				<>
 					<div className="space-y-3">
-						<h3 className="text-xl text-center font-semibold tracking-tight"><Tx en="Featured Article" fr="Article en vedette" /></h3>
-						<LabCard
-							id={featuredArticle.id}
-							title={featuredArticle.title}
-							titleFr={featuredArticle.titleFr}
-							summary={featuredArticle.excerpt}
-							summaryFr={featuredArticle.excerptFr}
-							href={`/lab/${featuredArticle.slug}`}
-							coverImageUrl={featuredArticle.coverImageUrl}
-							tags={featuredArticle.tags}
-							kind="article"
-							featured={true}
-							views={featuredArticle.views}
-							likes={featuredArticle.likes}
-							meta={featuredArticle.category}
-							publishedAt={featuredArticle.publishedAt}
-						/>
+						<h3 className="text-xl text-center font-semibold tracking-tight">
+							<Tx en="Featured Project" fr="Projet en vedette" />
+						</h3>
+						<div className="mx-auto max-w-lg">
+							<LabCard
+								id={featuredProject.id}
+								title={featuredProject.title}
+								titleFr={featuredProject.titleFr}
+								summary={featuredProject.summary}
+								summaryFr={featuredProject.summaryFr}
+								href={`/lab/${featuredProject.slug}`}
+								coverImageUrl={featuredProject.coverImageUrl}
+								tags={featuredProject.tags}
+								kind="project"
+								featured={featuredProject.featured}
+								views={featuredProject.views}
+								likes={featuredProject.likes}
+								problem={featuredProject.problem}
+								problemFr={featuredProject.problemFr}
+								solution={featuredProject.solution}
+								solutionFr={featuredProject.solutionFr}
+								meta="Project"
+								publishedAt={featuredProject.publishedAt}
+							/>
+						</div>
 					</div>
-				) : null}
-			</div>
-
-			<Separator />
+					<Separator />
+				</>
+			) : null}
 
 			<div className="space-y-5">
 				<div className="text-center">
-					<h2 className="text-2xl font-semibold tracking-tight"><Tx en="Browse Projects and Articles" fr="Parcourir les projets et articles" /></h2>
+					<h2 className="text-2xl font-semibold tracking-tight">
+						<Tx en="Browse Projects" fr="Parcourir les projets" />
+					</h2>
 					<p className="mt-1 text-sm text-muted-foreground">
-						<Tx en="Use search, filters, and sorting to navigate case studies, projects, and technical writing." fr="Utilisez la recherche, les filtres et le tri pour parcourir les études de cas, les projets et la rédaction technique." />
+						<Tx
+							en="Use search, filters, and sorting to navigate case studies and engineering projects."
+							fr="Utilisez la recherche, les filtres et le tri pour parcourir les études de cas et les projets."
+						/>
 					</p>
 				</div>
 
@@ -429,7 +327,7 @@ export function LabList() {
 					<Input
 						value={query}
 						onChange={(event) => onQueryChange(event.target.value)}
-						placeholder="Vector search (e.g. Next.js dashboard / operations)"
+						placeholder="Vector search (e.g. Next.js dashboard / cloud automation)"
 					/>
 					<select
 						value={sortBy}
@@ -456,7 +354,7 @@ export function LabList() {
 									: "border-border/70 text-muted-foreground hover:text-foreground"
 							)}
 						>
-							{option.label}
+							<Tx en={option.labelEn} fr={option.labelFr} />
 						</button>
 					))}
 				</div>
@@ -470,36 +368,38 @@ export function LabList() {
 							/>
 						))
 						: paginatedItems.map((item) => (
-								<LabCard
-									key={item.id}
-									id={item.id}
-									title={item.title}
-									titleFr={item.titleFr}
-									summary={item.summary}
-									summaryFr={item.summaryFr}
-									href={item.href}
-									coverImageUrl={item.coverImageUrl}
-									tags={item.tags}
-									kind={item.kind}
-									featured={item.featured}
-									views={item.views}
-									likes={item.likes}
-									problem={item.problem}
-									problemFr={item.problemFr}
-									solution={item.solution}
-									solutionFr={item.solutionFr}
-									matchScore={item.matchScore}
-									meta={item.meta}
-									publishedAt={item.publishedAt}
-								/>
-							))}
+							<LabCard
+								key={item.id}
+								id={item.id}
+								title={item.title}
+								titleFr={item.titleFr}
+								summary={item.summary}
+								summaryFr={item.summaryFr}
+								href={item.href}
+								coverImageUrl={item.coverImageUrl}
+								tags={item.tags}
+								kind={item.kind}
+								featured={item.featured}
+								views={item.views}
+								likes={item.likes}
+								problem={item.problem}
+								problemFr={item.problemFr}
+								solution={item.solution}
+								solutionFr={item.solutionFr}
+								matchScore={item.matchScore}
+								meta={item.meta}
+								publishedAt={item.publishedAt}
+							/>
+						))}
 				</div>
 
 				{!isLoading && paginatedItems.length === 0 ? (
-					<p className="text-sm text-muted-foreground text-center py-8"><Tx en="No items match your current search and filters." fr="Aucun élément ne correspond à votre recherche et à vos filtres actuels." /></p>
+					<p className="py-8 text-center text-sm text-muted-foreground">
+						<Tx en="No projects match your current search and filters." fr="Aucun projet ne correspond à votre recherche et à vos filtres actuels." />
+					</p>
 				) : null}
 
-				<Pagination className={isLoading ? "opacity-50 pointer-events-none" : ""}>
+				<Pagination className={isLoading ? "pointer-events-none opacity-50" : ""}>
 					<PaginationContent>
 						<PaginationItem>
 							<PaginationPrevious

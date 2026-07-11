@@ -6,7 +6,7 @@ import { Hero } from "@/components/home/hero";
 import { MainWork } from "@/components/home/main_work";
 import { Skills } from "@/components/home/skills";
 import { GsapSection } from "@/components/home/gsap-section";
-//import { TeamSection } from "@/components/home/team";
+import { TeamSection } from "@/components/home/team";
 
 export const metadata: Metadata = {
   title: "Home | MAC TECH",
@@ -29,7 +29,9 @@ export default function Home() {
       <GsapSection animation="fade-up" delay={0.1}>
         <Skills />
       </GsapSection>
-      {/*<TeamSection />*/}
+      <GsapSection animation="fade-up" delay={0.1}>
+        <TeamSection />
+      </GsapSection>
       <GsapSection animation="slide-right" delay={0.1}>
         <Contact />
       </GsapSection>

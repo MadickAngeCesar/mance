@@ -413,3 +413,29 @@ export const AuthUserResponseSchema = z.object({
 });
 
 export type AuthUserResponse = z.infer<typeof AuthUserResponseSchema>;
+
+/**
+ * Team Members / Collaborators
+ */
+export const TeamMemberCreateSchema = z.object({
+  name: z.string().min(1, "Name is required.").max(100),
+  role: z.string().min(1, "Role is required.").max(100),
+  roleFr: z.string().optional().nullable(),
+  speciality: z.string().min(1, "Speciality is required.").max(100),
+  specialityFr: z.string().optional().nullable(),
+  imageUrl: z.string().min(1, "Image URL is required."),
+  linkedIn: z.string().optional().nullable(),
+  whatsApp: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  website: z.string().optional().nullable(),
+  displayOrder: z.coerce.number().int().default(1),
+});
+
+export type TeamMemberCreate = z.infer<typeof TeamMemberCreateSchema>;
+
+export const TeamMemberUpdateSchema = TeamMemberCreateSchema.partial().extend({
+  id: z.string(),
+});
+
+export type TeamMemberUpdate = z.infer<typeof TeamMemberUpdateSchema>;
+

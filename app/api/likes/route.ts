@@ -36,4 +36,4 @@ async function handlePost(request: NextRequest) {
   });
 }
 
-export const POST = createApiHandler(handlePost);
+export const POST = createApiHandler<any>(handlePost);

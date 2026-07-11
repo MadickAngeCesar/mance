@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
 	BookOpenText,
 	FolderKanban,
+	GraduationCap,
 	LayoutDashboard,
 	Mail,
 	Menu,
@@ -31,6 +32,7 @@ const dashboardNavItems = [
 	{ href: "/dashboard/messages", label: { EN: "Messages", FR: "Messages" }, icon: Mail },
 	{ href: "/dashboard/projects", label: { EN: "Projects", FR: "Projets" }, icon: FolderKanban },
 	{ href: "/dashboard/services", label: { EN: "Services", FR: "Services" }, icon: Sparkles },
+	{ href: "/dashboard/academy", label: { EN: "Academy", FR: "Académie" }, icon: GraduationCap },
 	{ href: "/dashboard/subscribers", label: { EN: "Subscribers", FR: "Abonnes" }, icon: Users },
 	{ href: "/dashboard/settings", label: { EN: "Settings", FR: "Parametres" }, icon: Settings },
 ];

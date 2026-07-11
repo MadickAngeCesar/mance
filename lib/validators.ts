@@ -234,6 +234,41 @@ export const ClientWorkQuerySchema = z.object({
 export type ClientWorkQuery = z.infer<typeof ClientWorkQuerySchema>;
 
 /**
+ * Academy Resources
+ */
+export const AcademyResourceCreateSchema = z.object({
+  title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().optional().nullable(),
+  slug: z.string().min(1, "Slug is required.").max(200),
+  description: z.string().max(2000),
+  descriptionFr: z.string().optional().nullable(),
+  content: z.string().default(""),
+  contentFr: z.string().optional().nullable(),
+  type: z.enum(["ARTICLE", "GUIDE", "BOOK", "COURSE"]).default("ARTICLE"),
+  coverImageUrl: urlOrRootPath,
+  tags: z.array(z.string()).default([]),
+  publishedAt: optionalDate,
+});
+
+export type AcademyResourceCreate = z.infer<typeof AcademyResourceCreateSchema>;
+
+export const AcademyResourceUpdateSchema = AcademyResourceCreateSchema.partial().extend({
+  id: z.string(),
+});
+
+export type AcademyResourceUpdate = z.infer<typeof AcademyResourceUpdateSchema>;
+
+export const AcademyResourceQuerySchema = z.object({
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+  type: queryValue(z.enum(["all", "ARTICLE", "GUIDE", "BOOK", "COURSE"]).default("all")),
+  sort: queryValue(z.enum(["newest", "oldest", "views"]).default("newest")),
+  published: queryValue(z.enum(["all", "published", "draft"]).default("all")),
+});
+
+export type AcademyResourceQuery = z.infer<typeof AcademyResourceQuerySchema>;
+
+/**
  * Settings / Profile
  */
 export const SettingsUpdateSchema = z.object({

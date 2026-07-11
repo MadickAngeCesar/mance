@@ -7,6 +7,8 @@ import { TestimonialForm } from "@/components/dashboard/testimonial_form";
 import { TestimonialsList } from "@/components/dashboard/testimonials_list";
 import { WorkflowStageForm } from "@/components/dashboard/workflow_stage_form";
 import { WorkflowStageList } from "@/components/dashboard/workflow_stage_list";
+import { ClientWorkForm } from "@/components/dashboard/client_work_form";
+import { ClientWorkList } from "@/components/dashboard/client_work_list";
 
 export const metadata: Metadata = {
   title: "Services | Dashboard",
@@ -52,6 +54,19 @@ export default function ServicesDashboardPage() {
 			<div className="grid gap-3">
 				<TestimonialsList />
 			</div>
+
+			{/* Client Work Section */}
+			<div className="flex flex-wrap items-end justify-between gap-3">
+				<div className="space-y-1">
+					<h2 className="text-xl font-semibold tracking-tight"><Tx en="Client Work" fr="Projets Clients" /></h2>
+					<p className="text-sm text-muted-foreground">
+						<Tx en="Manage delivered client projects displayed on the Services page." fr="Gérez les projets clients livrés affichés sur la page Services." />
+					</p>
+				</div>
+				<ClientWorkForm />
+			</div>
+
+			<ClientWorkList />
 		</section>
 	);
 }

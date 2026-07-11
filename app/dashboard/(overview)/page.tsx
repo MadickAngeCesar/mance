@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inbox, Newspaper, Rocket, Users } from "lucide-react";
+import { BookOpen, Briefcase, GraduationCap, Inbox, Rocket, Users } from "lucide-react";
 
 import { Tx } from "@/components/i18n/tx";
 import { Badge } from "@/components/ui/badge";
@@ -14,86 +14,126 @@ export default async function DashboardOverviewPage() {
   const [
     totalArticles,
     totalProjects,
+    totalClientWorks,
+    totalAcademyResources,
     totalMessages,
     unreadMessages,
     totalSubscribers,
-    topArticles,
     topProjects,
     recentMessages,
+    recentSubscribers,
   ] = await Promise.all([
     prisma.labArticle.count(),
     prisma.labProject.count(),
+    prisma.clientWork.count(),
+    prisma.academyResource.count(),
     prisma.message.count(),
     prisma.message.count({ where: { isRead: false } }),
     prisma.subscriber.count({ where: { active: true } }),
-    prisma.labArticle.findMany({
-      select: { id: true, title: true, slug: true, views: true },
-      orderBy: { views: "desc" },
-      take: 3,
-    }),
     prisma.labProject.findMany({
-      select: { id: true, title: true, slug: true, views: true },
+      select: { id: true, title: true, slug: true, views: true, publishedAt: true },
       orderBy: { views: "desc" },
-      take: 3,
+      take: 5,
     }),
     prisma.message.findMany({
-      select: { id: true, subject: true, name: true, email: true, isRead: true },
+      select: { id: true, subject: true, name: true, email: true, isRead: true, createdAt: true },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: 4,
+    }),
+    prisma.subscriber.findMany({
+      select: { id: true, email: true, createdAt: true, active: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
     }),
   ]);
 
   const metrics = [
     {
-      title: "Articles",
-      value: totalArticles,
-      icon: Newspaper,
-      trend: `${topArticles.length} top entries tracked`,
-    },
-    {
-      title: "Projects",
+      title: "Lab Projects",
+      titleFr: "Projets Lab",
       value: totalProjects,
       icon: Rocket,
-      trend: `${topProjects.length} top entries tracked`,
+      trend: `${totalArticles} articles`,
+      color: "text-primary",
+      bg: "bg-primary/5",
     },
     {
-      title: "Inbox Messages",
+      title: "Client Works",
+      titleFr: "Projets Clients",
+      value: totalClientWorks,
+      icon: Briefcase,
+      trend: "Delivered projects",
+      color: "text-violet-400",
+      bg: "bg-violet-500/5",
+    },
+    {
+      title: "Academy",
+      titleFr: "Académie",
+      value: totalAcademyResources,
+      icon: GraduationCap,
+      trend: "Articles, guides & books",
+      color: "text-cyan-400",
+      bg: "bg-cyan-500/5",
+    },
+    {
+      title: "Inbox",
+      titleFr: "Messages",
       value: totalMessages,
       icon: Inbox,
       trend: `${unreadMessages} unread`,
+      color: "text-amber-400",
+      bg: "bg-amber-500/5",
     },
     {
       title: "Subscribers",
+      titleFr: "Abonnés",
       value: totalSubscribers,
       icon: Users,
       trend: "Active newsletter audience",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/5",
+    },
+    {
+      title: "Blogs",
+      titleFr: "Articles",
+      value: totalArticles,
+      icon: BookOpen,
+      trend: "Published + draft articles",
+      color: "text-rose-400",
+      bg: "bg-rose-500/5",
     },
   ];
 
-  const topContent = [...topArticles, ...topProjects]
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 3);
-
   return (
-    <section className="space-y-5">
+    <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight"><Tx en="Dashboard Overview" fr="Apercu du tableau de bord" /></h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          <Tx en="Dashboard Overview" fr="Apercu du tableau de bord" />
+        </h1>
         <p className="text-sm text-muted-foreground">
-          <Tx en="Quick snapshot of content, leads, and audience growth." fr="Vue rapide du contenu, des prospects et de la croissance d'audience." />
+          <Tx
+            en="Quick snapshot of content, leads, and audience growth."
+            fr="Vue rapide du contenu, des prospects et de la croissance d'audience."
+          />
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Metrics Grid */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
-            <Card key={metric.title}>
+            <Card key={metric.title} className="overflow-hidden">
               <CardHeader className="flex flex-row items-start justify-between gap-3 border-b border-border/70 pb-3">
                 <div>
-                  <CardDescription>{metric.title}</CardDescription>
-                  <CardTitle className="mt-1 text-2xl">{metric.value}</CardTitle>
+                  <CardDescription>
+                    <Tx en={metric.title} fr={metric.titleFr} />
+                  </CardDescription>
+                  <CardTitle className="mt-1 text-3xl font-bold">{metric.value}</CardTitle>
                 </div>
-                <Icon className="size-4 text-primary" />
+                <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 ${metric.bg}`}>
+                  <Icon className={`size-4.5 ${metric.color}`} />
+                </div>
               </CardHeader>
               <CardContent className="pt-3 text-xs text-muted-foreground">{metric.trend}</CardContent>
             </Card>
@@ -101,45 +141,96 @@ export default async function DashboardOverviewPage() {
         })}
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {/* Top Projects by views */}
+        <Card className="xl:col-span-2">
           <CardHeader className="border-b border-border/70 pb-3">
-            <CardTitle className="text-base"><Tx en="Top Content" fr="Contenu le plus consulte" /></CardTitle>
-            <CardDescription><Tx en="Most viewed portfolio entries." fr="Elements du portfolio les plus consultes." /></CardDescription>
+            <CardTitle className="text-base">
+              <Tx en="Top Lab Projects" fr="Projets Lab les plus consultés" />
+            </CardTitle>
+            <CardDescription>
+              <Tx en="Most viewed portfolio entries." fr="Éléments du portfolio les plus consultés." />
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 pt-4">
-            {topContent.map((entry) => (
-                <div key={entry.id} className="rounded-lg border border-border/70 bg-card/60 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{entry.title}</p>
-                    <Badge variant="outline">{entry.views.toLocaleString()} views</Badge>
+          <CardContent className="space-y-2 pt-4">
+            {topProjects.map((project, index) => (
+              <div key={project.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-card/50 px-3 py-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{project.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">/{project.slug}</p>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">/{entry.slug}</p>
                 </div>
-              ))}
-            {topContent.length === 0 ? <p className="text-sm text-muted-foreground">No published content yet.</p> : null}
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className="text-xs">{project.views.toLocaleString()} views</Badge>
+                  {project.publishedAt
+                    ? <Badge className="text-xs">Published</Badge>
+                    : <Badge variant="outline" className="text-xs">Draft</Badge>}
+                </div>
+              </div>
+            ))}
+            {topProjects.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No published projects yet.</p>
+            ) : null}
           </CardContent>
         </Card>
 
+        {/* Recent Subscribers */}
         <Card>
           <CardHeader className="border-b border-border/70 pb-3">
-            <CardTitle className="text-base"><Tx en="Inbox Snapshot" fr="Apercu de la boite de reception" /></CardTitle>
-            <CardDescription><Tx en="Most recent lead messages to triage." fr="Messages prospects recents a traiter." /></CardDescription>
+            <CardTitle className="text-base">
+              <Tx en="Recent Subscribers" fr="Nouveaux abonnés" />
+            </CardTitle>
+            <CardDescription>
+              <Tx en="Latest newsletter sign-ups." fr="Dernières inscriptions à la newsletter." />
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 pt-4">
-            {recentMessages.map((message) => (
-              <div key={message.id} className="rounded-lg border border-border/70 bg-card/60 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium">{message.subject}</p>
-                  <Badge variant={message.isRead ? "outline" : "default"}>{message.isRead ? "Read" : "New"}</Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">{message.name} · {message.email}</p>
+          <CardContent className="space-y-2 pt-4">
+            {recentSubscribers.map((sub) => (
+              <div key={sub.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-card/50 px-3 py-2">
+                <p className="truncate text-xs font-medium">{sub.email}</p>
+                <Badge variant={sub.active ? "default" : "outline"} className="text-[10px] shrink-0">
+                  {sub.active ? "Active" : "Inactive"}
+                </Badge>
               </div>
             ))}
-            {recentMessages.length === 0 ? <p className="text-sm text-muted-foreground">No inbox messages yet.</p> : null}
+            {recentSubscribers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No subscribers yet.</p>
+            ) : null}
           </CardContent>
         </Card>
       </div>
+
+      {/* Inbox Snapshot */}
+      <Card>
+        <CardHeader className="border-b border-border/70 pb-3">
+          <CardTitle className="text-base">
+            <Tx en="Inbox Snapshot" fr="Apercu de la boîte de réception" />
+          </CardTitle>
+          <CardDescription>
+            <Tx en="Most recent lead messages to triage." fr="Messages prospects récents à traiter." />
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-2 pt-4 sm:grid-cols-2">
+          {recentMessages.map((message) => (
+            <div key={message.id} className="rounded-lg border border-border/70 bg-card/60 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-medium">{message.subject}</p>
+                <Badge variant={message.isRead ? "outline" : "default"} className="shrink-0 text-[10px]">
+                  {message.isRead ? "Read" : "New"}
+                </Badge>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">{message.name} · {message.email}</p>
+            </div>
+          ))}
+          {recentMessages.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No inbox messages yet.</p>
+          ) : null}
+        </CardContent>
+      </Card>
     </section>
   );
 }

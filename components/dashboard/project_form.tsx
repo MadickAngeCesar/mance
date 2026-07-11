@@ -89,7 +89,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 
 			// Upload screenshot files
 			const screenshotFiles = formData.getAll("screenshotFiles") as File[];
-			let screenshotUrls = [...uploadedScreenshots]; // Start with existing screenshots
+			const screenshotUrls = [...uploadedScreenshots]; // Start with existing screenshots
 
 			for (const file of screenshotFiles) {
 				if (file instanceof File && file.size > 0) {

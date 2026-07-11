@@ -24,7 +24,7 @@ async function handleGet(request: NextRequest) {
   });
 
   // Build filter
-  let where: any = {};
+  const where: any = {};
   if (query.active === "active") {
     where.active = true;
   } else if (query.active === "inactive") {

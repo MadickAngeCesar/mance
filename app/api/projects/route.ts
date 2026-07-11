@@ -35,7 +35,7 @@ async function handleGet(request: NextRequest) {
       });
 
   // Build filter
-  let where: any = {};
+  const where: any = {};
 
   if (query.featured === "featured") {
     where.featured = true;

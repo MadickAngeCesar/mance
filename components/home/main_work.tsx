@@ -27,9 +27,21 @@ export async function MainWork() {
 
 	try {
         const [labResult, clientWorkResult, academyResult] = await Promise.all([
-            prisma.labProject.findMany({ take: 1, orderBy: { createdAt: 'desc' } }),
-            prisma.clientWork.findMany({ take: 1, orderBy: { createdAt: 'desc' } }),
-            prisma.academyResource.findMany({ take: 1, orderBy: { createdAt: 'desc' } })
+            prisma.labProject.findMany({
+                where: { publishedAt: { not: null } },
+                take: 1,
+                orderBy: { publishedAt: 'desc' }
+            }),
+            prisma.clientWork.findMany({
+                where: { publishedAt: { not: null } },
+                take: 1,
+                orderBy: { publishedAt: 'desc' }
+            }),
+            prisma.academyResource.findMany({
+                where: { publishedAt: { not: null } },
+                take: 1,
+                orderBy: { publishedAt: 'desc' }
+            })
         ]);
 
         if (labResult[0]) {
@@ -66,7 +78,7 @@ export async function MainWork() {
                 kind: "CLIENT_WORK",
                 summary: clientWorkResult[0].description,
                 summaryFr: clientWorkResult[0].descriptionFr,
-                href: `/services`,
+                href: clientWorkResult[0].slug ? `/lab/${clientWorkResult[0].slug}` : `/services`,
                 featured: false,
                 imageUrl: clientWorkResult[0].imageUrl || "/images/Profile.jpg",
             });
@@ -78,7 +90,7 @@ export async function MainWork() {
                 kind: "CLIENT_WORK",
                 summary: fallbackClientWork[0].description,
                 summaryFr: fallbackClientWork[0].descriptionFr || null,
-                href: `/services`,
+                href: fallbackClientWork[0].slug ? `/lab/${fallbackClientWork[0].slug}` : `/services`,
                 featured: false,
                 imageUrl: fallbackClientWork[0].imageUrl || "/images/Profile.jpg",
             });

@@ -144,7 +144,14 @@ export async function Footer() {
 							download
 							className="transition-colors hover:text-foreground"
 						>
-							<Tx en="Download Resume (PDF)" fr="Télécharger le CV (PDF)" />
+							<Tx en="⬇️ Resume - English (PDF)" fr="⬇️ CV - Anglais (PDF)" />
+						</a>
+						<a
+							href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_CV_FR.pdf"}
+							download
+							className="transition-colors hover:text-foreground"
+						>
+							<Tx en="⬇️ Resume - French (PDF)" fr="⬇️ CV - Français (PDF)" />
 						</a>
 						<Link href="/sign-in" className="transition-colors hover:text-foreground">
 							<Tx en="Dashboard" fr="Tableau de bord" />

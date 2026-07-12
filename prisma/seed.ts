@@ -98,33 +98,31 @@ async function seedCore(options: SeedOptions) {
   // If reset is true, clear all data
   if (options.reset) {
     console.log("🔄 Resetting all data...");
-    await prisma.$transaction([
-      prisma.subscriberCampaignDelivery.deleteMany(),
-      prisma.subscriberCampaign.deleteMany(),
-      prisma.authEvent.deleteMany(),
-      prisma.authUser.deleteMany(),
-      prisma.message.deleteMany(),
-      prisma.subscriber.deleteMany(),
-      prisma.testimonial.deleteMany(),
-      prisma.clientWork.deleteMany(),
-      prisma.labArticle.deleteMany(),
-      prisma.labProject.deleteMany(),
-      prisma.bookingCta.deleteMany(),
-      prisma.workflowStage.deleteMany(),
-      prisma.offering.deleteMany(),
-      prisma.mainWorkHighlight.deleteMany(),
-      prisma.skill.deleteMany(),
-      prisma.experience.deleteMany(),
-      prisma.education.deleteMany(),
-      prisma.socialLink.deleteMany(),
-      prisma.freelancePlatform.deleteMany(),
-      prisma.contactDetails.deleteMany(),
-      prisma.aboutSummary.deleteMany(),
-      prisma.brandProfile.deleteMany(),
-      prisma.academyResource.deleteMany(),
-      prisma.teamMember.deleteMany(),
-      prisma.targetSector.deleteMany(),
-    ]);
+    await prisma.subscriberCampaignDelivery.deleteMany();
+    await prisma.subscriberCampaign.deleteMany();
+    await prisma.authEvent.deleteMany();
+    await prisma.authUser.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.subscriber.deleteMany();
+    await prisma.testimonial.deleteMany();
+    await prisma.clientWork.deleteMany();
+    await prisma.labArticle.deleteMany();
+    await prisma.labProject.deleteMany();
+    await prisma.bookingCta.deleteMany();
+    await prisma.workflowStage.deleteMany();
+    await prisma.offering.deleteMany();
+    await prisma.mainWorkHighlight.deleteMany();
+    await prisma.skill.deleteMany();
+    await prisma.experience.deleteMany();
+    await prisma.education.deleteMany();
+    await prisma.socialLink.deleteMany();
+    await prisma.freelancePlatform.deleteMany();
+    await prisma.contactDetails.deleteMany();
+    await prisma.aboutSummary.deleteMany();
+    await prisma.brandProfile.deleteMany();
+    await prisma.academyResource.deleteMany();
+    await prisma.teamMember.deleteMany();
+    await prisma.targetSector.deleteMany();
   }
 
   // Create brand profile

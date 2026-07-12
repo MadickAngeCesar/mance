@@ -1256,6 +1256,126 @@ export const targetSectors: TargetSector[] = [
 			"Réputation professionnelle renforcée auprès des sponsors et donateurs"
 		],
 		displayOrder: 4
+	},
+	{
+		id: "sec-smes",
+		slug: "smes-local-businesses",
+		title: "SMEs & Local Businesses",
+		titleFr: "PMEs & Commerces Locaux",
+		description: "Inventory management, local POS integrations, custom CRM portals, and bookkeeping automations.",
+		descriptionFr: "Gestion des stocks, intégrations de caisses locales, portails CRM personnalisés et automatisation de la comptabilité.",
+		iconSlug: "Store",
+		challenges: [
+			"Manual receipt tracking and billing errors",
+			"Difficulties maintaining customer relationships",
+			"Inefficient inventory and supply chain tracking"
+		],
+		challengesFr: [
+			"Suivi manuel des reçus et erreurs de facturation",
+			"Difficultés à maintenir les relations clients",
+			"Suivi inefficace des stocks et de la chaîne d'approvisionnement"
+		],
+		solutions: [
+			"Custom client management portals",
+			"Integrated online payment processing and automated invoicing",
+			"Automated stock tracking systems"
+		],
+		solutionsFr: [
+			"Portails personnalisés de gestion de clients",
+			"Traitement intégré des paiements en ligne et facturation automatique",
+			"Systèmes automatisés de suivi des stocks"
+		],
+		benefits: [
+			"Reduced checkout and invoice processing time",
+			"Accurate supply chain forecasting",
+			"Stronger retention via structured client records"
+		],
+		benefitsFr: [
+			"Réduction du temps de traitement des factures",
+			"Prévisions précises de la chaîne d'approvisionnement",
+			"Meilleure fidélisation grâce aux dossiers clients"
+		],
+		displayOrder: 5
+	},
+	{
+		id: "sec-edutech",
+		slug: "edutech-learning-hubs",
+		title: "EduTech & Learning Hubs",
+		titleFr: "EduTech & Hubs d'Apprentissage",
+		description: "LMS integrations, training portals, course completion tracking, and downloadable resource libraries.",
+		descriptionFr: "Intégrations LMS, portails de formation, suivi d'achèvement des cours et bibliothèques de ressources téléchargeables.",
+		iconSlug: "GraduationCap",
+		challenges: [
+			"Difficulty tracking student progress and grading manually",
+			"Fragmented learning materials and PDF distribution",
+			"Low student engagement on static web pages"
+		],
+		challengesFr: [
+			"Difficulté à suivre les progrès des élèves et notation manuelle",
+			"Matériel d'apprentissage fragmenté et distribution de PDF",
+			"Faible engagement des élèves sur des pages web statiques"
+		],
+		solutions: [
+			"Interactive learner dashboards with completion tracking",
+			"Unified course repository and resource library hubs",
+			"Automated feedback systems and certificate generation"
+		],
+		solutionsFr: [
+			"Tableaux de bord apprenant interactifs avec suivi d'achèvement",
+			"Dépôt de cours unifié et bibliothèque de ressources",
+			"Systèmes de retour d'information automatisés et génération de certificats"
+		],
+		benefits: [
+			"Increased course completion rates",
+			"Streamlined teacher administrative workload",
+			"Scalable digital delivery of academic content"
+		],
+		benefitsFr: [
+			"Augmentation des taux d'achèvement des cours",
+			"Allègement de la charge administrative des enseignants",
+			"Diffusion numérique évolutive du contenu académique"
+		],
+		displayOrder: 6
+	},
+	{
+		id: "sec-it",
+		slug: "it-tech-services",
+		title: "IT & Tech Services",
+		titleFr: "Services Informatiques & Tech",
+		description: "API integrations, dashboard metrics, system monitoring utilities, and cloud pipeline automations.",
+		descriptionFr: "Intégrations d'API, indicateurs de tableaux de bord, utilitaires de surveillance de systèmes et automatisations cloud.",
+		iconSlug: "Laptop",
+		challenges: [
+			"High software licensing fees and complex workflows",
+			"Security threats and lack of automated backups",
+			"Siloed developer pipelines and system downtime"
+		],
+		challengesFr: [
+			"Frais de licence élevés et flux complexes",
+			"Menaces de sécurité et manque de sauvegardes automatisées",
+			"Pipelines de développement cloisonnés et temps d'arrêt"
+		],
+		solutions: [
+			"Custom dashboard monitors with real-time metrics",
+			"Hardened server configurations and automated backups",
+			"Custom scripting and API middleware integrations"
+		],
+		solutionsFr: [
+			"Moniteurs de tableaux de bord avec indicateurs en temps réel",
+			"Configurations de serveur sécurisées et sauvegardes automatiques",
+			"Scripts personnalisés et intégrations de middleware API"
+		],
+		benefits: [
+			"99.9% system uptime and operational security",
+			"Reduced operational software overhead costs",
+			"Streamlined and automated deployment cycles"
+		],
+		benefitsFr: [
+			"Disponibilité du système à 99,9% et sécurité opérationnelle",
+			"Réduction des coûts de logiciels opérationnels",
+			"Cycles de déploiement simplifiés et automatisés"
+		],
+		displayOrder: 7
 	}
 ];
 

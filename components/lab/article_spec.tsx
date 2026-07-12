@@ -4,6 +4,7 @@ import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
+import { LikeButton } from "@/components/lab/like_button";
 import type { LabArticle } from "@/lib/definitions";
 
 type ArticleSpecProps = {
@@ -73,8 +74,11 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 									{publishedOn}
 								</div>
 							) : null}
-							<div className="text-xs text-muted-foreground">
-								~{readingTimeMinutes} min read • {article.views.toLocaleString()} views
+							<div className="text-xs text-muted-foreground flex flex-col gap-3">
+								<span>~{readingTimeMinutes} min read • {article.views.toLocaleString()} views</span>
+								<div className="pt-1">
+									<LikeButton id={article.id} initialLikes={article.likes} kind="article" />
+								</div>
 							</div>
 						</CardContent>
 					</Card>

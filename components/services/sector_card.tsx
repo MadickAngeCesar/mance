@@ -10,6 +10,9 @@ import {
   Cpu,
   CheckCircle2,
   X,
+  Store,
+  GraduationCap,
+  Laptop,
 } from "lucide-react";
 
 import { useLanguage } from "@/components/i18n/language-provider";
@@ -32,6 +35,9 @@ const iconMap = {
   Briefcase: Briefcase,
   Activity: Activity,
   Users: Users,
+  Store: Store,
+  GraduationCap: GraduationCap,
+  Laptop: Laptop,
 };
 
 const accentMap = {
@@ -39,6 +45,9 @@ const accentMap = {
   Briefcase: "text-violet-400 border-violet-500/20 bg-violet-500/5",
   Activity: "text-blue-400 border-blue-500/20 bg-blue-500/5",
   Users: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+  Store: "text-rose-400 border-rose-500/20 bg-rose-500/5",
+  GraduationCap: "text-sky-400 border-sky-500/20 bg-sky-500/5",
+  Laptop: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5",
 };
 
 export function SectorCard({ sector }: SectorCardProps) {

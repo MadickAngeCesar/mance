@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import { Tx } from "@/components/i18n/tx";
+import { LikeButton } from "@/components/lab/like_button";
 import type { LabProject } from "@/lib/definitions";
 
 type ProjectSpecProps = {
@@ -83,6 +84,12 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 									Published {publishedOn}
 								</div>
 							) : null}
+							<div className="text-xs text-muted-foreground flex flex-col gap-3">
+								<span>{project.views.toLocaleString()} views</span>
+								<div>
+									<LikeButton id={project.id} initialLikes={project.likes} kind="project" />
+								</div>
+							</div>
 							<div className="flex flex-col gap-2">
 								{project.demoUrl ? (
 									<Button asChild className="w-full justify-between">

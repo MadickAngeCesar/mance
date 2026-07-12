@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { ArticleSpec } from "@/components/lab/article_spec";
 import { ClientWorkSpec } from "@/components/lab/client_work_spec";
@@ -53,27 +54,34 @@ export async function generateStaticParams() {
 
 async function getLabEntryBySlug(slug: string) {
   try {
-    const [project, article] = await Promise.all([
-      prisma.labProject.findFirst({
-        where: {
-          slug,
-          publishedAt: { not: null },
-        },
-      }),
-      prisma.labArticle.findFirst({
-        where: {
-          slug,
-          publishedAt: { not: null },
-        },
-      }),
-    ]);
+    const project = await prisma.labProject.findFirst({
+      where: {
+        slug,
+        publishedAt: { not: null },
+      },
+    });
 
     if (project) {
-      return { kind: "project" as const, data: project };
+      const updatedProject = await prisma.labProject.update({
+        where: { id: project.id },
+        data: { views: { increment: 1 } },
+      });
+      return { kind: "project" as const, data: updatedProject };
     }
 
+    const article = await prisma.labArticle.findFirst({
+      where: {
+        slug,
+        publishedAt: { not: null },
+      },
+    });
+
     if (article) {
-      return { kind: "article" as const, data: article };
+      const updatedArticle = await prisma.labArticle.update({
+        where: { id: article.id },
+        data: { views: { increment: 1 } },
+      });
+      return { kind: "article" as const, data: updatedArticle };
     }
   } catch (error) {
     if (!isDatabaseUnavailableError(error)) {
@@ -213,22 +221,52 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
     };
 
     return (
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-3 py-6 sm:gap-8 sm:px-6 sm:py-10 lg:px-8 overflow-hidden">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-12 lg:px-8">
+        <GsapSection animation="fade-up" delay={0.05}>
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-2">
+            <Link
+              href="/lab"
+              className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back to Lab</span>
+            </Link>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+              Lab / Project Details
+            </div>
+          </div>
+        </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.1}>
           <ProjectSpec project={project} />
         </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.2}>
-          <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
+          <div className="grid gap-4 border-t border-border/60 pt-8 sm:grid-cols-2 mt-4">
             {navigation.previous ? (
-              <Link href={`/lab/${navigation.previous.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40">
-                <span className="block text-xs text-muted-foreground">Previous</span>
-                <span className="font-medium leading-6 wrap-break-word">{navigation.previous.title}</span>
+              <Link
+                href={`/lab/${navigation.previous.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
+                  <span>Previous Entry</span>
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
               </Link>
-            ) : <div className="hidden sm:block" />}
+            ) : (
+              <div className="hidden sm:block" />
+            )}
             {navigation.next ? (
-              <Link href={`/lab/${navigation.next.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40 sm:text-right">
-                <span className="block text-xs text-muted-foreground">Next</span>
-                <span className="font-medium leading-6 wrap-break-word">{navigation.next.title}</span>
+              <Link
+                href={`/lab/${navigation.next.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <span>Next Entry</span>
+                  <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
               </Link>
             ) : null}
           </div>
@@ -244,22 +282,52 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
     };
 
     return (
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-3 py-6 sm:gap-8 sm:px-6 sm:py-10 lg:px-8 overflow-hidden">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-12 lg:px-8">
+        <GsapSection animation="fade-up" delay={0.05}>
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-2">
+            <Link
+              href="/lab"
+              className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back to Lab</span>
+            </Link>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+              Lab / Article Details
+            </div>
+          </div>
+        </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.1}>
           <ArticleSpec article={article} />
         </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.2}>
-          <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
+          <div className="grid gap-4 border-t border-border/60 pt-8 sm:grid-cols-2 mt-4">
             {navigation.previous ? (
-              <Link href={`/lab/${navigation.previous.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40">
-                <span className="block text-xs text-muted-foreground">Previous</span>
-                <span className="font-medium leading-6 wrap-break-word">{navigation.previous.title}</span>
+              <Link
+                href={`/lab/${navigation.previous.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
+                  <span>Previous Entry</span>
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
               </Link>
-            ) : <div className="hidden sm:block" />}
+            ) : (
+              <div className="hidden sm:block" />
+            )}
             {navigation.next ? (
-              <Link href={`/lab/${navigation.next.slug}`} className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 p-3 text-sm transition-colors hover:bg-muted/40 sm:text-right">
-                <span className="block text-xs text-muted-foreground">Next</span>
-                <span className="font-medium leading-6 wrap-break-word">{navigation.next.title}</span>
+              <Link
+                href={`/lab/${navigation.next.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <span>Next Entry</span>
+                  <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
               </Link>
             ) : null}
           </div>
@@ -278,22 +346,52 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
     };
 
     return (
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 overflow-hidden">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-12 lg:px-8">
+        <GsapSection animation="fade-up" delay={0.05}>
+          <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-2">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back to Services</span>
+            </Link>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+              Lab / Client Work Details
+            </div>
+          </div>
+        </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.1}>
           <ClientWorkSpec clientWorkItem={clientWorkItem} />
         </GsapSection>
+
         <GsapSection animation="fade-up" delay={0.2}>
-          <div className="grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-2">
+          <div className="grid gap-4 border-t border-border/60 pt-8 sm:grid-cols-2 mt-4">
             {navigation.previous ? (
-              <Link href={`/lab/${navigation.previous.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40">
-                <span className="block text-xs text-muted-foreground">Previous</span>
-                <span className="font-medium">{navigation.previous.title}</span>
+              <Link
+                href={`/lab/${navigation.previous.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
+                  <span>Previous Entry</span>
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
               </Link>
-            ) : <div />}
+            ) : (
+              <div className="hidden sm:block" />
+            )}
             {navigation.next ? (
-              <Link href={`/lab/${navigation.next.slug}`} className="rounded-lg border border-border/70 p-3 text-sm hover:bg-muted/40 sm:text-right">
-                <span className="block text-xs text-muted-foreground">Next</span>
-                <span className="font-medium">{navigation.next.title}</span>
+              <Link
+                href={`/lab/${navigation.next.slug}`}
+                className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
+              >
+                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                  <span>Next Entry</span>
+                  <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
               </Link>
             ) : null}
           </div>

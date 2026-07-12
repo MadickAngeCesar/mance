@@ -70,9 +70,9 @@ export async function Footer() {
 							height={28}
 							className="h-auto w-auto rounded-md"
 						/>
-						<p className="text-base font-semibold tracking-wide">MAC TECH</p>
+						<p className="text-lg font-semibold tracking-wide">MAC TECH</p>
 					</div>
-					<p className="text-xs text-muted-foreground leading-relaxed">
+					<p className="text-sm text-muted-foreground leading-relaxed">
 						<Tx
 							en="Building digital solutions and automated pipelines for modern organizations."
 							fr="Concevoir des solutions numériques et des pipelines automatisés pour les organisations modernes."
@@ -80,7 +80,7 @@ export async function Footer() {
 					</p>
 					
 					{/* Short Quote */}
-					<p className="text-xs text-muted-foreground/80 italic leading-relaxed pt-1">
+					<p className="text-sm text-muted-foreground/80 italic leading-relaxed pt-1">
 						&ldquo;<Tx
 							en="Crafting stable code and automated systems to solve complex business challenges."
 							fr="Concevoir du code stable et des systèmes automatisés pour résoudre les défis complexes."
@@ -114,10 +114,10 @@ export async function Footer() {
 
 				{/* Nav Links column */}
 				<div className="space-y-3">
-					<p className="text-xs font-bold uppercase tracking-wider text-foreground">
+					<p className="text-sm font-bold uppercase tracking-wider text-foreground">
 						<Tx en="Navigation" fr="Navigation" />
 					</p>
-					<div className="grid gap-2 text-xs text-muted-foreground">
+					<div className="grid gap-2 text-sm text-muted-foreground">
 						<Link href="/" className="transition-colors hover:text-foreground">
 							<Tx en="Home" fr="Accueil" />
 						</Link>
@@ -135,10 +135,10 @@ export async function Footer() {
 
 				{/* Resources and Download */}
 				<div className="space-y-3">
-					<p className="text-xs font-bold uppercase tracking-wider text-foreground">
+					<p className="text-sm font-bold uppercase tracking-wider text-foreground">
 						<Tx en="Resources" fr="Ressources" />
 					</p>
-					<div className="grid gap-2 text-xs text-muted-foreground">
+					<div className="grid gap-2 text-sm text-muted-foreground">
 						<a
 							href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_Resume_EN.pdf"}
 							download
@@ -147,7 +147,7 @@ export async function Footer() {
 							<Tx en="⬇️ Resume - English (PDF)" fr="⬇️ CV - Anglais (PDF)" />
 						</a>
 						<a
-							href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_CV_FR.pdf"}
+							href="/MadickAngeCesar_FullStack_CV_FR.pdf"
 							download
 							className="transition-colors hover:text-foreground"
 						>
@@ -161,10 +161,10 @@ export async function Footer() {
 
 				{/* Buy Me a Coffee Column */}
 				<div className="space-y-3 lg:text-right lg:items-end flex flex-col items-start">
-					<p className="text-xs font-bold uppercase tracking-wider text-foreground">
+					<p className="text-sm font-bold uppercase tracking-wider text-foreground">
 						<Tx en="Support Work" fr="Soutenir mon travail" />
 					</p>
-					<p className="text-xs text-muted-foreground leading-relaxed max-w-[200px] lg:text-right">
+					<p className="text-sm text-muted-foreground leading-relaxed max-w-[200px] lg:text-right">
 						<Tx
 							en="Support the hosting and building of free open-source software tools."
 							fr="Soutenez l'hébergement et le développement d'outils logiciels libres."
@@ -172,8 +172,8 @@ export async function Footer() {
 					</p>
 					<div className="pt-1">
 						<Link
-							href="/lab"
-							className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs font-bold text-primary transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/10"
+							href="https://ko-fi.com/angecesarmadick"
+							className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/10"
 						>
 							<Coffee className="size-4 shrink-0" />
 							<span>
@@ -185,7 +185,7 @@ export async function Footer() {
 
 			</div>
 			
-			<div className="border-t border-border/70 px-4 py-6 text-center text-[11px] text-muted-foreground sm:px-6 lg:px-8">
+			<div className="border-t border-border/70 px-4 py-6 text-center text-xs text-muted-foreground sm:px-6 lg:px-8">
 				© {year} MAC TECH. All rights reserved.
 			</div>
 		</footer>

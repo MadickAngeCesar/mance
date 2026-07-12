@@ -6,6 +6,7 @@ export type DashboardDataDomain =
   | "blogs"
   | "projects"
   | "services"
+  | "sectors"
   | "profile";
 
 export function emitDashboardDataChanged(domain: DashboardDataDomain) {

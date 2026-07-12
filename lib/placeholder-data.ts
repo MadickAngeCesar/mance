@@ -16,6 +16,7 @@ import type {
 	TeamMember,
 	TestimonialItem,
 	WorkflowStage,
+	TargetSector,
 } from "@/lib/definitions";
 
 export const brandProfile: BrandProfile = {
@@ -1070,3 +1071,191 @@ export const subscriberPreviews: SubscriberPreview[] = [
 		subscribedAt: "2026-02-01T17:02:00.000Z",
 	},
 ];
+
+export const targetSectors: TargetSector[] = [
+	{
+		id: "sec-hospitality",
+		slug: "hospitality",
+		title: "Hospitality & Hotel",
+		titleFr: "Hôtellerie & Hébergement",
+		description: "Operations dashboards, room and booking management systems, and guest experience portals for modern hotels.",
+		descriptionFr: "Tableaux de bord opérationnels, systèmes de gestion des chambres et réservations, et portails d'expérience client pour les hôtels modernes.",
+		iconSlug: "Hotel",
+		challenges: [
+			"Disorganized booking requests and manual room management",
+			"Loss of critical guest profiles and booking history",
+			"Difficulty tracking payments, invoices, and deposits",
+			"Low online visibility and high commission on third-party channels"
+		],
+		challengesFr: [
+			"Réservations mal organisées et gestion manuelle des chambres",
+			"Perte de profils clients critiques et d'historique de réservation",
+			"Difficulté à suivre les paiements, factures et dépôts",
+			"Faible visibilité en ligne et commissions élevées sur les canaux tiers"
+		],
+		solutions: [
+			"Bespoke professional website with integrated booking inquiry forms",
+			"Centralized room management and availability tracking system",
+			"Automated invoicing, payment tracking, and secure deposit processing",
+			"Cloud backups, IT support, and secure local client databases"
+		],
+		solutionsFr: [
+			"Site web professionnel sur mesure avec formulaires de réservation intégrés",
+			"Système centralisé de gestion des chambres et de suivi des disponibilités",
+			"Facturation automatisée, suivi des paiements et traitement sécurisé des dépôts",
+			"Sauvegardes cloud, support informatique et base de données clients sécurisée"
+		],
+		benefits: [
+			"Increase in direct bookings and customer retention",
+			"Reduction in double-bookings and scheduling errors",
+			"Improved guest experience and faster check-in/out workflows",
+			"Consolidated business dashboard for occupancy and revenue analytics"
+		],
+		benefitsFr: [
+			"Augmentation des réservations directes et fidélisation client",
+			"Réduction des doubles réservations et des erreurs de planification",
+			"Amélioration de l'expérience client et accélération des arrivées/départs",
+			"Tableau de bord consolidé pour l'analyse de l'occupation et des revenus"
+		],
+		displayOrder: 1
+	},
+	{
+		id: "sec-cabinets",
+		slug: "professional-services",
+		title: "Professional Services & Consulting",
+		titleFr: "Cabinets de Conseil & Services",
+		description: "Custom workflow automation, secure client portals, and document management for accounting, legal, and consulting firms.",
+		descriptionFr: "Automatisation de workflows, portails clients sécurisés et gestion documentaire pour cabinets juridiques, comptables et conseil.",
+		iconSlug: "Briefcase",
+		challenges: [
+			"Scattered business documents and manual file tracking",
+			"Exposure of sensitive client files and compliance risks",
+			"Time lost on repetitive admin and client communication",
+			"Lack of structured collaboration between internal team members"
+		],
+		challengesFr: [
+			"Documents professionnels dispersés et suivi manuel des dossiers",
+			"Exposition de dossiers clients sensibles et risques de conformité",
+			"Temps perdu dans les tâches administratives et communications clients répétitives",
+			"Manque de collaboration structurée entre les membres de l'équipe"
+		],
+		solutions: [
+			"Secure client portals for file exchange and project updates",
+			"Centralized document management systems with access control",
+			"Process automation workflows for billing, reminders, and intake",
+			"Tailored business software solutions integrated with cloud backups"
+		],
+		solutionsFr: [
+			"Portails clients sécurisés pour l'échange de fichiers et les mises à jour",
+			"Systèmes de gestion documentaire centralisés avec contrôle d'accès",
+			"Workflows d'automatisation des processus pour factures, rappels et accueil",
+			"Solutions logicielles métier personnalisées intégrées aux sauvegardes cloud"
+		],
+		benefits: [
+			"Enhanced operational productivity and lower overhead costs",
+			"Secure client data compliance with advanced access controls",
+			"Unified internal database eliminating double-entry and manual tracking",
+			"More professional brand image with client-facing portals"
+		],
+		benefitsFr: [
+			"Productivité opérationnelle accrue et réduction des coûts",
+			"Conformité des données clients avec contrôles d'accès avancés",
+			"Base de données interne unifiée éliminant la double saisie et le suivi manuel",
+			"Image de marque plus professionnelle grâce aux portails clients"
+		],
+		displayOrder: 2
+	},
+	{
+		id: "sec-healthcare",
+		slug: "healthcare-hospitals",
+		title: "Healthcare & Hospitals",
+		titleFr: "Santé & Hôpitaux",
+		description: "Electronic health records, patient scheduling, and secure data interfaces designed for clinics and clinical administration.",
+		descriptionFr: "Dossiers de santé électroniques, planification de rendez-vous et interfaces de données sécurisées pour cliniques et administration clinique.",
+		iconSlug: "Activity",
+		challenges: [
+			"Dependence on paper patient charts causing slow access and errors",
+			"Disorganized appointment calendars leading to double-bookings",
+			"Scattered patient health records across different departments",
+			"Limited patient tracking, long wait times, and communication gaps"
+		],
+		challengesFr: [
+			"Dépendance aux dossiers patients papier entraînant lenteur et erreurs",
+			"Calendriers de rendez-vous désorganisés provoquant des doubles réservations",
+			"Dossiers de santé éparpillés entre différents services hospitaliers",
+			"Suivi limité des patients, longs temps d'attente et manque de communication"
+		],
+		solutions: [
+			"Electronic Health Records (EHR) with instant access and high security",
+			"Automated appointment scheduling system with SMS/Email reminders",
+			"Centralized operations platform connecting clinics, labs, and pharmacies",
+			"Interactive dashboards for clinical administration and performance tracking"
+		],
+		solutionsFr: [
+			"Dossiers médicaux électroniques (DME) avec accès instantané et haute sécurité",
+			"Système de planification automatique des rendez-vous avec rappels SMS/E-mail",
+			"Plateforme d'opérations centralisée reliant cliniques, labos et pharmacies",
+			"Tableaux de bord interactifs pour l'administration clinique et le suivi"
+		],
+		benefits: [
+			"Significant improvement in patient care quality and response times",
+			"Optimized time allocation for medical staff and admin personnel",
+			"Reduced operational costs via paperless and automated workflows",
+			"Ensured compliance with medical data security regulations"
+		],
+		benefitsFr: [
+			"Amélioration significative de la qualité des soins et des temps de réponse",
+			"Optimisation du temps pour le personnel médical et administratif",
+			"Réduction des coûts opérationnels grâce aux flux dématérialisés",
+			"Conformité assurée avec les réglementations de sécurité des données médicales"
+		],
+		displayOrder: 3
+	},
+	{
+		id: "sec-ngo",
+		slug: "ngos-associations",
+		title: "NGOs & Associations",
+		titleFr: "ONG & Associations",
+		description: "Member management portals, digital project tracking, and donor outreach platforms for non-profits and foundations.",
+		descriptionFr: "Portails de gestion des membres, suivi de projets numériques et plateformes de donateurs pour les associations et fondations.",
+		iconSlug: "Users",
+		challenges: [
+			"Inefficient member communication and manual contact tracking",
+			"Scattered data across spreadsheets making reporting complex",
+			"Low online visibility making it hard to attract donors and sponsors",
+			"Difficulty tracking project progress, budgets, and field operations"
+		],
+		challengesFr: [
+			"Communication inefficace avec les membres et suivi manuel des contacts",
+			"Données éparpillées sur tableurs rendant les rapports complexes",
+			"Faible visibilité en ligne rendant difficile l'attraction de donateurs",
+			"Difficulté à suivre l'avancement des projets, budgets et opérations terrain"
+		],
+		solutions: [
+			"Integrated member portals with directories and email automation",
+			"Centralized database for donor records, grants, and campaign metrics",
+			"Interactive website showcasing impact reports and donation channels",
+			"Collaborative project management tools for field coordinators"
+		],
+		solutionsFr: [
+			"Portails membres intégrés avec annuaires et automatisation d'e-mails",
+			"Base de données centralisée pour les donateurs, subventions et campagnes",
+			"Site web interactif présentant les rapports d'impact et canaux de dons",
+			"Outils collaboratifs de gestion de projet pour coordinateurs de terrain"
+		],
+		benefits: [
+			"Enhanced community engagement and volunteer coordination",
+			"Streamlined donor reporting and transparent budget tracking",
+			"Time saved by replacing manual sheets with central cloud tools",
+			"Strengthened professional reputation with corporate sponsors and international donors"
+		],
+		benefitsFr: [
+			"Engagement communautaire et coordination des bénévoles renforcés",
+			"Rapports aux donateurs simplifiés et suivi budgétaire transparent",
+			"Gain de temps en remplaçant les feuilles de calcul manuelles",
+			"Réputation professionnelle renforcée auprès des sponsors et donateurs"
+		],
+		displayOrder: 4
+	}
+];
+

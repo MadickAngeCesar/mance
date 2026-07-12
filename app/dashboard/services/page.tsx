@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Tx } from "@/components/i18n/tx";
 import { OfferingForm } from "@/components/dashboard/offering_form";
 import { OfferingList } from "@/components/dashboard/offering_list";
+import { SectorForm } from "@/components/dashboard/sector_form";
+import { SectorList } from "@/components/dashboard/sector_list";
 import { TestimonialForm } from "@/components/dashboard/testimonial_form";
 import { TestimonialsList } from "@/components/dashboard/testimonials_list";
 import { WorkflowStageForm } from "@/components/dashboard/workflow_stage_form";
@@ -28,6 +30,19 @@ export default function ServicesDashboardPage() {
 			</div>
 
 			<OfferingList />
+
+			{/* Target Sectors Section */}
+			<div className="flex flex-wrap items-end justify-between gap-3 pt-2">
+				<div className="space-y-1">
+					<h2 className="text-xl font-semibold tracking-tight"><Tx en="Target Sectors" fr="Secteurs Cibles" /></h2>
+					<p className="text-sm text-muted-foreground">
+						<Tx en="Manage flyer content, challenges, and outcomes for your key business sectors." fr="Gérez le contenu des flyers, les défis et les résultats pour vos secteurs d'activité clés." />
+					</p>
+				</div>
+				<SectorForm />
+			</div>
+
+			<SectorList />
 
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div className="space-y-1">

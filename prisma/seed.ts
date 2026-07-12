@@ -29,6 +29,7 @@ import {
   workflowStages,
   academyResources,
   teamMembers,
+  targetSectors,
 } from "../lib/placeholder-data";
 
 // Parse CLI arguments to support partial seeding
@@ -80,6 +81,9 @@ function mapFreelancePlatform(value: string): FreelancePlatformName {
  */
 async function seedCore(options: SeedOptions) {
   console.log("🌱 Seeding core profile data...");
+  console.log("DEBUG: DATABASE_URL =", process.env.DATABASE_URL);
+  console.log("DEBUG: DIRECT_DATABASE_URL =", process.env.DIRECT_DATABASE_URL);
+  console.log("DEBUG: prisma client is initialized");
 
   // Check if profile already exists
   let brandProfileId: string;
@@ -119,6 +123,7 @@ async function seedCore(options: SeedOptions) {
       prisma.brandProfile.deleteMany(),
       prisma.academyResource.deleteMany(),
       prisma.teamMember.deleteMany(),
+      prisma.targetSector.deleteMany(),
     ]);
   }
 
@@ -252,6 +257,27 @@ async function seedCore(options: SeedOptions) {
     })),
   });
   console.log("✓ Offerings created");
+
+  // Create target sectors
+  await prisma.targetSector.createMany({
+    data: targetSectors.map((item) => ({
+      slug: item.slug,
+      title: item.title,
+      titleFr: item.titleFr,
+      description: item.description,
+      descriptionFr: item.descriptionFr,
+      iconSlug: item.iconSlug,
+      challenges: item.challenges,
+      challengesFr: item.challengesFr || [],
+      solutions: item.solutions,
+      solutionsFr: item.solutionsFr || [],
+      benefits: item.benefits,
+      benefitsFr: item.benefitsFr || [],
+      displayOrder: item.displayOrder,
+      brandProfileId,
+    })),
+  });
+  console.log("✓ Target sectors created");
 
   // Create workflow stages
   await prisma.workflowStage.createMany({

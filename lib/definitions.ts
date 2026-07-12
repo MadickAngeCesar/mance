@@ -99,6 +99,23 @@ export type Offering = {
 	ctaUrl: string;
 };
 
+export type TargetSector = {
+	id: string;
+	slug: string;
+	title: string;
+	titleFr?: string | null;
+	description: string;
+	descriptionFr?: string | null;
+	iconSlug: string;
+	challenges: string[];
+	challengesFr?: string[];
+	solutions: string[];
+	solutionsFr?: string[];
+	benefits: string[];
+	benefitsFr?: string[];
+	displayOrder: number;
+};
+
 export type WorkflowStage = {
 	step: number;
 	title: string;

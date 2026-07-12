@@ -4,7 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
@@ -98,6 +98,7 @@ model BrandProfile {
   mainWorkHighlights        MainWorkHighlight[]
   offerings                 Offering[]
   workflowStages            WorkflowStage[]
+  targetSectors             TargetSector[]
 }
 
 model AboutSummary {
@@ -245,6 +246,28 @@ model WorkflowStage {
   brandProfileId String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+
+  brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+}
+
+model TargetSector {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  title          String
+  titleFr        String?
+  description    String
+  descriptionFr  String?
+  iconSlug       String       // "Hotel", "Briefcase", "Activity", "Users"
+  challenges     String[]
+  challengesFr   String[]
+  solutions      String[]
+  solutionsFr    String[]
+  benefits       String[]
+  benefitsFr     String[]
+  displayOrder   Int          @default(0)
+  brandProfileId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   brandProfile   BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
 }

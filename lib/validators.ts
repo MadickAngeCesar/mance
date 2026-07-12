@@ -306,6 +306,37 @@ export const ServiceQuerySchema = z.object({
 
 export type ServiceQuery = z.infer<typeof ServiceQuerySchema>;
 
+export const TargetSectorCreateSchema = z.object({
+  title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
+  description: z.string().min(1, "Description is required.").max(1000),
+  descriptionFr: z.string().max(1000).optional().nullable(),
+  iconSlug: z.string().min(1, "Icon is required.").max(100),
+  challenges: z.array(z.string()).default([]),
+  challengesFr: z.array(z.string()).default([]),
+  solutions: z.array(z.string()).default([]),
+  solutionsFr: z.array(z.string()).default([]),
+  benefits: z.array(z.string()).default([]),
+  benefitsFr: z.array(z.string()).default([]),
+  displayOrder: z.coerce.number().int().default(0),
+});
+
+export type TargetSectorCreate = z.infer<typeof TargetSectorCreateSchema>;
+
+export const TargetSectorUpdateSchema = TargetSectorCreateSchema.partial().extend({
+  id: z.string(),
+});
+
+export type TargetSectorUpdate = z.infer<typeof TargetSectorUpdateSchema>;
+
+export const TargetSectorQuerySchema = z.object({
+  page: queryValue(z.coerce.number().int().positive().default(1)),
+  limit: queryValue(z.coerce.number().int().min(1).max(100).default(10)),
+});
+
+export type TargetSectorQuery = z.infer<typeof TargetSectorQuerySchema>;
+
+
 export const WorkflowStageCreateSchema = z.object({
   step: z.coerce.number().int().positive(),
   title: z.string().min(1, "Title is required.").max(200),

@@ -1,36 +1,29 @@
+import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
-const normalizePgSslMode = (connectionString: string) => {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(connectionString);
-  } catch {
-    return connectionString;
-  }
-
-  const sslMode = parsedUrl.searchParams.get("sslmode");
-  const useLibpqCompat = parsedUrl.searchParams.get("uselibpqcompat")?.toLowerCase() === "true";
-
-  // Keep current pg v8 behavior explicit and silence the deprecation warning.
-  if (!useLibpqCompat && (sslMode === "prefer" || sslMode === "require" || sslMode === "verify-ca")) {
-    parsedUrl.searchParams.set("sslmode", "verify-full");
-  }
-
-  return parsedUrl.toString();
-};
-
 const prismaClientSingleton = () => {
+  console.log("DEBUG: prismaClientSingleton started");
   const directConnectionString = process.env.DIRECT_DATABASE_URL;
   const databaseUrl = process.env.DATABASE_URL;
+
+  console.log("DEBUG: directConnectionString =", directConnectionString);
+  console.log("DEBUG: databaseUrl =", databaseUrl);
 
   if (!directConnectionString && !databaseUrl) {
     throw new Error("DIRECT_DATABASE_URL or DATABASE_URL environment variable must be defined.");
   }
 
   if (directConnectionString) {
-    const adapter = new PrismaPg({ connectionString: normalizePgSslMode(directConnectionString) });
+    console.log("DEBUG: Using directConnectionString adapter");
+    process.env.DATABASE_URL = directConnectionString;
+    const adapter = new PrismaPg({
+      connectionString: directConnectionString,
+      max: 1,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
     return new PrismaClient({ adapter });
   }
 
@@ -39,7 +32,13 @@ const prismaClientSingleton = () => {
     return new PrismaClient({ accelerateUrl: databaseUrl });
   }
 
-  const adapter = new PrismaPg({ connectionString: normalizePgSslMode(databaseUrl!) });
+  const pool = new Pool({
+    connectionString: databaseUrl!,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 };
 
@@ -52,3 +51,4 @@ export const prisma = globalThis.prisma ?? prismaClientSingleton();
 if (process.env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;
 }
+

@@ -106,6 +106,7 @@ export type TargetSector = {
 	titleFr?: string | null;
 	description: string;
 	descriptionFr?: string | null;
+	imageUrl?: string | null;
 	iconSlug: string;
 	challenges: string[];
 	challengesFr?: string[];

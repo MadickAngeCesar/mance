@@ -1077,6 +1077,7 @@ export const targetSectors: TargetSector[] = [
 		id: "sec-hospitality",
 		slug: "hospitality",
 		title: "Real estate / Hotels (Housing)",
+		imageUrl: "/images/services/hotels.jpg",
 		titleFr: "Hôtellerie & Hébergement",
 		description: "Operations dashboards, room and booking management systems, and guest experience portals for modern hotels.",
 		descriptionFr: "Tableaux de bord opérationnels, systèmes de gestion des chambres et réservations, et portails d'expérience client pour les hôtels modernes.",
@@ -1123,6 +1124,7 @@ export const targetSectors: TargetSector[] = [
 		id: "sec-cabinets",
 		slug: "professional-services",
 		title: "Firms",
+		imageUrl: "/images/services/firms.jpg",
 		titleFr: "Cabinets de Conseil & Services",
 		description: "Custom workflow automation, secure client portals, and document management for accounting, legal, and consulting firms.",
 		descriptionFr: "Automatisation de workflows, portails clients sécurisés et gestion documentaire pour cabinets juridiques, comptables et conseil.",
@@ -1169,6 +1171,7 @@ export const targetSectors: TargetSector[] = [
 		id: "sec-healthcare",
 		slug: "healthcare-hospitals",
 		title: "Healthcare",
+		imageUrl: "/images/services/healthcare.jpg",
 		titleFr: "Santé & Hôpitaux",
 		description: "Electronic health records, patient scheduling, and secure data interfaces designed for clinics and clinical administration.",
 		descriptionFr: "Dossiers de santé électroniques, planification de rendez-vous et interfaces de données sécurisées pour cliniques et administration clinique.",
@@ -1214,7 +1217,8 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-ngo",
 		slug: "ngos-associations",
-		title: "NGOs & Associations",
+		title: "NGOs",
+		imageUrl: "/images/services/ngos.jpg",
 		titleFr: "ONG & Associations",
 		description: "Member management portals, digital project tracking, and donor outreach platforms for non-profits and foundations.",
 		descriptionFr: "Portails de gestion des membres, suivi de projets numériques et plateformes de donateurs pour les associations et fondations.",
@@ -1260,7 +1264,8 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-smes",
 		slug: "smes-local-businesses",
-		title: "SMEs & Local Businesses",
+		title: "PMEs",
+		imageUrl: "/images/services/pmes.jpg",
 		titleFr: "PMEs & Commerces Locaux",
 		description: "Inventory management, local POS integrations, custom CRM portals, and bookkeeping automations.",
 		descriptionFr: "Gestion des stocks, intégrations de caisses locales, portails CRM personnalisés et automatisation de la comptabilité.",
@@ -1300,7 +1305,8 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-edutech",
 		slug: "edutech-learning-hubs",
-		title: "EduTech & Learning Hubs",
+		title: "Schools",
+		imageUrl: "/images/services/schools.jpg",
 		titleFr: "EduTech & Hubs d'Apprentissage",
 		description: "LMS integrations, training portals, course completion tracking, and downloadable resource libraries.",
 		descriptionFr: "Intégrations LMS, portails de formation, suivi d'achèvement des cours et bibliothèques de ressources téléchargeables.",
@@ -1337,45 +1343,5 @@ export const targetSectors: TargetSector[] = [
 		],
 		displayOrder: 6
 	},
-	{
-		id: "sec-it",
-		slug: "it-tech-services",
-		title: "IT & Tech Services",
-		titleFr: "Services Informatiques & Tech",
-		description: "API integrations, dashboard metrics, system monitoring utilities, and cloud pipeline automations.",
-		descriptionFr: "Intégrations d'API, indicateurs de tableaux de bord, utilitaires de surveillance de systèmes et automatisations cloud.",
-		iconSlug: "Laptop",
-		challenges: [
-			"High software licensing fees and complex workflows",
-			"Security threats and lack of automated backups",
-			"Siloed developer pipelines and system downtime"
-		],
-		challengesFr: [
-			"Frais de licence élevés et flux complexes",
-			"Menaces de sécurité et manque de sauvegardes automatisées",
-			"Pipelines de développement cloisonnés et temps d'arrêt"
-		],
-		solutions: [
-			"Custom dashboard monitors with real-time metrics",
-			"Hardened server configurations and automated backups",
-			"Custom scripting and API middleware integrations"
-		],
-		solutionsFr: [
-			"Moniteurs de tableaux de bord avec indicateurs en temps réel",
-			"Configurations de serveur sécurisées et sauvegardes automatiques",
-			"Scripts personnalisés et intégrations de middleware API"
-		],
-		benefits: [
-			"99.9% system uptime and operational security",
-			"Reduced operational software overhead costs",
-			"Streamlined and automated deployment cycles"
-		],
-		benefitsFr: [
-			"Disponibilité du système à 99,9% et sécurité opérationnelle",
-			"Réduction des coûts de logiciels opérationnels",
-			"Cycles de déploiement simplifiés et automatisés"
-		],
-		displayOrder: 7
-	}
 ];
 

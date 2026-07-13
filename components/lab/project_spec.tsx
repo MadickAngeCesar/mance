@@ -105,6 +105,11 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 										</Link>
 									</Button>
 								) : null}
+								<Button asChild className="w-full mt-2 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold">
+									<Link href={`/contact?subject=Web Development&message=Hi, I am interested in building a project similar to "${project.title}".`}>
+										<Tx en="Request Similar Project" fr="Demander un projet similaire" />
+									</Link>
+								</Button>
 							</div>
 						</CardContent>
 					</Card>

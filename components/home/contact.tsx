@@ -22,6 +22,8 @@ const subjects = [
   { EN: "Web Development", FR: "Développement Web" },
   { EN: "IT Support", FR: "Support IT" },
   { EN: "Technical Consulting", FR: "Conseil Technique" },
+  { EN: "Referral Partner", FR: "Partenaire de Parrainage" },
+  { EN: "Project Application", FR: "Candidature de Projet" },
   { EN: "Other", FR: "Autre" },
 ];
 
@@ -120,6 +122,32 @@ export function Contact() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [prefilledMessage, setPrefilledMessage] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const subjectParam = params.get("subject");
+      if (subjectParam) {
+        const matched = subjects.find(
+          (s) =>
+            s.EN.toLowerCase() === subjectParam.toLowerCase() ||
+            s.EN.toLowerCase().replace(/\s+/g, "") === subjectParam.toLowerCase().replace(/\s+/g, "") ||
+            (subjectParam.toLowerCase() === "referral" && s.EN === "Referral Partner") ||
+            (subjectParam.toLowerCase() === "apply" && s.EN === "Project Application")
+        );
+        if (matched) {
+          setSelectedSubject(matched.EN);
+        }
+      }
+      const messageParam = params.get("message");
+      if (messageParam) {
+        setPrefilledMessage(messageParam);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -244,8 +272,9 @@ export function Contact() {
               <select
                 name="subject"
                 aria-label={language === "FR" ? "Sujet" : "Subject"}
-                className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                defaultValue=""
+                className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
                 required
               >
                 <option
@@ -269,6 +298,8 @@ export function Contact() {
                 name="message"
                 aria-label={language === "FR" ? "Message" : "Message"}
                 placeholder={language === "FR" ? "Parlez-moi de votre projet" : "Tell me about your project"}
+                value={prefilledMessage}
+                onChange={(e) => setPrefilledMessage(e.target.value)}
                 required
                 rows={4}
               />

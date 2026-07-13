@@ -1,7 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tx } from "@/components/i18n/tx";
 import type { ClientWorkItem } from "@/lib/definitions";
 
 type ClientWorkSpecProps = {
@@ -43,11 +46,18 @@ export function ClientWorkSpec({ clientWorkItem }: ClientWorkSpecProps) {
 			</div>
 
 			<Card className="border-border/80">
-				<CardContent className="pt-1">
+				<CardContent className="pt-4 space-y-4">
 					<p className="text-sm leading-7 text-muted-foreground sm:text-base">
 						{clientWorkItem.content ??
 							"Placeholder client-work body. Replace this with real project background, implementation details, and outcomes."}
 					</p>
+					<div className="pt-2">
+						<Button asChild className="bg-primary hover:bg-primary/95 text-primary-foreground font-semibold">
+							<Link href={`/contact?subject=Web Development&message=Hi, I am interested in a digital solution similar to "${clientWorkItem.title}".`}>
+								<Tx en="Start a Similar Project" fr="Démarrer un projet similaire" />
+							</Link>
+						</Button>
+					</div>
 				</CardContent>
 			</Card>
 		</article>

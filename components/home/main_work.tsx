@@ -27,7 +27,7 @@ export async function MainWork() {
 	const items: MainWorkItem[] = [];
 
 	try {
-        const [labResult, clientWorkResult, academyResult] = await Promise.all([
+        const [labResult, clientWorkResult, labArticleResult] = await Promise.all([
             prisma.labProject.findMany({
                 where: { publishedAt: { not: null } },
                 take: 1,
@@ -38,7 +38,7 @@ export async function MainWork() {
                 take: 1,
                 orderBy: { publishedAt: 'desc' }
             }),
-            prisma.academyResource.findMany({
+            prisma.labArticle.findMany({
                 where: { publishedAt: { not: null } },
                 take: 1,
                 orderBy: { publishedAt: 'desc' }
@@ -73,17 +73,17 @@ export async function MainWork() {
             });
         }
 
-        if (academyResult[0]) {
+        if (labArticleResult[0]) {
             items.push({
-                id: academyResult[0].id,
-                title: academyResult[0].title,
-                titleFr: academyResult[0].titleFr,
+                id: labArticleResult[0].id,
+                title: labArticleResult[0].title,
+                titleFr: labArticleResult[0].titleFr,
                 kind: "ARTICLE",
-                summary: academyResult[0].description,
-                summaryFr: academyResult[0].descriptionFr,
-                href: `/academy`,
+                summary: labArticleResult[0].excerpt,
+                summaryFr: labArticleResult[0].excerptFr,
+                href: `/lab/${labArticleResult[0].slug}`,
                 featured: false,
-                imageUrl: academyResult[0].coverImageUrl || "/images/Profile.jpg",
+                imageUrl: labArticleResult[0].coverImageUrl || "/images/Profile.jpg",
             });
         }
 	} catch (error) {
@@ -96,12 +96,12 @@ export async function MainWork() {
 		<section className="space-y-6">
 			<div>
 				<h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                    <Tx en="Main Work" fr="Travail Principal" />
+                    <Tx en="Recent Work" fr="Travaux Récents" />
                 </h2>
 				<p className="mt-1 text-sm text-muted-foreground">
                     <Tx
-                        en="Featured projects, client work, and articles."
-                        fr="Projets mis en avant, travaux clients et articles."
+                        en="Recent projects, client work, and articles."
+                        fr="Projets récents, travaux clients et articles."
                     />
                 </p>
 			</div>

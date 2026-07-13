@@ -1123,47 +1123,65 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-cabinets",
 		slug: "professional-services",
-		title: "Firms",
+		title: "Firms & Professional Services",
 		imageUrl: "/images/services/firms.jpg",
-		titleFr: "Cabinets de Conseil & Services",
-		description: "Custom workflow automation, secure client portals, and document management for accounting, legal, and consulting firms.",
-		descriptionFr: "Automatisation de workflows, portails clients sécurisés et gestion documentaire pour cabinets juridiques, comptables et conseil.",
+		titleFr: "Cabinets Professionnels & Services",
+		description: "Optimize your operations, secure your data, and deliver a better client experience.",
+		descriptionFr: "Optimisez vos opérations, sécurisez vos données, et offrez une meilleure expérience client.",
 		iconSlug: "Briefcase",
 		challenges: [
-			"Scattered business documents and manual file tracking",
-			"Exposure of sensitive client files and compliance risks",
-			"Time lost on repetitive admin and client communication",
-			"Lack of structured collaboration between internal team members"
+			"Documents scattered everywhere",
+			"Manual file management",
+			"Poor internal collaboration",
+			"Sensitive data at risk",
+			"Time lost on repetitive tasks",
+			"Insufficient digital presence"
 		],
 		challengesFr: [
-			"Documents professionnels dispersés et suivi manuel des dossiers",
-			"Exposition de dossiers clients sensibles et risques de conformité",
-			"Temps perdu dans les tâches administratives et communications clients répétitives",
-			"Manque de collaboration structurée entre les membres de l'équipe"
+			"Documents dispersés",
+			"Gestion manuelle des dossiers",
+			"Faible collaboration interne",
+			"Données sensibles exposées",
+			"Perte de temps sur les tâches répétitives",
+			"Présence digitale insuffisante"
 		],
 		solutions: [
-			"Secure client portals for file exchange and project updates",
-			"Centralized document management systems with access control",
-			"Process automation workflows for billing, reminders, and intake",
-			"Tailored business software solutions integrated with cloud backups"
+			"Professional websites",
+			"Secure client portals",
+			"Document management",
+			"Cloud solutions",
+			"Process automation",
+			"Cybersecurity",
+			"IT support",
+			"Custom business applications"
 		],
 		solutionsFr: [
-			"Portails clients sécurisés pour l'échange de fichiers et les mises à jour",
-			"Systèmes de gestion documentaire centralisés avec contrôle d'accès",
-			"Workflows d'automatisation des processus pour factures, rappels et accueil",
-			"Solutions logicielles métier personnalisées intégrées aux sauvegardes cloud"
+			"Sites web professionnels",
+			"Portails clients sécurisés",
+			"Gestion documentaire",
+			"Solutions Cloud",
+			"Automatisation des processus",
+			"Cybersécurité",
+			"Support informatique",
+			"Applications métier sur mesure"
 		],
 		benefits: [
-			"Enhanced operational productivity and lower overhead costs",
-			"Secure client data compliance with advanced access controls",
-			"Unified internal database eliminating double-entry and manual tracking",
-			"More professional brand image with client-facing portals"
+			"Increased productivity",
+			"Reduced manual tasks",
+			"Improved collaboration",
+			"Stronger data security",
+			"Better client experience",
+			"More professional image",
+			"Sustainable growth"
 		],
 		benefitsFr: [
-			"Productivité opérationnelle accrue et réduction des coûts",
-			"Conformité des données clients avec contrôles d'accès avancés",
-			"Base de données interne unifiée éliminant la double saisie et le suivi manuel",
-			"Image de marque plus professionnelle grâce aux portails clients"
+			"Productivité accrue",
+			"Réduction des tâches manuelles",
+			"Collaboration améliorée",
+			"Sécurité renforcée",
+			"Meilleure expérience client",
+			"Image plus professionnelle",
+			"Croissance durable"
 		],
 		displayOrder: 2
 	},
@@ -1217,47 +1235,63 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-ngo",
 		slug: "ngos-associations",
-		title: "NGOs",
+		title: "NGOs & Associations",
 		imageUrl: "/images/services/ngos.jpg",
 		titleFr: "ONG & Associations",
-		description: "Member management portals, digital project tracking, and donor outreach platforms for non-profits and foundations.",
-		descriptionFr: "Portails de gestion des membres, suivi de projets numériques et plateformes de donateurs pour les associations et fondations.",
+		description: "Digital solutions that strengthen your mission, increase your visibility and create lasting change in your communities.",
+		descriptionFr: "Des solutions digitales qui renforcent votre mission, augmentent votre visibilité et créent un changement durable dans vos communautés.",
 		iconSlug: "Users",
 		challenges: [
-			"Inefficient member communication and manual contact tracking",
-			"Scattered data across spreadsheets making reporting complex",
-			"Low online visibility making it hard to attract donors and sponsors",
-			"Difficulty tracking project progress, budgets, and field operations"
+			"Difficulty communicating with members",
+			"Manual data management",
+			"Low online visibility",
+			"Difficulty tracking projects",
+			"Lack of collaborative tools",
+			"Loss of important documents"
 		],
 		challengesFr: [
-			"Communication inefficace avec les membres et suivi manuel des contacts",
-			"Données éparpillées sur tableurs rendant les rapports complexes",
-			"Faible visibilité en ligne rendant difficile l'attraction de donateurs",
-			"Difficulté à suivre l'avancement des projets, budgets et opérations terrain"
+			"Difficulté à communiquer avec les membres",
+			"Gestion manuelle des données",
+			"Faible visibilité en ligne",
+			"Difficulté à suivre les projets",
+			"Manque d'outils collaboratifs",
+			"Perte de documents importants"
 		],
 		solutions: [
-			"Integrated member portals with directories and email automation",
-			"Centralized database for donor records, grants, and campaign metrics",
-			"Interactive website showcasing impact reports and donation channels",
-			"Collaborative project management tools for field coordinators"
+			"Professional websites",
+			"Member portals",
+			"Digital project management",
+			"Cloud collaboration tools",
+			"Data security",
+			"IT support",
+			"Custom solutions"
 		],
 		solutionsFr: [
-			"Portails membres intégrés avec annuaires et automatisation d'e-mails",
-			"Base de données centralisée pour les donateurs, subventions et campagnes",
-			"Site web interactif présentant les rapports d'impact et canaux de dons",
-			"Outils collaboratifs de gestion de projet pour coordinateurs de terrain"
+			"Sites internet professionnels",
+			"Portails membres",
+			"Gestion de projets digitaux",
+			"Outils de collaboration cloud",
+			"Sécurité des données",
+			"Support informatique",
+			"Solutions sur mesure"
 		],
 		benefits: [
-			"Enhanced community engagement and volunteer coordination",
-			"Streamlined donor reporting and transparent budget tracking",
-			"Time saved by replacing manual sheets with central cloud tools",
-			"Strengthened professional reputation with corporate sponsors and international donors"
+			"Greater visibility",
+			"Simplified communication",
+			"Efficient member management",
+			"Secure data",
+			"Time savings",
+			"Better tracking of activities",
+			"More professionalism with partners and donors"
 		],
 		benefitsFr: [
-			"Engagement communautaire et coordination des bénévoles renforcés",
-			"Rapports aux donateurs simplifiés et suivi budgétaire transparent",
-			"Gain de temps en remplaçant les feuilles de calcul manuelles",
-			"Réputation professionnelle renforcée auprès des sponsors et donateurs"
+			"Plus grande visibilité",
+			"Communication simplifiée",
+			"Gestion efficace des membres",
+			"Données sécurisées",
+			"Gain de temps",
+			"Meilleur suivi des activités",
+			"Plus de professionnalisme avec les partenaires et donateurs"
 		],
 		displayOrder: 4
 	},
@@ -1305,41 +1339,65 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-edutech",
 		slug: "edutech-learning-hubs",
-		title: "Schools",
+		title: "Schools & Academies",
 		imageUrl: "/images/services/schools.jpg",
-		titleFr: "EduTech & Hubs d'Apprentissage",
-		description: "LMS integrations, training portals, course completion tracking, and downloadable resource libraries.",
-		descriptionFr: "Intégrations LMS, portails de formation, suivi d'achèvement des cours et bibliothèques de ressources téléchargeables.",
+		titleFr: "Écoles & Académies",
+		description: "Digital solutions designed to improve management, learning, and communication and enhance the experience of your entire school community.",
+		descriptionFr: "Solutions digitales conçues pour améliorer la gestion, l'apprentissage et la communication, et enrichir l'expérience de toute votre communauté scolaire.",
 		iconSlug: "GraduationCap",
 		challenges: [
-			"Difficulty tracking student progress and grading manually",
-			"Fragmented learning materials and PDF distribution",
-			"Low student engagement on static web pages"
+			"Manual management of results",
+			"Difficult communication with students",
+			"Lack of digital platform",
+			"Complex administrative tracking",
+			"Low online visibility",
+			"Dispersed school data"
 		],
 		challengesFr: [
-			"Difficulté à suivre les progrès des élèves et notation manuelle",
-			"Matériel d'apprentissage fragmenté et distribution de PDF",
-			"Faible engagement des élèves sur des pages web statiques"
+			"Gestion manuelle des résultats",
+			"Communication difficile avec les élèves",
+			"Absence de plateforme numérique",
+			"Suivi administratif complexe",
+			"Faible visibilité en ligne",
+			"Données scolaires dispersées"
 		],
 		solutions: [
-			"Interactive learner dashboards with completion tracking",
-			"Unified course repository and resource library hubs",
-			"Automated feedback systems and certificate generation"
+			"Modern website",
+			"Student portal",
+			"Results management",
+			"E-learning platform",
+			"Enrollment management",
+			"Collaboration tools",
+			"IT support",
+			"Data backup & security"
 		],
 		solutionsFr: [
-			"Tableaux de bord apprenant interactifs avec suivi d'achèvement",
-			"Dépôt de cours unifié et bibliothèque de ressources",
-			"Systèmes de retour d'information automatisés et génération de certificats"
+			"Site web moderne",
+			"Portail étudiant",
+			"Gestion des résultats",
+			"Plateforme e-learning",
+			"Gestion des inscriptions",
+			"Outils de collaboration",
+			"Support informatique",
+			"Sauvegarde & sécurité des données"
 		],
 		benefits: [
-			"Increased course completion rates",
-			"Streamlined teacher administrative workload",
-			"Scalable digital delivery of academic content"
+			"Improved communication",
+			"Simplified management",
+			"Better student experience",
+			"Reduced administrative workload",
+			"Centralized data",
+			"Modern image",
+			"Prepared for the digital future"
 		],
 		benefitsFr: [
-			"Augmentation des taux d'achèvement des cours",
-			"Allègement de la charge administrative des enseignants",
-			"Diffusion numérique évolutive du contenu académique"
+			"Communication améliorée",
+			"Gestion simplifiée",
+			"Meilleure expérience étudiante",
+			"Charge de travail administrative réduite",
+			"Données centralisées",
+			"Image moderne",
+			"Préparé pour le futur numérique"
 		],
 		displayOrder: 6
 	},

@@ -49,7 +49,9 @@ export function LabCard({
 	meta,
 	publishedAt,
 	problem,
+	problemFr,
 	solution,
+	solutionFr,
 	matchScore,
 }: LabCardProps) {
 	const [currentLikes, setCurrentLikes] = useState(likes);
@@ -208,7 +210,7 @@ export function LabCard({
 										<Tx en="Problem" fr="Problème" />
 									</div>
 									<p className="text-muted-foreground text-xs leading-5">
-										<Tx en={problem} fr={problem} />
+										<Tx en={problem} fr={problemFr || problem} />
 									</p>
 								</div>
 							)}
@@ -219,7 +221,7 @@ export function LabCard({
 										<Tx en="Solution" fr="Solution" />
 									</div>
 									<p className="text-muted-foreground text-xs leading-5">
-										<Tx en={solution} fr={solution} />
+										<Tx en={solution} fr={solutionFr || solution} />
 									</p>
 								</div>
 							)}

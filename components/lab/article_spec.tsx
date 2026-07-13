@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { CalendarDays } from "lucide-react";
 
@@ -5,13 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import { LikeButton } from "@/components/lab/like_button";
+import { useLanguage } from "@/components/i18n/language-provider";
+import { Tx } from "@/components/i18n/tx";
 import type { LabArticle } from "@/lib/definitions";
 
 type ArticleSpecProps = {
 	article: LabArticle;
 };
 
-function formatDate(value?: string) {
+function formatDate(value?: string, lang?: string) {
 	if (!value) {
 		return null;
 	}
@@ -21,7 +25,7 @@ function formatDate(value?: string) {
 		return null;
 	}
 
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(lang === "FR" ? "fr-FR" : "en-US", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -29,28 +33,34 @@ function formatDate(value?: string) {
 }
 
 export function ArticleSpec({ article }: ArticleSpecProps) {
+	const { language } = useLanguage();
 	const isPlaceholder = article.tags.includes("placeholder") || article.category.toLowerCase() === "placeholder";
-	const publishedOn = formatDate(article.publishedAt);
-	const readingTimeMinutes = Math.ceil(article.content.split(/\s+/).length / 200);
+	const publishedOn = formatDate(article.publishedAt, language);
+	const contentToAnalyze = language === "FR" ? (article.contentFr || article.content) : article.content;
+	const readingTimeMinutes = Math.ceil(contentToAnalyze.split(/\s+/).length / 200);
 
 	return (
 		<article className="space-y-6 sm:space-y-8">
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
-						Article
+						<Tx en="Article" fr="Article" />
 					</Badge>
 					{isPlaceholder ? (
 						<Badge variant="secondary" className="rounded-full">
-							Placeholder Preview
+							<Tx en="Placeholder Preview" fr="Aperçu fictif" />
 						</Badge>
 					) : null}
 					<Badge variant="secondary" className="rounded-full">
-						{article.category}
+						<Tx en={article.category} fr={article.categoryFr || article.category} />
 					</Badge>
 				</div>
-				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{article.title}</h1>
-				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{article.excerpt}</p>
+				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+					<Tx en={article.title} fr={article.titleFr || article.title} />
+				</h1>
+				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
+					<Tx en={article.excerpt} fr={article.excerptFr || article.excerpt} />
+				</p>
 			</header>
 
 			<div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
@@ -58,7 +68,7 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 					<div className="relative h-56 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-72 lg:h-80">
 						<Image
 							src={article.coverImageUrl}
-							alt={`${article.title} cover image`}
+							alt={language === "FR" ? `${article.titleFr || article.title} image de couverture` : `${article.title} cover image`}
 							fill
 							sizes="(min-width: 1024px) 33vw, 100vw"
 							className="object-cover"
@@ -75,7 +85,14 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 								</div>
 							) : null}
 							<div className="text-xs text-muted-foreground flex flex-col gap-3">
-								<span>~{readingTimeMinutes} min read • {article.views.toLocaleString()} views</span>
+								<span>
+									<Tx
+										en={`~${readingTimeMinutes} min read`}
+										fr={`~${readingTimeMinutes} min de lecture`}
+									/>{" "}
+									• {article.views.toLocaleString(language === "FR" ? "fr-FR" : "en-US")}{" "}
+									<Tx en="views" fr="vues" />
+								</span>
 								<div className="pt-1">
 									<LikeButton id={article.id} initialLikes={article.likes} kind="article" />
 								</div>
@@ -87,7 +104,7 @@ export function ArticleSpec({ article }: ArticleSpecProps) {
 				<section className="space-y-5 order-last lg:order-first lg:col-span-8">
 					<Card className="border-border/80">
 						<CardContent className="pt-4">
-							<MarkdownRenderer content={article.content} />
+							<MarkdownRenderer content={language === "FR" ? (article.contentFr || article.content) : article.content} />
 						</CardContent>
 					</Card>
 

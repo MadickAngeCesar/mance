@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { apiRequest } from "@/lib/client-api";
 import { cn } from "@/lib/utils";
 import { Tx } from "@/components/i18n/tx";
+import { useLanguage } from "@/components/i18n/language-provider";
 import { calculateVectorMatchScore } from "@/lib/vector-search";
 
 type LabFilter = "all" | "projects" | "case-studies";
@@ -94,6 +95,7 @@ const filterOptions: Array<{ value: LabFilter; labelEn: string; labelFr: string 
 ];
 
 export function LabList() {
+	const { language } = useLanguage();
 	const [projects, setProjects] = useState<ProjectItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
@@ -327,17 +329,17 @@ export function LabList() {
 					<Input
 						value={query}
 						onChange={(event) => onQueryChange(event.target.value)}
-						placeholder="Vector search (e.g. Next.js dashboard / cloud automation)"
+						placeholder={language === "FR" ? "Recherche vectorielle (ex. dashboard Next.js / cloud automation)" : "Vector search (e.g. Next.js dashboard / cloud automation)"}
 					/>
 					<select
 						value={sortBy}
 						onChange={(event) => onSortChange(event.target.value as LabSort)}
 						className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 					>
-						<option value="recent">Sort: Recent</option>
-						<option value="views">Sort: Most viewed</option>
-						<option value="likes">Sort: Most liked</option>
-						<option value="alpha">Sort: Alphabetical</option>
+						<option value="recent">{language === "FR" ? "Tri : Récent" : "Sort: Recent"}</option>
+						<option value="views">{language === "FR" ? "Tri : Les plus vus" : "Sort: Most viewed"}</option>
+						<option value="likes">{language === "FR" ? "Tri : Les plus aimés" : "Sort: Most liked"}</option>
+						<option value="alpha">{language === "FR" ? "Tri : Alphabétique" : "Sort: Alphabetical"}</option>
 					</select>
 				</div>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, ExternalLink, Github } from "lucide-react";
@@ -8,13 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import { Tx } from "@/components/i18n/tx";
 import { LikeButton } from "@/components/lab/like_button";
+import { useLanguage } from "@/components/i18n/language-provider";
 import type { LabProject } from "@/lib/definitions";
 
 type ProjectSpecProps = {
 	project: LabProject;
 };
 
-function formatDate(value?: string) {
+function formatDate(value?: string, lang?: string) {
 	if (!value) {
 		return null;
 	}
@@ -24,7 +27,7 @@ function formatDate(value?: string) {
 		return null;
 	}
 
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(lang === "FR" ? "fr-FR" : "en-US", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -32,25 +35,34 @@ function formatDate(value?: string) {
 }
 
 export function ProjectSpec({ project }: ProjectSpecProps) {
+	const { language } = useLanguage();
 	const isPlaceholder = project.tags.includes("placeholder");
-	const publishedOn = formatDate(project.publishedAt);
+	const publishedOn = formatDate(project.publishedAt, language);
 
 	return (
 		<article className="space-y-6 sm:space-y-8">
 			<header className="space-y-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline" className="rounded-full">
-						Project
+						<Tx en="Project" fr="Projet" />
 					</Badge>
 					{isPlaceholder ? (
 						<Badge variant="secondary" className="rounded-full">
-							Placeholder Preview
+							<Tx en="Placeholder Preview" fr="Aperçu fictif" />
 						</Badge>
 					) : null}
-					{project.featured ? <Badge className="rounded-full">Featured</Badge> : null}
+					{project.featured ? (
+						<Badge className="rounded-full">
+							<Tx en="Featured" fr="Mis en avant" />
+						</Badge>
+					) : null}
 				</div>
-				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.title}</h1>
-				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">{project.summary}</p>
+				<h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+					<Tx en={project.title} fr={project.titleFr || project.title} />
+				</h1>
+				<p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
+					<Tx en={project.summary} fr={project.summaryFr || project.summary} />
+				</p>
 			</header>
 
 			<div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
@@ -58,7 +70,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<div className="relative h-56 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-72 lg:h-80">
 						<Image
 							src={project.coverImageUrl}
-							alt={`${project.title} cover image`}
+							alt={language === "FR" ? `${project.titleFr || project.title} image de couverture` : `${project.title} cover image`}
 							fill
 							sizes="(min-width: 1024px) 33vw, 100vw"
 							className="object-cover"
@@ -69,7 +81,9 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					<Card className="border-border/80">
 						<CardContent className="space-y-4 pt-4">
 							<div>
-								<p className="text-xs uppercase tracking-wide text-muted-foreground">Tech stack</p>
+								<p className="text-xs uppercase tracking-wide text-muted-foreground">
+									<Tx en="Tech stack" fr="Technologies" />
+								</p>
 								<div className="mt-2 flex flex-wrap gap-1.5">
 									{project.stack.map((tech) => (
 										<Badge key={`${project.id}-${tech}`} variant="secondary" className="rounded-full">
@@ -81,11 +95,14 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 							{publishedOn ? (
 								<div className="flex items-center gap-2 text-xs text-muted-foreground">
 									<CalendarDays className="size-3.5" />
-									Published {publishedOn}
+									<Tx en={`Published ${publishedOn}`} fr={`Publié le ${publishedOn}`} />
 								</div>
 							) : null}
 							<div className="text-xs text-muted-foreground flex flex-col gap-3">
-								<span>{project.views.toLocaleString()} views</span>
+								<span>
+									{project.views.toLocaleString(language === "FR" ? "fr-FR" : "en-US")}{" "}
+									<Tx en="views" fr="vues" />
+								</span>
 								<div>
 									<LikeButton id={project.id} initialLikes={project.likes} kind="project" />
 								</div>
@@ -94,19 +111,25 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 								{project.demoUrl ? (
 									<Button asChild className="w-full justify-between">
 										<Link href={project.demoUrl} target="_blank" rel="noreferrer noopener">
-											Live Demo <ExternalLink className="size-3.5" />
+											<Tx en="Live Demo" fr="Démo en direct" /> <ExternalLink className="size-3.5" />
 										</Link>
 									</Button>
 								) : null}
 								{project.repoUrl ? (
 									<Button asChild variant="outline" className="w-full justify-between">
 										<Link href={project.repoUrl} target="_blank" rel="noreferrer noopener">
-											Source Code <Github className="size-3.5" />
+											<Tx en="Source Code" fr="Code source" /> <Github className="size-3.5" />
 										</Link>
 									</Button>
 								) : null}
 								<Button asChild className="w-full mt-2 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold">
-									<Link href={`/contact?subject=Web Development&message=Hi, I am interested in building a project similar to "${project.title}".`}>
+									<Link
+										href={
+											language === "FR"
+												? `/contact?subject=Développement Web&message=Bonjour, je suis intéressé par la création d'un projet similaire à "${project.titleFr || project.title}".`
+												: `/contact?subject=Web Development&message=Hi, I am interested in building a project similar to "${project.title}".`
+										}
+									>
 										<Tx en="Request Similar Project" fr="Demander un projet similaire" />
 									</Link>
 								</Button>
@@ -124,7 +147,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 										<Tx en="Problem Context" fr="Contexte du Problème" />
 									</h3>
 									<p className="text-xs leading-relaxed text-muted-foreground">
-										<Tx en={project.problem} fr={project.problem} />
+										<Tx en={project.problem} fr={project.problemFr || project.problem} />
 									</p>
 								</div>
 							)}
@@ -134,7 +157,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 										<Tx en="Solution Delivered" fr="Solution Livrée" />
 									</h3>
 									<p className="text-xs leading-relaxed text-muted-foreground">
-										<Tx en={project.solution} fr={project.solution} />
+										<Tx en={project.solution} fr={project.solutionFr || project.solution} />
 									</p>
 								</div>
 							)}
@@ -143,7 +166,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 
 					<Card className="border-border/80">
 						<CardContent className="pt-4">
-							<MarkdownRenderer content={project.content} />
+							<MarkdownRenderer content={language === "FR" ? (project.contentFr || project.content) : project.content} />
 						</CardContent>
 					</Card>
 
@@ -161,20 +184,24 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 
 			{project.screenshotUrls.length ? (
 				<section className="space-y-3">
-					<h2 className="text-xl font-semibold tracking-tight">Screenshots</h2>
+					<h2 className="text-xl font-semibold tracking-tight">
+						<Tx en="Screenshots" fr="Captures d'écran" />
+					</h2>
 					<div className="grid gap-3 sm:grid-cols-2">
 						{project.screenshotUrls.map((screenshot, index) => (
 							<div key={screenshot} className="space-y-2">
 								<div className="relative h-44 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-56 lg:h-64">
 									<Image
 										src={screenshot}
-										alt={`${project.title} screenshot ${index + 1}`}
+										alt={language === "FR" ? `${project.titleFr || project.title} capture d'écran ${index + 1}` : `${project.title} screenshot ${index + 1}`}
 										fill
 										sizes="(min-width: 640px) 50vw, 100vw"
 										className="object-cover"
 									/>
 								</div>
-								<p className="text-xs text-muted-foreground">Screenshot {index + 1}</p>
+								<p className="text-xs text-muted-foreground">
+									<Tx en={`Screenshot ${index + 1}`} fr={`Capture d'écran ${index + 1}`} />
+								</p>
 							</div>
 						))}
 					</div>

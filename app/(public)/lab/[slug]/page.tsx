@@ -9,6 +9,7 @@ import { ProjectSpec } from "@/components/lab/project_spec";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { GsapSection } from "@/components/home/gsap-section";
+import { Tx } from "@/components/i18n/tx";
 
 type LabDetailPageProps = {
   params: Promise<{
@@ -113,18 +114,18 @@ async function getLabNavigation(slug: string) {
     const [projects, articles, workItems] = await Promise.all([
       prisma.labProject.findMany({
         where: { publishedAt: { not: null } },
-        select: { slug: true, title: true, publishedAt: true },
+        select: { slug: true, title: true, titleFr: true, publishedAt: true },
       }),
       prisma.labArticle.findMany({
         where: { publishedAt: { not: null } },
-        select: { slug: true, title: true, publishedAt: true },
+        select: { slug: true, title: true, titleFr: true, publishedAt: true },
       }),
       prisma.clientWork.findMany({
         where: {
           slug: { not: null },
           publishedAt: { not: null },
         },
-        select: { slug: true, title: true, publishedAt: true },
+        select: { slug: true, title: true, titleFr: true, publishedAt: true },
       }),
     ]);
 
@@ -229,10 +230,10 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="size-3.5" />
-              <span>Back to Lab</span>
+              <span><Tx en="Back to Lab" fr="Retour au Lab" /></span>
             </Link>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-              Lab / Project Details
+              <Tx en="Lab / Project Details" fr="Lab / Détails du Projet" />
             </div>
           </div>
         </GsapSection>
@@ -250,9 +251,11 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
                   <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
-                  <span>Previous Entry</span>
+                  <span><Tx en="Previous Entry" fr="Entrée Précédente" /></span>
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.previous.title} fr={navigation.previous.titleFr || navigation.previous.title} />
+                </span>
               </Link>
             ) : (
               <div className="hidden sm:block" />
@@ -263,10 +266,12 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
                 className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                  <span>Next Entry</span>
+                  <span><Tx en="Next Entry" fr="Entrée Suivante" /></span>
                   <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.next.title} fr={navigation.next.titleFr || navigation.next.title} />
+                </span>
               </Link>
             ) : null}
           </div>
@@ -290,10 +295,10 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="size-3.5" />
-              <span>Back to Lab</span>
+              <span><Tx en="Back to Lab" fr="Retour au Lab" /></span>
             </Link>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-              Lab / Article Details
+              <Tx en="Lab / Article Details" fr="Lab / Détails de l'Article" />
             </div>
           </div>
         </GsapSection>
@@ -311,9 +316,11 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
                   <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
-                  <span>Previous Entry</span>
+                  <span><Tx en="Previous Entry" fr="Entrée Précédente" /></span>
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.previous.title} fr={navigation.previous.titleFr || navigation.previous.title} />
+                </span>
               </Link>
             ) : (
               <div className="hidden sm:block" />
@@ -324,10 +331,12 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
                 className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                  <span>Next Entry</span>
+                  <span><Tx en="Next Entry" fr="Entrée Suivante" /></span>
                   <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.next.title} fr={navigation.next.titleFr || navigation.next.title} />
+                </span>
               </Link>
             ) : null}
           </div>
@@ -354,10 +363,10 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="size-3.5" />
-              <span>Back to Services</span>
+              <span><Tx en="Back to Services" fr="Retour aux Services" /></span>
             </Link>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
-              Lab / Client Work Details
+              <Tx en="Lab / Client Work Details" fr="Lab / Détails du Travail Client" />
             </div>
           </div>
         </GsapSection>
@@ -375,9 +384,11 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
                   <ChevronLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
-                  <span>Previous Entry</span>
+                  <span><Tx en="Previous Entry" fr="Entrée Précédente" /></span>
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.previous.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.previous.title} fr={navigation.previous.titleFr || navigation.previous.title} />
+                </span>
               </Link>
             ) : (
               <div className="hidden sm:block" />
@@ -388,10 +399,12 @@ export default async function LabDetailPage({ params }: LabDetailPageProps) {
                 className="group flex flex-col justify-between gap-2 rounded-xl border border-border/70 bg-card/40 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 sm:text-right sm:items-end"
               >
                 <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                  <span>Next Entry</span>
+                  <span><Tx en="Next Entry" fr="Entrée Suivante" /></span>
                   <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
-                <span className="font-medium text-foreground leading-snug wrap-break-word">{navigation.next.title}</span>
+                <span className="font-medium text-foreground leading-snug wrap-break-word">
+                  <Tx en={navigation.next.title} fr={navigation.next.titleFr || navigation.next.title} />
+                </span>
               </Link>
             ) : null}
           </div>

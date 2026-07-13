@@ -52,7 +52,7 @@ export function CtaSection() {
 		try {
 			const projectLabels: Record<string, string> = {
 				"portfolio-platform": "Portfolio Platform",
-				"clinic-operations-dashboard": "Clinic Operations Dashboard",
+				"clinic-ops": "Clinic Operations Dashboard",
 				"finance-crm-modernization": "Finance CRM Modernization",
 				"general-collaboration": "General Open-Source Collaboration",
 			};
@@ -278,7 +278,7 @@ ${proposeForm.solution}
 					>
 						<motion.div
 							variants={modalVariants}
-							className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 dark:border-white/5 bg-card/90 backdrop-blur-xl p-8 shadow-2xl shadow-primary/10"
+							className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-3xl border border-white/10 dark:border-white/5 bg-card/90 backdrop-blur-xl p-8 shadow-2xl shadow-primary/10"
 							onClick={(e) => e.stopPropagation()}
 						>
 							{/* Top Accent Bar */}
@@ -314,7 +314,7 @@ ${proposeForm.solution}
 										</div>
 									</div>
 
-									<div className="space-y-4">
+									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
 										<div className="space-y-1.5">
 											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
 												<Tx en="Full Name" fr="Nom Complet" /> *
@@ -424,7 +424,7 @@ ${proposeForm.solution}
 										</div>
 									</div>
 
-									<div className="space-y-4">
+									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
 										{/* Ko-fi Direct Link */}
 										<a
 											href="https://ko-fi.com/angecesarmadick"
@@ -507,7 +507,7 @@ ${proposeForm.solution}
 										</div>
 									</div>
 
-									<div className="space-y-4">
+									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
 										<div className="grid gap-3 sm:grid-cols-2">
 											<div className="space-y-1.5">
 												<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">

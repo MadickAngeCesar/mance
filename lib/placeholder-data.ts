@@ -1076,7 +1076,7 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-hospitality",
 		slug: "hospitality",
-		title: "Hospitality & Hotel",
+		title: "Real estate / Hotels (Housing)",
 		titleFr: "Hôtellerie & Hébergement",
 		description: "Operations dashboards, room and booking management systems, and guest experience portals for modern hotels.",
 		descriptionFr: "Tableaux de bord opérationnels, systèmes de gestion des chambres et réservations, et portails d'expérience client pour les hôtels modernes.",
@@ -1122,7 +1122,7 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-cabinets",
 		slug: "professional-services",
-		title: "Professional Services & Consulting",
+		title: "Firms",
 		titleFr: "Cabinets de Conseil & Services",
 		description: "Custom workflow automation, secure client portals, and document management for accounting, legal, and consulting firms.",
 		descriptionFr: "Automatisation de workflows, portails clients sécurisés et gestion documentaire pour cabinets juridiques, comptables et conseil.",
@@ -1168,7 +1168,7 @@ export const targetSectors: TargetSector[] = [
 	{
 		id: "sec-healthcare",
 		slug: "healthcare-hospitals",
-		title: "Healthcare & Hospitals",
+		title: "Healthcare",
 		titleFr: "Santé & Hôpitaux",
 		description: "Electronic health records, patient scheduling, and secure data interfaces designed for clinics and clinical administration.",
 		descriptionFr: "Dossiers de santé électroniques, planification de rendez-vous et interfaces de données sécurisées pour cliniques et administration clinique.",

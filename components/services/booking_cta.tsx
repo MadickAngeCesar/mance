@@ -84,7 +84,7 @@ export async function BookingCta() {
 							size="lg"
 							className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-6 shadow-xl shadow-primary/10 group transition-all duration-300"
 						>
-							<Link href={ctaData.ctaUrl?.startsWith("/") ? ctaData.ctaUrl : "/#contact"}>
+							<Link href={/*ctaData.ctaUrl?.startsWith("/") ? ctaData.ctaUrl : */"/#contact"}>
 								<span className="uppercase text-xs tracking-wider">
 									<Tx en={ctaData.ctaText} fr={ctaData.ctaTextFr || ctaData.ctaText} />
 								</span>

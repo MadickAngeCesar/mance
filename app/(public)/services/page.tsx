@@ -124,12 +124,12 @@ export default function ServicesPage() {
       {/* 6. Client Testimonials Section */}
       <GsapSection animation="fade-up" delay={0.1}>
         <Testimonials />
-			<ReferralSection />
+        <BookingCta />
       </GsapSection>
 
-      {/* 7. Call to Action (BookingCta) Section */}
+      {/* 7. Referral Section */}
       <GsapSection animation="fade-up" delay={0.1}>
-        <BookingCta />
+			  <ReferralSection />
       </GsapSection>
     </main>
   );

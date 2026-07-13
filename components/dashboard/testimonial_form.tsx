@@ -111,11 +111,15 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 			const payload = {
 				clientName: String(formData.get("clientName") ?? ""),
 				clientRoleCompany: String(formData.get("clientRoleCompany") ?? ""),
+				clientRoleCompanyFr: String(formData.get("clientRoleCompanyFr") ?? "") || null,
 				rating: Number(formData.get("rating") ?? 5),
 				avatarUrl,
 				projectReference: String(formData.get("projectReference") ?? ""),
+				projectReferenceFr: String(formData.get("projectReferenceFr") ?? "") || null,
 				text: String(formData.get("text") ?? ""),
+				textFr: String(formData.get("textFr") ?? "") || null,
 				date: String(formData.get("date") ?? ""),
+				dateLabelFr: String(formData.get("dateLabelFr") ?? "") || null,
 			};
 
 			if (isEditMode && initialTestimonial) {
@@ -148,13 +152,18 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 				title: isEditMode ? "Modifier le temoignage" : "Creer un temoignage",
 				description: "Ajoutez une preuve sociale avec contexte client et impact du projet.",
 				name: "Nom du client",
-				role: "Role et entreprise",
+				role: "Role et entreprise (EN)",
+				roleFr: "Role et entreprise (FR)",
 				rating: "Evaluation",
 				avatar: "URL avatar",
 				avatarUpload: "Televerser l'avatar",
-				project: "Projet client (optionnel)",
+				project: "Projet client EN (optionnel)",
+				projectFr: "Projet client FR (optionnel)",
 				projectNone: "Aucun projet selectionne",
-				quote: "Citation",
+				quote: "Citation (EN)",
+				quoteFr: "Citation (FR)",
+				date: "Date (EN)",
+				dateFr: "Date (FR)",
 				save: isEditMode ? "Mettre a jour le temoignage" : "Enregistrer le temoignage",
 			};
 		}
@@ -164,13 +173,18 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 			title: isEditMode ? "Edit Testimonial" : "Create Testimonial",
 			description: "Capture social proof with role/company context and delivery impact notes.",
 			name: "Client Name",
-			role: "Role and Company",
+			role: "Role and Company (EN)",
+			roleFr: "Role and Company (FR)",
 			rating: "Rating",
 			avatar: "Avatar Image URL",
 			avatarUpload: "Upload Avatar Image",
-			project: "Client Project (optional)",
+			project: "Client Project EN (optional)",
+			projectFr: "Client Project FR (optional)",
 			projectNone: "No linked project",
-			quote: "Quote",
+			quote: "Quote (EN)",
+			quoteFr: "Quote (FR)",
+			date: "Date (EN)",
+			dateFr: "Date (FR)",
 			save: isEditMode ? "Update Testimonial" : "Save Testimonial",
 		};
 	}, [isEditMode, language]);
@@ -197,25 +211,31 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 						<label htmlFor="testimonial-name" className="text-xs font-medium text-muted-foreground">
 							{copy.name}
 						</label>
-						<Input id="testimonial-name" name="clientName" placeholder="Sarah Jean" defaultValue={initialTestimonial?.clientName} />
-					</div>
-					<div className="space-y-1.5">
-						<label htmlFor="testimonial-role" className="text-xs font-medium text-muted-foreground">
-							{copy.role}
-						</label>
-						<Input id="testimonial-role" name="clientRoleCompany" placeholder="Founder, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompany} />
+						<Input id="testimonial-name" name="clientName" placeholder="Sarah Jean" defaultValue={initialTestimonial?.clientName} required />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-rating" className="text-xs font-medium text-muted-foreground">
 							{copy.rating}
 						</label>
-						<select id="testimonial-rating" name="rating" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={String(initialTestimonial?.rating ?? 5)}>
+						<select id="testimonial-rating" name="rating" className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={String(initialTestimonial?.rating ?? 5)}>
 							<option value="5">{language === "FR" ? "5 etoiles" : "5 stars"}</option>
 							<option value="4">{language === "FR" ? "4 etoiles" : "4 stars"}</option>
 							<option value="3">{language === "FR" ? "3 etoiles" : "3 stars"}</option>
 						</select>
 					</div>
 					<div className="space-y-1.5">
+						<label htmlFor="testimonial-role" className="text-xs font-medium text-muted-foreground">
+							{copy.role}
+						</label>
+						<Input id="testimonial-role" name="clientRoleCompany" placeholder="Founder, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompany} required />
+					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-role-fr" className="text-xs font-medium text-muted-foreground">
+							{copy.roleFr}
+						</label>
+						<Input id="testimonial-role-fr" name="clientRoleCompanyFr" placeholder="Fondatrice, BrightPath Studio" defaultValue={initialTestimonial?.clientRoleCompanyFr ?? ""} />
+					</div>
+					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="testimonial-image" className="text-xs font-medium text-muted-foreground">
 							{copy.avatar}
 						</label>
@@ -226,11 +246,11 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 						<Input id="testimonial-image-file" name="avatarFile" type="file" accept="image/*" />
 						{uploadedAvatarUrl ? <p className="text-xs text-muted-foreground">Uploaded: {uploadedAvatarUrl}</p> : null}
 					</div>
-					<div className="space-y-1.5 md:col-span-2">
+					<div className="space-y-1.5">
 						<label htmlFor="testimonial-project" className="text-xs font-medium text-muted-foreground">
 							{copy.project}
 						</label>
-						<select id="testimonial-project" name="projectReference" className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={initialTestimonial?.projectReference ?? ""}>
+						<select id="testimonial-project" name="projectReference" className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm" defaultValue={initialTestimonial?.projectReference ?? ""}>
 							<option value="">{copy.projectNone}</option>
 							{projects.map((project) => (
 								<option key={project.id} value={project.title}>
@@ -239,23 +259,35 @@ export function TestimonialForm({ mode = "create", initialTestimonial, trigger }
 							))}
 						</select>
 					</div>
+					<div className="space-y-1.5">
+						<label htmlFor="testimonial-project-fr" className="text-xs font-medium text-muted-foreground">
+							{copy.projectFr}
+						</label>
+						<Input id="testimonial-project-fr" name="projectReferenceFr" placeholder="Référence projet en français" defaultValue={initialTestimonial?.projectReferenceFr ?? ""} />
+					</div>
 					<div className="space-y-1.5 md:col-span-2">
 						<label htmlFor="testimonial-text" className="text-xs font-medium text-muted-foreground">
 							{copy.quote}
 						</label>
-						<Textarea id="testimonial-text" name="text" placeholder="MAC TECH translated our rough idea into a complete platform..." rows={4} defaultValue={initialTestimonial?.text} />
+						<Textarea id="testimonial-text" name="text" placeholder="MAC TECH translated our rough idea into a complete platform..." rows={3} defaultValue={initialTestimonial?.text} required />
+					</div>
+					<div className="space-y-1.5 md:col-span-2">
+						<label htmlFor="testimonial-text-fr" className="text-xs font-medium text-muted-foreground">
+							{copy.quoteFr}
+						</label>
+						<Textarea id="testimonial-text-fr" name="textFr" placeholder="MAC TECH a traduit notre idée brute en une plateforme complète..." rows={3} defaultValue={initialTestimonial?.textFr ?? ""} />
 					</div>
 					<div className="space-y-1.5">
 						<label htmlFor="testimonial-date" className="text-xs font-medium text-muted-foreground">
-							{language === "FR" ? "Date" : "Date"}
+							{copy.date}
 						</label>
 						<Input id="testimonial-date" name="date" placeholder="January 2025" defaultValue={initialTestimonial?.date} />
 					</div>
 					<div className="space-y-1.5">
-						<label htmlFor="testimonial-project-reference" className="text-xs font-medium text-muted-foreground">
-							{language === "FR" ? "Reference projet" : "Project Reference"}
+						<label htmlFor="testimonial-date-fr" className="text-xs font-medium text-muted-foreground">
+							{copy.dateFr}
 						</label>
-						<Input id="testimonial-project-reference" placeholder="Project: Service Business Platform" defaultValue={initialTestimonial?.projectReference} disabled />
+						<Input id="testimonial-date-fr" name="dateLabelFr" placeholder="Janvier 2025" defaultValue={initialTestimonial?.dateFr ?? ""} />
 					</div>
 				</div>
 				</div>

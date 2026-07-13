@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { emitDashboardDataChanged } from "@/components/dashboard/data-events";
 import { apiRequest } from "@/lib/client-api";
 import type { LabProject } from "@/lib/definitions";
@@ -36,6 +37,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownDetails, setMarkdownDetails] = useState(initialProject?.content ?? "");
+	const [markdownDetailsFr, setMarkdownDetailsFr] = useState(initialProject?.contentFr ?? "");
 	const [editorView, setEditorView] = useState<"write" | "preview">("write");
 	const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 	const [uploadedScreenshots, setUploadedScreenshots] = useState<string[]>(initialProject?.screenshotUrls ?? []);
@@ -121,9 +123,12 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 
 			const payload = {
 				title: String(formData.get("title") ?? ""),
+				titleFr: String(formData.get("titleFr") ?? "") || null,
 				slug: String(formData.get("slug") ?? ""),
 				summary: String(formData.get("summary") ?? ""),
+				summaryFr: String(formData.get("summaryFr") ?? "") || null,
 				content: markdownDetails,
+				contentFr: markdownDetailsFr || null,
 				coverImageUrl,
 				featured: formData.get("featured") === "on",
 				stack: String(formData.get("stack") ?? "")
@@ -137,6 +142,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				screenshotUrls,
 				demoUrl: toOptionalAbsoluteUrl(String(formData.get("demoUrl") ?? "")),
 				repoUrl: toOptionalAbsoluteUrl(String(formData.get("repoUrl") ?? "")),
+				problem: String(formData.get("problem") ?? "") || null,
+				problemFr: String(formData.get("problemFr") ?? "") || null,
+				solution: String(formData.get("solution") ?? "") || null,
+				solutionFr: String(formData.get("solutionFr") ?? "") || null,
 				publishedAt:
 					intent === "publish"
 						? initialProject?.publishedAt ?? new Date().toISOString()
@@ -172,9 +181,12 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				create: "Creer un projet",
 				title: isEditMode ? "Modifier le projet" : "Creer un projet",
 				description: "Gerez les metadonnees du projet, la stack technique et les liens externes.",
-				labelTitle: "Titre",
-				labelSummary: "Resume",
-				labelDetails: "Contenu detaille (Markdown)",
+				labelTitle: "Titre (EN)",
+				labelTitleFr: "Titre (FR)",
+				labelSummary: "Resume (EN)",
+				labelSummaryFr: "Resume (FR)",
+				labelDetails: "Contenu detaille EN (Markdown)",
+				labelDetailsFr: "Contenu detaille FR (Markdown)",
 				labelImage: "URL image de couverture",
 				labelImageUpload: "Televerser l'image de couverture",
 				labelStack: "Stack technique",
@@ -183,6 +195,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 				labelDemo: "URL de demo",
 				labelRepo: "URL du depot",
 				labelFeatured: "Mis en avant",
+				labelProblem: "Problematique (EN)",
+				labelProblemFr: "Problematique (FR)",
+				labelSolution: "Solution apportee (EN)",
+				labelSolutionFr: "Solution apportee (FR)",
 				write: "Ecrire",
 				previewOnly: "Apercu",
 				preview: "Apercu Markdown",
@@ -195,9 +211,12 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			create: "Create Project",
 			title: isEditMode ? "Edit Project" : "Create Project",
 			description: "Maintain project metadata, technical stack, and external links for your lab showcase.",
-			labelTitle: "Title",
-			labelSummary: "Summary",
-			labelDetails: "Detailed Content (Markdown)",
+			labelTitle: "Title (EN)",
+			labelTitleFr: "Title (FR)",
+			labelSummary: "Summary (EN)",
+			labelSummaryFr: "Summary (FR)",
+			labelDetails: "Detailed Content EN (Markdown)",
+			labelDetailsFr: "Detailed Content FR (Markdown)",
 			labelImage: "Cover Image URL",
 			labelImageUpload: "Upload Cover Image",
 			labelStack: "Tech Stack",
@@ -206,6 +225,10 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			labelDemo: "Demo URL",
 			labelRepo: "Repository URL",
 			labelFeatured: "Featured",
+			labelProblem: "Problem (EN)",
+			labelProblemFr: "Problem (FR)",
+			labelSolution: "Solution (EN)",
+			labelSolutionFr: "Solution (FR)",
 			write: "Write",
 			previewOnly: "Preview",
 			preview: "Markdown Preview",
@@ -220,6 +243,7 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 			if (!newOpen) {
 				setEditorView("write");
 				setMarkdownDetails(initialProject?.content ?? "");
+				setMarkdownDetailsFr(initialProject?.contentFr ?? "");
 				setUploadedCoverUrl(null);
 				if (!isEditMode) {
 					setUploadedScreenshots([]);
@@ -243,11 +267,17 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 					</DialogHeader>
 					<div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-4 sm:px-5">
 						<div className="grid gap-3 md:grid-cols-2">
-							<div className="space-y-1.5 md:col-span-2">
+							<div className="space-y-1.5">
 								<label htmlFor="project-title" className="text-xs font-medium text-muted-foreground">
 									{copy.labelTitle}
 								</label>
 								<Input id="project-title" name="title" placeholder="Finance CRM Modernization" defaultValue={initialProject?.title} />
+							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="project-title-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelTitleFr}
+								</label>
+								<Input id="project-title-fr" name="titleFr" placeholder="Modernisation du CRM Finance" defaultValue={initialProject?.titleFr ?? ""} />
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="project-slug" className="text-xs font-medium text-muted-foreground">
@@ -259,58 +289,147 @@ export function ProjectForm({ mode = "create", initialProject, trigger }: Projec
 								<label htmlFor="project-summary" className="text-xs font-medium text-muted-foreground">
 									{copy.labelSummary}
 								</label>
-								<Textarea id="project-summary" name="summary" placeholder="Short problem and solution summary." rows={3} defaultValue={initialProject?.summary} />
+								<Textarea id="project-summary" name="summary" placeholder="Short problem and solution summary." rows={2} defaultValue={initialProject?.summary} />
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
-								<div className="flex items-center justify-between gap-3">
-									<label htmlFor="project-content" className="text-xs font-medium text-muted-foreground">
-										{copy.labelDetails}
-									</label>
-									<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
-										<button
-											type="button"
-											onClick={() => setEditorView("write")}
-											className={cn(
-												"rounded-md px-2.5 py-1 text-xs font-medium transition",
-												editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
-											)}
-										>
-											{copy.write}
-										</button>
-										<button
-											type="button"
-											onClick={() => setEditorView("preview")}
-											className={cn(
-												"rounded-md px-2.5 py-1 text-xs font-medium transition",
-												editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
-											)}
-										>
-											{copy.previewOnly}
-										</button>
-									</div>
-								</div>
-								<div className="grid gap-3 md:grid-cols-2">
-									<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
-										<Textarea
-											id="project-content"
-											placeholder={language === "FR" ? "Ecrivez le contenu detaille en Markdown." : "Write detailed content in Markdown."}
-											rows={14}
-											className="min-h-60 md:min-h-72"
-											value={markdownDetails}
-											onChange={(event) => setMarkdownDetails(event.target.value)}
-										/>
-									</div>
-									<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
-										<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
-										<div className="max-h-[48vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
-											<MarkdownRenderer
-												content={markdownDetails}
-												emptyState={language === "FR" ? "Aucun contenu pour le moment." : "No content yet."}
-												className="text-sm"
-											/>
+								<label htmlFor="project-summary-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelSummaryFr}
+								</label>
+								<Textarea id="project-summary-fr" name="summaryFr" placeholder="Bref résumé de la problématique et de la solution." rows={2} defaultValue={initialProject?.summaryFr ?? ""} />
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<Tabs defaultValue="en" className="w-full">
+									<TabsList className="mb-2">
+										<TabsTrigger value="en">English Content</TabsTrigger>
+										<TabsTrigger value="fr">Contenu Français</TabsTrigger>
+									</TabsList>
+									<TabsContent value="en" className="space-y-2">
+										<div className="flex items-center justify-between gap-3">
+											<label htmlFor="project-content" className="text-xs font-medium text-muted-foreground">
+												{copy.labelDetails}
+											</label>
+											<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
+												<button
+													type="button"
+													onClick={() => setEditorView("write")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.write}
+												</button>
+												<button
+													type="button"
+													onClick={() => setEditorView("preview")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.previewOnly}
+												</button>
+											</div>
 										</div>
-									</div>
-								</div>
+										<div className="grid gap-3 md:grid-cols-2">
+											<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
+												<Textarea
+													id="project-content"
+													placeholder="Write detailed content in Markdown."
+													rows={10}
+													className="min-h-40 md:min-h-52"
+													value={markdownDetails}
+													onChange={(event) => setMarkdownDetails(event.target.value)}
+												/>
+											</div>
+											<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
+												<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
+												<div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
+													<MarkdownRenderer
+														content={markdownDetails}
+														emptyState="No content yet."
+														className="text-sm"
+													/>
+												</div>
+											</div>
+										</div>
+									</TabsContent>
+									<TabsContent value="fr" className="space-y-2">
+										<div className="flex items-center justify-between gap-3">
+											<label htmlFor="project-content-fr" className="text-xs font-medium text-muted-foreground">
+												{copy.labelDetailsFr}
+											</label>
+											<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
+												<button
+													type="button"
+													onClick={() => setEditorView("write")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.write}
+												</button>
+												<button
+													type="button"
+													onClick={() => setEditorView("preview")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.previewOnly}
+												</button>
+											</div>
+										</div>
+										<div className="grid gap-3 md:grid-cols-2">
+											<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
+												<Textarea
+													id="project-content-fr"
+													placeholder="Écrivez le contenu détaillé en Markdown."
+													rows={10}
+													className="min-h-40 md:min-h-52"
+													value={markdownDetailsFr}
+													onChange={(event) => setMarkdownDetailsFr(event.target.value)}
+												/>
+											</div>
+											<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
+												<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
+												<div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
+													<MarkdownRenderer
+														content={markdownDetailsFr}
+														emptyState="Aucun contenu pour le moment."
+														className="text-sm"
+													/>
+												</div>
+											</div>
+										</div>
+									</TabsContent>
+								</Tabs>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="project-problem" className="text-xs font-medium text-muted-foreground">
+									{copy.labelProblem}
+								</label>
+								<Textarea id="project-problem" name="problem" placeholder="Describe the challenge or problem statement." rows={2} defaultValue={initialProject?.problem ?? ""} />
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="project-problem-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelProblemFr}
+								</label>
+								<Textarea id="project-problem-fr" name="problemFr" placeholder="Décrivez le défi ou la problématique." rows={2} defaultValue={initialProject?.problemFr ?? ""} />
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="project-solution" className="text-xs font-medium text-muted-foreground">
+									{copy.labelSolution}
+								</label>
+								<Textarea id="project-solution" name="solution" placeholder="Describe the implemented solution." rows={2} defaultValue={initialProject?.solution ?? ""} />
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="project-solution-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelSolutionFr}
+								</label>
+								<Textarea id="project-solution-fr" name="solutionFr" placeholder="Décrivez la solution mise en œuvre." rows={2} defaultValue={initialProject?.solutionFr ?? ""} />
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="project-image" className="text-xs font-medium text-muted-foreground">

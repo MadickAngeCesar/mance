@@ -24,8 +24,11 @@ type WorkflowStageItem = {
   id: string;
   step: number;
   title: string;
+  titleFr?: string | null;
   subtitle: string;
+  subtitleFr?: string | null;
   details: string;
+  detailsFr?: string | null;
 };
 
 type WorkflowStageFormProps = {
@@ -47,8 +50,11 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
 
     const step = Number(formData.get("step") ?? 0);
     const title = String(formData.get("title") ?? "").trim();
+    const titleFr = String(formData.get("titleFr") ?? "").trim() || null;
     const subtitle = String(formData.get("subtitle") ?? "").trim();
+    const subtitleFr = String(formData.get("subtitleFr") ?? "").trim() || null;
     const details = String(formData.get("details") ?? "").trim();
+    const detailsFr = String(formData.get("detailsFr") ?? "").trim() || null;
 
     if (!step || !title || !subtitle || !details) {
       setError("Step, title, subtitle, and details are required.");
@@ -63,13 +69,13 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
         await apiRequest(`/api/workflow-stages/${initialStage.id}`, {
           method: "PATCH",
           auth: true,
-          body: JSON.stringify({ step, title, subtitle, details }),
+          body: JSON.stringify({ step, title, titleFr, subtitle, subtitleFr, details, detailsFr }),
         });
       } else {
         await apiRequest("/api/workflow-stages", {
           method: "POST",
           auth: true,
-          body: JSON.stringify({ step, title, subtitle, details }),
+          body: JSON.stringify({ step, title, titleFr, subtitle, subtitleFr, details, detailsFr }),
         });
       }
 
@@ -88,12 +94,24 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
           create: "Ajouter une etape",
           title: isEditMode ? "Modifier l'etape" : "Ajouter une etape",
           description: "Configurez les etapes de delivery affichees sur la page services.",
+          labelTitle: "Titre (EN)",
+          labelTitleFr: "Titre (FR)",
+          labelSubtitle: "Sous-titre (EN)",
+          labelSubtitleFr: "Sous-titre (FR)",
+          labelDetails: "Details (EN)",
+          labelDetailsFr: "Details (FR)",
           save: isEditMode ? "Mettre a jour" : "Enregistrer",
         }
       : {
           create: "Add Stage",
           title: isEditMode ? "Edit Stage" : "Add Stage",
           description: "Configure delivery workflow stages shown on the services page.",
+          labelTitle: "Title (EN)",
+          labelTitleFr: "Title (FR)",
+          labelSubtitle: "Subtitle (EN)",
+          labelSubtitleFr: "Subtitle (FR)",
+          labelDetails: "Details (EN)",
+          labelDetailsFr: "Details (FR)",
           save: isEditMode ? "Update Stage" : "Save Stage",
         };
 
@@ -130,43 +148,84 @@ export function WorkflowStageForm({ mode = "create", initialStage, trigger }: Wo
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="workflow-title" className="text-xs font-medium text-muted-foreground">
-                Title
-              </label>
-              <Input
-                id="workflow-title"
-                name="title"
-                placeholder="Discovery and Planning"
-                defaultValue={initialStage?.title}
-                required
-              />
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="workflow-title" className="text-xs font-medium text-muted-foreground">
+                  {copy.labelTitle}
+                </label>
+                <Input
+                  id="workflow-title"
+                  name="title"
+                  placeholder="Discovery and Planning"
+                  defaultValue={initialStage?.title}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="workflow-title-fr" className="text-xs font-medium text-muted-foreground">
+                  {copy.labelTitleFr}
+                </label>
+                <Input
+                  id="workflow-title-fr"
+                  name="titleFr"
+                  placeholder="Cadrage & Planification"
+                  defaultValue={initialStage?.titleFr ?? ""}
+                />
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="workflow-subtitle" className="text-xs font-medium text-muted-foreground">
-                Subtitle
-              </label>
-              <Input
-                id="workflow-subtitle"
-                name="subtitle"
-                placeholder="Align scope, goals, and milestones"
-                defaultValue={initialStage?.subtitle}
-                required
-              />
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="workflow-subtitle" className="text-xs font-medium text-muted-foreground">
+                  {copy.labelSubtitle}
+                </label>
+                <Input
+                  id="workflow-subtitle"
+                  name="subtitle"
+                  placeholder="Align scope, goals, and milestones"
+                  defaultValue={initialStage?.subtitle}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="workflow-subtitle-fr" className="text-xs font-medium text-muted-foreground">
+                  {copy.labelSubtitleFr}
+                </label>
+                <Input
+                  id="workflow-subtitle-fr"
+                  name="subtitleFr"
+                  placeholder="Alignement du périmètre et jalons"
+                  defaultValue={initialStage?.subtitleFr ?? ""}
+                />
+              </div>
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="workflow-details" className="text-xs font-medium text-muted-foreground">
-                Details
+                {copy.labelDetails}
               </label>
               <Textarea
                 id="workflow-details"
                 name="details"
                 placeholder="Kickoff, requirements mapping, and implementation timeline with clear ownership."
-                rows={4}
+                rows={3}
                 defaultValue={initialStage?.details}
                 required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="workflow-details-fr" className="text-xs font-medium text-muted-foreground">
+                {copy.labelDetailsFr}
+              </label>
+              <Textarea
+                id="workflow-details-fr"
+                name="detailsFr"
+                placeholder="Kickoff, cartographie des exigences et calendrier d'exécution."
+                rows={3}
+                defaultValue={initialStage?.detailsFr ?? ""}
               />
             </div>
           </div>

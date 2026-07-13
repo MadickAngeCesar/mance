@@ -17,15 +17,19 @@ async function resolveId(context: RouteContext) {
 const TestimonialUpdateSchema = z.object({
   clientName: z.string().min(1).max(200).optional(),
   clientRoleCompany: z.string().min(1).max(200).optional(),
+  clientRoleCompanyFr: z.string().max(200).optional().nullable(),
   text: z.string().min(1).max(3000).optional(),
+  textFr: z.string().min(1).max(3000).optional().nullable(),
   avatarUrl: z
     .string()
     .refine((value) => value.startsWith("/") || /^https?:\/\//.test(value), "Invalid avatar URL")
     .optional(),
   rating: z.coerce.number().int().min(1).max(5).optional(),
   projectReference: z.string().max(300).optional(),
+  projectReferenceFr: z.string().max(300).optional().nullable(),
   date: z.string().max(100).optional(),
   dateLabel: z.string().max(100).optional(),
+  dateLabelFr: z.string().max(100).optional().nullable(),
 });
 
 async function handleGet(
@@ -70,11 +74,15 @@ async function handlePatch(
     data: {
       clientName: body.clientName,
       clientRoleCompany: body.clientRoleCompany,
+      clientRoleCompanyFr: body.clientRoleCompanyFr,
       text: body.text,
+      textFr: body.textFr,
       avatarUrl: body.avatarUrl === undefined ? existing.avatarUrl : body.avatarUrl,
       rating: body.rating,
       projectReference: body.projectReference,
+      projectReferenceFr: body.projectReferenceFr,
       dateLabel: body.date ?? body.dateLabel ?? existing.dateLabel,
+      dateLabelFr: body.dateLabelFr ?? existing.dateLabelFr,
     },
   });
 

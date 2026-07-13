@@ -15,42 +15,57 @@ type ProfilePayload = {
 		currentName: string;
 		currentDomain: string;
 		headline: string;
+		headlineFr: string;
 		roleTagline: string;
+		roleTaglineFr: string;
 		subTagline: string;
+		subTaglineFr: string;
 		freelanceAvailabilityLabel: string;
+		freelanceAvailabilityLabelFr: string;
 		jobAvailabilityLabel: string;
+		jobAvailabilityLabelFr: string;
 	};
 	aboutSummary: {
 		biography: string;
+		biographyFr: string;
 		cvDownloadUrl: string;
 		interests: string[];
+		interestsFr: string[];
 	};
 	contactDetails: {
 		email: string;
 		phone: string;
 		location: string;
+		locationFr: string;
 	};
 };
 
 type EducationItem = {
 	id: string;
 	title: string;
+	titleFr?: string | null;
 	institution: string;
+	institutionFr?: string | null;
 	period: string;
 	location?: string | null;
+	locationFr?: string | null;
 };
 
 type ExperienceItem = {
 	id: string;
 	role: string;
+	roleFr?: string | null;
 	company: string;
+	companyFr?: string | null;
 	period: string;
 	summary: string;
+	summaryFr?: string | null;
 };
 
 type SkillItem = {
 	id: string;
 	name: string;
+	nameFr?: string | null;
 	category: "FRONTEND" | "BACKEND" | "DEVOPS" | "IT_SUPPORT" | "TOOLS" | "LANGUAGES";
 	proficiency: number;
 	iconSlug?: string;
@@ -127,20 +142,28 @@ export function ProfileForm() {
 			currentName: "",
 			currentDomain: "",
 			headline: "",
+			headlineFr: "",
 			roleTagline: "",
+			roleTaglineFr: "",
 			subTagline: "",
+			subTaglineFr: "",
 			freelanceAvailabilityLabel: "",
+			freelanceAvailabilityLabelFr: "",
 			jobAvailabilityLabel: "",
+			jobAvailabilityLabelFr: "",
 		},
 		aboutSummary: {
 			biography: "",
+			biographyFr: "",
 			cvDownloadUrl: "",
 			interests: [],
+			interestsFr: [],
 		},
 		contactDetails: {
 			email: "",
 			phone: "",
 			location: "",
+			locationFr: "",
 		},
 	});
 	const [isLoading, setIsLoading] = useState(true);
@@ -208,20 +231,28 @@ export function ProfileForm() {
 						currentName: data.currentName ?? "",
 						currentDomain: data.currentDomain ?? "",
 						headline: data.headline ?? "",
+						headlineFr: data.headlineFr ?? "",
 						roleTagline: data.roleTagline ?? "",
+						roleTaglineFr: data.roleTaglineFr ?? "",
 						subTagline: data.subTagline ?? "",
+						subTaglineFr: data.subTaglineFr ?? "",
 						freelanceAvailabilityLabel: data.freelanceAvailabilityLabel ?? "",
+						freelanceAvailabilityLabelFr: data.freelanceAvailabilityLabelFr ?? "",
 						jobAvailabilityLabel: data.jobAvailabilityLabel ?? "",
+						jobAvailabilityLabelFr: data.jobAvailabilityLabelFr ?? "",
 					},
 					aboutSummary: {
 						biography: data.aboutSummary?.biography ?? "",
+						biographyFr: data.aboutSummary?.biographyFr ?? "",
 						cvDownloadUrl: data.aboutSummary?.cvDownloadUrl ?? "",
 						interests: data.aboutSummary?.interests ?? [],
+						interestsFr: data.aboutSummary?.interestsFr ?? [],
 					},
 					contactDetails: {
 						email: data.contactDetails?.email ?? "",
 						phone: data.contactDetails?.phone ?? "",
 						location: data.contactDetails?.location ?? "",
+						locationFr: data.contactDetails?.locationFr ?? "",
 					},
 				});
 
@@ -268,22 +299,29 @@ export function ProfileForm() {
 						education: education
 							.map((entry) => ({
 								title: entry.title.trim(),
+								titleFr: entry.titleFr?.trim() || null,
 								institution: entry.institution.trim(),
+								institutionFr: entry.institutionFr?.trim() || null,
 								period: entry.period.trim(),
 								location: entry.location?.trim() || null,
+								locationFr: entry.locationFr?.trim() || null,
 							}))
 							.filter((entry) => entry.title && entry.institution && entry.period),
 						experience: experience
 							.map((entry) => ({
 								role: entry.role.trim(),
+								roleFr: entry.roleFr?.trim() || null,
 								company: entry.company.trim(),
+								companyFr: entry.companyFr?.trim() || null,
 								period: entry.period.trim(),
 								summary: entry.summary.trim(),
+								summaryFr: entry.summaryFr?.trim() || null,
 							}))
 							.filter((entry) => entry.role && entry.company && entry.period && entry.summary),
 						skills: skills
 							.map((entry) => ({
 								name: entry.name.trim(),
+								nameFr: entry.nameFr?.trim() || null,
 								category: entry.category,
 								proficiency: Math.min(5, Math.max(1, Number(entry.proficiency) || 1)),
 								iconSlug: entry.iconSlug?.trim() || undefined,
@@ -315,17 +353,17 @@ export function ProfileForm() {
 	};
 
 	const addExperience = () => {
-		setExperience((current) => [...current, { id: crypto.randomUUID(), role: "", company: "", period: "", summary: "" }]);
+		setExperience((current) => [...current, { id: crypto.randomUUID(), role: "", roleFr: "", company: "", companyFr: "", period: "", summary: "", summaryFr: "" }]);
 	};
 
 	const addEducation = () => {
-		setEducation((current) => [...current, { id: crypto.randomUUID(), title: "", institution: "", period: "", location: "" }]);
+		setEducation((current) => [...current, { id: crypto.randomUUID(), title: "", titleFr: "", institution: "", institutionFr: "", period: "", location: "", locationFr: "" }]);
 	};
 
 	const addSkill = () => {
 		setSkills((current) => [
 			...current,
-			{ id: crypto.randomUUID(), name: "", category: "FRONTEND", proficiency: 3, iconSlug: "" },
+			{ id: crypto.randomUUID(), name: "", nameFr: "", category: "FRONTEND", proficiency: 3, iconSlug: "" },
 		]);
 	};
 
@@ -399,7 +437,7 @@ export function ProfileForm() {
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="headline" className="text-xs font-medium text-muted-foreground">
-									Headline
+									Headline (EN)
 								</label>
 								<Input
 									id="headline"
@@ -414,8 +452,24 @@ export function ProfileForm() {
 								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="headline-fr" className="text-xs font-medium text-muted-foreground">
+									Headline (FR)
+								</label>
+								<Input
+									id="headline-fr"
+									placeholder="Construire des solutions numériques pratiques"
+									value={form.brandProfile.headlineFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, headlineFr: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="tagline" className="text-xs font-medium text-muted-foreground">
-									Role Tagline
+									Role Tagline (EN)
 								</label>
 								<Input
 									id="tagline"
@@ -430,8 +484,24 @@ export function ProfileForm() {
 								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="tagline-fr" className="text-xs font-medium text-muted-foreground">
+									Role Tagline (FR)
+								</label>
+								<Input
+									id="tagline-fr"
+									placeholder="Développeur JavaScript Full-Stack"
+									value={form.brandProfile.roleTaglineFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, roleTaglineFr: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="sub-tagline" className="text-xs font-medium text-muted-foreground">
-									Sub Tagline
+									Sub Tagline (EN)
 								</label>
 								<Input
 									id="sub-tagline"
@@ -445,9 +515,25 @@ export function ProfileForm() {
 									}
 								/>
 							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="sub-tagline-fr" className="text-xs font-medium text-muted-foreground">
+									Sub Tagline (FR)
+								</label>
+								<Input
+									id="sub-tagline-fr"
+									placeholder="Je conçois et livre des plateformes web pratiques."
+									value={form.brandProfile.subTaglineFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, subTaglineFr: event.target.value },
+										}))
+									}
+								/>
+							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="freelance-label" className="text-xs font-medium text-muted-foreground">
-									Freelance Availability Label
+									Freelance Availability Label (EN)
 								</label>
 								<Input
 									id="freelance-label"
@@ -465,8 +551,27 @@ export function ProfileForm() {
 								/>
 							</div>
 							<div className="space-y-1.5">
+								<label htmlFor="freelance-label-fr" className="text-xs font-medium text-muted-foreground">
+									Freelance Availability Label (FR)
+								</label>
+								<Input
+									id="freelance-label-fr"
+									placeholder="Projets freelance"
+									value={form.brandProfile.freelanceAvailabilityLabelFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: {
+												...current.brandProfile,
+												freelanceAvailabilityLabelFr: event.target.value,
+											},
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5">
 								<label htmlFor="job-label" className="text-xs font-medium text-muted-foreground">
-									Job Availability Label
+									Job Availability Label (EN)
 								</label>
 								<Input
 									id="job-label"
@@ -480,14 +585,30 @@ export function ProfileForm() {
 									}
 								/>
 							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="job-label-fr" className="text-xs font-medium text-muted-foreground">
+									Job Availability Label (FR)
+								</label>
+								<Input
+									id="job-label-fr"
+									placeholder="Travail à long terme"
+									value={form.brandProfile.jobAvailabilityLabelFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											brandProfile: { ...current.brandProfile, jobAvailabilityLabelFr: event.target.value },
+										}))
+									}
+								/>
+							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="bio" className="text-xs font-medium text-muted-foreground">
-									Biography
+									Biography (EN)
 								</label>
 								<Textarea
 									id="bio"
 									placeholder="Write a short professional biography..."
-									rows={6}
+									rows={4}
 									value={form.aboutSummary.biography}
 									onChange={(event) =>
 										setForm((current) => ({
@@ -498,13 +619,30 @@ export function ProfileForm() {
 								/>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="bio-fr" className="text-xs font-medium text-muted-foreground">
+									Biography (FR)
+								</label>
+								<Textarea
+									id="bio-fr"
+									placeholder="Écrivez une courte biographie professionnelle..."
+									rows={4}
+									value={form.aboutSummary.biographyFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											aboutSummary: { ...current.aboutSummary, biographyFr: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="interests" className="text-xs font-medium text-muted-foreground">
-									About Interests
+									About Interests (EN)
 								</label>
 								<Textarea
 									id="interests"
 									placeholder="React\nPrisma\nProduct Design"
-									rows={4}
+									rows={3}
 									value={form.aboutSummary.interests.join("\n")}
 									onChange={(event) => {
 										const interests = event.target.value
@@ -515,6 +653,29 @@ export function ProfileForm() {
 										setForm((current) => ({
 											...current,
 											aboutSummary: { ...current.aboutSummary, interests },
+										}));
+									}}
+								/>
+								<p className="text-xs text-muted-foreground">Use one item per line or separate with commas.</p>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="interests-fr" className="text-xs font-medium text-muted-foreground">
+									About Interests (FR)
+								</label>
+								<Textarea
+									id="interests-fr"
+									placeholder="Développement\nCloud\nCybersécurité"
+									rows={3}
+									value={form.aboutSummary.interestsFr.join("\n")}
+									onChange={(event) => {
+										const interestsFr = event.target.value
+											.split(/[,\n]/)
+											.map((interest) => interest.trim())
+											.filter(Boolean);
+
+										setForm((current) => ({
+											...current,
+											aboutSummary: { ...current.aboutSummary, interestsFr },
 										}));
 									}}
 								/>
@@ -566,11 +727,11 @@ export function ProfileForm() {
 									Add Entry
 								</Button>
 							</div>
-								{experience.map((entry, index) => (
-								<div key={`${entry.company}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
+							{experience.map((entry, index) => (
+								<div key={entry.id} className="rounded-lg border border-border/70 p-3 space-y-2">
 									<div className="grid gap-2 md:grid-cols-2">
 										<Input
-											placeholder="Full Stack Developer"
+											placeholder="Role (EN)"
 											value={entry.role}
 											onChange={(event) =>
 												setExperience((current) =>
@@ -582,7 +743,19 @@ export function ProfileForm() {
 											aria-label="Role"
 										/>
 										<Input
-											placeholder="Acme Inc"
+											placeholder="Role (FR)"
+											value={entry.roleFr ?? ""}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, roleFr: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Role FR"
+										/>
+										<Input
+											placeholder="Company (EN)"
 											value={entry.company}
 											onChange={(event) =>
 												setExperience((current) =>
@@ -592,6 +765,18 @@ export function ProfileForm() {
 												)
 											}
 											aria-label="Company"
+										/>
+										<Input
+											placeholder="Company (FR)"
+											value={entry.companyFr ?? ""}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, companyFr: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Company FR"
 										/>
 										<Input
 											placeholder="2022 - Present"
@@ -616,23 +801,37 @@ export function ProfileForm() {
 											Remove
 										</Button>
 									</div>
-									<Textarea
-										placeholder="Describe responsibilities and impact..."
-										value={entry.summary}
-										onChange={(event) =>
-											setExperience((current) =>
-												current.map((item, itemIndex) =>
-													itemIndex === index ? { ...item, summary: event.target.value } : item
+									<div className="grid gap-2 md:grid-cols-2">
+										<Textarea
+											placeholder="Describe responsibilities (EN)..."
+											value={entry.summary}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, summary: event.target.value } : item
+													)
 												)
-											)
-										}
-										className="mt-2"
-										rows={3}
-										aria-label="Summary"
-									/>
+											}
+											rows={3}
+											aria-label="Summary"
+										/>
+										<Textarea
+											placeholder="Describe responsibilities (FR)..."
+											value={entry.summaryFr ?? ""}
+											onChange={(event) =>
+												setExperience((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, summaryFr: event.target.value } : item
+													)
+												)
+											}
+											rows={3}
+											aria-label="Summary FR"
+										/>
+									</div>
 								</div>
 							))}
-								{experience.length === 0 ? <p className="text-sm text-muted-foreground">No experience entries yet.</p> : null}
+							{experience.length === 0 ? <p className="text-sm text-muted-foreground">No experience entries yet.</p> : null}
 						</div>
 
 						<div className="space-y-3">
@@ -644,10 +843,10 @@ export function ProfileForm() {
 								</Button>
 							</div>
 							{education.map((entry, index) => (
-								<div key={`${entry.title}-${entry.period}`} className="rounded-lg border border-border/70 p-3">
+								<div key={entry.id} className="rounded-lg border border-border/70 p-3 space-y-2">
 									<div className="grid gap-2 md:grid-cols-2">
 										<Input
-											placeholder="BSc Computer Science"
+											placeholder="BSc Computer Science (EN)"
 											value={entry.title}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -659,7 +858,19 @@ export function ProfileForm() {
 											aria-label="Title"
 										/>
 										<Input
-											placeholder="State University"
+											placeholder="BSc Computer Science (FR)"
+											value={entry.titleFr ?? ""}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, titleFr: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Title FR"
+										/>
+										<Input
+											placeholder="State University (EN)"
 											value={entry.institution}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -669,6 +880,18 @@ export function ProfileForm() {
 												)
 											}
 											aria-label="Institution"
+										/>
+										<Input
+											placeholder="State University (FR)"
+											value={entry.institutionFr ?? ""}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, institutionFr: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Institution FR"
 										/>
 										<Input
 											placeholder="2018 - 2022"
@@ -683,7 +906,7 @@ export function ProfileForm() {
 											aria-label="Period"
 										/>
 										<Input
-											placeholder="Montreal, QC"
+											placeholder="Location (EN)"
 											value={entry.location ?? ""}
 											onChange={(event) =>
 												setEducation((current) =>
@@ -693,6 +916,18 @@ export function ProfileForm() {
 												)
 											}
 											aria-label="Location"
+										/>
+										<Input
+											placeholder="Location (FR)"
+											value={entry.locationFr ?? ""}
+											onChange={(event) =>
+												setEducation((current) =>
+													current.map((item, itemIndex) =>
+														itemIndex === index ? { ...item, locationFr: event.target.value } : item
+													)
+												)
+											}
+											aria-label="Location FR"
 										/>
 										<Button
 											variant="ghost"
@@ -720,9 +955,9 @@ export function ProfileForm() {
 						</div>
 						<div className="grid gap-2">
 							{skills.map((skill, index) => (
-								<div key={skill.name} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[1fr_150px_80px_auto]">
+								<div key={skill.id} className="grid gap-2 rounded-lg border border-border/70 p-2 md:grid-cols-[1fr_1fr_150px_80px_auto]">
 									<Input
-										placeholder="Next.js"
+										placeholder="Skill Name (EN)"
 										value={skill.name}
 										onChange={(event) =>
 											setSkills((current) =>
@@ -732,6 +967,18 @@ export function ProfileForm() {
 											)
 										}
 										aria-label="Skill"
+									/>
+									<Input
+										placeholder="Skill Name (FR)"
+										value={skill.nameFr ?? ""}
+										onChange={(event) =>
+											setSkills((current) =>
+												current.map((item, itemIndex) =>
+													itemIndex === index ? { ...item, nameFr: event.target.value } : item
+												)
+											)
+										}
+										aria-label="Skill FR"
 									/>
 									<select
 										value={skill.category}
@@ -821,7 +1068,7 @@ export function ProfileForm() {
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="contact-location" className="text-xs font-medium text-muted-foreground">
-									Location
+									Location (EN)
 								</label>
 								<Input
 									id="contact-location"
@@ -831,6 +1078,22 @@ export function ProfileForm() {
 										setForm((current) => ({
 											...current,
 											contactDetails: { ...current.contactDetails, location: event.target.value },
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="contact-location-fr" className="text-xs font-medium text-muted-foreground">
+									Location (FR)
+								</label>
+								<Input
+									id="contact-location-fr"
+									placeholder="Montréal, Canada"
+									value={form.contactDetails.locationFr}
+									onChange={(event) =>
+										setForm((current) => ({
+											...current,
+											contactDetails: { ...current.contactDetails, locationFr: event.target.value },
 										}))
 									}
 								/>

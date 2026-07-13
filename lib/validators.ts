@@ -128,10 +128,14 @@ export type SubscriberQuery = z.infer<typeof SubscriberQuerySchema>;
  */
 export const LabArticleCreateSchema = z.object({
   title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
   slug: z.string().min(1, "Slug is required.").max(200),
   category: z.string().min(1, "Category is required."),
+  categoryFr: z.string().optional().nullable(),
   excerpt: z.string().max(500),
+  excerptFr: z.string().max(500).optional().nullable(),
   content: z.string(),
+  contentFr: z.string().optional().nullable(),
   coverImageUrl: urlOrRootPath,
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
@@ -163,9 +167,12 @@ export type LabArticleQuery = z.infer<typeof LabArticleQuerySchema>;
  */
 export const LabProjectCreateSchema = z.object({
   title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
   slug: z.string().min(1, "Slug is required.").max(200),
   summary: z.string().max(500),
+  summaryFr: z.string().max(500).optional().nullable(),
   content: z.string(),
+  contentFr: z.string().optional().nullable(),
   stack: z.array(z.string()).default([]),
   coverImageUrl: urlOrRootPath,
   screenshotUrls: z.array(urlOrRootPath).default([]),
@@ -205,14 +212,17 @@ export type LabProjectQuery = z.infer<typeof LabProjectQuerySchema>;
  */
 export const ClientWorkCreateSchema = z.object({
   title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
   slug: z.string().min(1, "Slug is required.").max(200),
   description: z.string().max(1000),
+  descriptionFr: z.string().max(1000).optional().nullable(),
   imageUrl: urlOrRootPath,
   projectUrl: optionalUrlOrRootPath,
   clientName: z.string().optional().nullable(),
   clientNameFr: z.string().optional().nullable(),
   stack: z.array(z.string()).default([]),
   content: z.string().optional(),
+  contentFr: z.string().optional().nullable(),
   publishedAt: optionalDate,
 });
 
@@ -285,9 +295,13 @@ export type SettingsUpdate = z.infer<typeof SettingsUpdateSchema>;
  */
 export const ServiceCreateSchema = z.object({
   title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
   description: z.string().max(1000),
+  descriptionFr: z.string().max(1000).optional().nullable(),
   features: z.array(z.string()).default([]),
+  featuresFr: z.array(z.string()).default([]),
   ctaText: z.string().max(100),
+  ctaTextFr: z.string().max(100).optional().nullable(),
   ctaUrl: optionalUrlOrRootPath,
 });
 
@@ -340,8 +354,11 @@ export type TargetSectorQuery = z.infer<typeof TargetSectorQuerySchema>;
 export const WorkflowStageCreateSchema = z.object({
   step: z.coerce.number().int().positive(),
   title: z.string().min(1, "Title is required.").max(200),
+  titleFr: z.string().max(200).optional().nullable(),
   subtitle: z.string().min(1, "Subtitle is required.").max(200),
+  subtitleFr: z.string().max(200).optional().nullable(),
   details: z.string().min(1, "Details are required.").max(2000),
+  detailsFr: z.string().max(2000).optional().nullable(),
 });
 
 export type WorkflowStageCreate = z.infer<typeof WorkflowStageCreateSchema>;
@@ -366,19 +383,26 @@ export const BrandProfileUpdateSchema = z.object({
   currentName: z.string().optional(),
   currentDomain: z.string().optional(),
   roleTagline: z.string().optional(),
+  roleTaglineFr: z.string().optional().nullable(),
   headline: z.string().optional(),
+  headlineFr: z.string().optional().nullable(),
   subTagline: z.string().optional(),
+  subTaglineFr: z.string().optional().nullable(),
   freelanceAvailabilityLabel: z.string().optional(),
+  freelanceAvailabilityLabelFr: z.string().optional().nullable(),
   jobAvailabilityLabel: z.string().optional(),
+  jobAvailabilityLabelFr: z.string().optional().nullable(),
 });
 
 export type BrandProfileUpdate = z.infer<typeof BrandProfileUpdateSchema>;
 
 export const AboutSummaryUpdateSchema = z.object({
   biography: z.string().optional(),
+  biographyFr: z.string().optional().nullable(),
   cvDownloadUrl: optionalUrlOrRootPath,
   linkedinResumeSource: z.string().optional(),
   interests: z.array(z.string()).optional(),
+  interestsFr: z.array(z.string()).optional(),
 });
 
 export type AboutSummaryUpdate = z.infer<typeof AboutSummaryUpdateSchema>;
@@ -387,6 +411,7 @@ export const ContactDetailsUpdateSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional(),
   location: z.string().optional(),
+  locationFr: z.string().optional().nullable(),
 });
 
 export type ContactDetailsUpdate = z.infer<typeof ContactDetailsUpdateSchema>;

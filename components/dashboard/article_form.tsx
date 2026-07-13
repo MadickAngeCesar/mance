@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { MarkdownRenderer } from "@/components/ui/markdown_renderer";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/client-api";
 import type { LabArticle } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [markdownContent, setMarkdownContent] = useState(initialArticle?.content ?? "");
+	const [markdownContentFr, setMarkdownContentFr] = useState(initialArticle?.contentFr ?? "");
 	const [editorView, setEditorView] = useState<"write" | "preview">("write");
 	const [uploadedCoverUrl, setUploadedCoverUrl] = useState<string | null>(null);
 
@@ -88,16 +90,20 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 
 			const payload = {
 				title: String(formData.get("title") ?? ""),
+				titleFr: String(formData.get("titleFr") ?? "") || null,
 				excerpt: String(formData.get("excerpt") ?? ""),
+				excerptFr: String(formData.get("excerptFr") ?? "") || null,
 				coverImageUrl,
 				slug: String(formData.get("slug") ?? ""),
 				category: String(formData.get("category") ?? ""),
+				categoryFr: String(formData.get("categoryFr") ?? "") || null,
 				featured: formData.get("featured") === "on",
 				tags: String(formData.get("tags") ?? "")
 					.split(",")
 					.map((tag) => tag.trim())
 					.filter(Boolean),
 				content: markdownContent,
+				contentFr: markdownContentFr || null,
 				publishedAt:
 					intent === "publish"
 						? initialArticle?.publishedAt ?? new Date().toISOString()
@@ -133,14 +139,18 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				create: "Creer un article",
 				title: isEditMode ? "Modifier l'article" : "Creer un article",
 				description: "Redigez un article technique en Markdown puis publiez-le dans le Lab.",
-				labelTitle: "Titre",
-				labelDescription: "Description courte",
+				labelTitle: "Titre (EN)",
+				labelTitleFr: "Titre (FR)",
+				labelDescription: "Description courte (EN)",
+				labelDescriptionFr: "Description courte (FR)",
 				labelImage: "URL de l'image de couverture",
 				labelImageUpload: "Televerser l'image de couverture",
 				labelSlug: "URL / Slug",
-				labelCategory: "Categorie",
+				labelCategory: "Categorie (EN)",
+				labelCategoryFr: "Categorie (FR)",
 				labelTags: "Tags",
-				labelContent: "Contenu (Markdown)",
+				labelContent: "Contenu EN (Markdown)",
+				labelContentFr: "Contenu FR (Markdown)",
 				placeholderContent: "Ecrivez votre contenu en Markdown avec titres, listes et blocs de code.",
 				preview: "Apercu Markdown",
 				write: "Ecrire",
@@ -155,14 +165,18 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 			create: "Create Article",
 			title: isEditMode ? "Edit Article" : "Create Article",
 			description: "Draft long-form technical writing in Markdown, then publish it to the lab.",
-			labelTitle: "Title",
-			labelDescription: "Short Description",
+			labelTitle: "Title (EN)",
+			labelTitleFr: "Title (FR)",
+			labelDescription: "Short Description (EN)",
+			labelDescriptionFr: "Short Description (FR)",
 			labelImage: "Cover Image URL",
 			labelImageUpload: "Upload Cover Image",
 			labelSlug: "Article URL / Slug",
-			labelCategory: "Category",
+			labelCategory: "Category (EN)",
+			labelCategoryFr: "Category (FR)",
 			labelTags: "Tags",
 			labelContent: "Content (Markdown)",
+			labelContentFr: "Content FR (Markdown)",
 			placeholderContent: "Write markdown content with headings, lists, links, and code blocks.",
 			preview: "Markdown Preview",
 			write: "Write",
@@ -181,6 +195,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 				if (!newOpen) {
 					setEditorView("write");
 					setMarkdownContent(initialArticle?.content ?? "");
+					setMarkdownContentFr(initialArticle?.contentFr ?? "");
 					setUploadedCoverUrl(null);
 					setError(null);
 				}
@@ -202,7 +217,7 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 					</DialogHeader>
 					<div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-4 sm:px-5">
 						<div className="grid gap-3 md:grid-cols-2">
-							<div className="space-y-1.5 md:col-span-2">
+							<div className="space-y-1.5">
 								<label htmlFor="article-title" className="text-xs font-medium text-muted-foreground">
 									{copy.labelTitle}
 								</label>
@@ -213,6 +228,17 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 									defaultValue={initialArticle?.title}
 								/>
 							</div>
+							<div className="space-y-1.5">
+								<label htmlFor="article-title-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelTitleFr}
+								</label>
+								<Input
+									id="article-title-fr"
+									name="titleFr"
+									placeholder="Concevoir des pipelines de formulaires fiables en Next.js"
+									defaultValue={initialArticle?.titleFr ?? ""}
+								/>
+							</div>
 							<div className="space-y-1.5 md:col-span-2">
 								<label htmlFor="article-description" className="text-xs font-medium text-muted-foreground">
 									{copy.labelDescription}
@@ -221,8 +247,20 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 									id="article-description"
 									name="excerpt"
 									placeholder="Concise summary for cards and SEO snippets."
-									rows={3}
+									rows={2}
 									defaultValue={initialArticle?.excerpt}
+								/>
+							</div>
+							<div className="space-y-1.5 md:col-span-2">
+								<label htmlFor="article-description-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelDescriptionFr}
+								</label>
+								<Textarea
+									id="article-description-fr"
+									name="excerptFr"
+									placeholder="Résumé concis pour les cartes et les extraits SEO."
+									rows={2}
+									defaultValue={initialArticle?.excerptFr ?? ""}
 								/>
 							</div>
 							<div className="space-y-1.5">
@@ -274,6 +312,17 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 								</select>
 							</div>
 							<div className="space-y-1.5">
+								<label htmlFor="article-category-fr" className="text-xs font-medium text-muted-foreground">
+									{copy.labelCategoryFr}
+								</label>
+								<Input
+									id="article-category-fr"
+									name="categoryFr"
+									placeholder="Ingénierie, Tutoriel, etc."
+									defaultValue={initialArticle?.categoryFr ?? ""}
+								/>
+							</div>
+							<div className="space-y-1.5">
 								<label htmlFor="article-tags" className="text-xs font-medium text-muted-foreground">
 									{copy.labelTags}
 								</label>
@@ -297,55 +346,114 @@ export function ArticleForm({ mode = "create", initialArticle, trigger }: Articl
 								</label>
 							</div>
 							<div className="space-y-1.5 md:col-span-2">
-								<div className="flex items-center justify-between gap-3">
-									<label htmlFor="article-content" className="text-xs font-medium text-muted-foreground">
-										{copy.labelContent}
-									</label>
-									<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
-										<button
-											type="button"
-											onClick={() => setEditorView("write")}
-											className={cn(
-												"rounded-md px-2.5 py-1 text-xs font-medium transition",
-												editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
-											)}
-										>
-											{copy.write}
-										</button>
-										<button
-											type="button"
-											onClick={() => setEditorView("preview")}
-											className={cn(
-												"rounded-md px-2.5 py-1 text-xs font-medium transition",
-												editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
-											)}
-										>
-											{copy.previewOnly}
-										</button>
-									</div>
-								</div>
-								<div className="grid gap-3 md:grid-cols-2">
-									<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
-										<Textarea
-											id="article-content"
-											placeholder={copy.placeholderContent}
-											rows={14}
-											className="min-h-60 md:min-h-72"
-											value={markdownContent}
-											onChange={(event) => setMarkdownContent(event.target.value)}
-										/>
-									</div>
-									<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
-										<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
-										<div className="max-h-[48vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
-											<MarkdownRenderer
-												content={markdownContent}
-												emptyState={language === "FR" ? "Aucun contenu pour le moment." : "No content yet."}
-												className="text-sm"
-											/>
+								<Tabs defaultValue="en" className="w-full">
+									<TabsList className="mb-2">
+										<TabsTrigger value="en">English Content</TabsTrigger>
+										<TabsTrigger value="fr">Contenu Français</TabsTrigger>
+									</TabsList>
+									<TabsContent value="en" className="space-y-2">
+										<div className="flex items-center justify-between gap-3">
+											<label htmlFor="article-content" className="text-xs font-medium text-muted-foreground">
+												{copy.labelContent}
+											</label>
+											<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
+												<button
+													type="button"
+													onClick={() => setEditorView("write")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.write}
+												</button>
+												<button
+													type="button"
+													onClick={() => setEditorView("preview")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.previewOnly}
+												</button>
+											</div>
 										</div>
-									</div>
-								</div>
+										<div className="grid gap-3 md:grid-cols-2">
+											<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
+												<Textarea
+													id="article-content"
+													placeholder={copy.placeholderContent}
+													rows={12}
+													className="min-h-40 md:min-h-52"
+													value={markdownContent}
+													onChange={(event) => setMarkdownContent(event.target.value)}
+												/>
+											</div>
+											<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
+												<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
+												<div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
+													<MarkdownRenderer
+														content={markdownContent}
+														emptyState="No content yet."
+														className="text-sm"
+													/>
+												</div>
+											</div>
+										</div>
+									</TabsContent>
+									<TabsContent value="fr" className="space-y-2">
+										<div className="flex items-center justify-between gap-3">
+											<label htmlFor="article-content-fr" className="text-xs font-medium text-muted-foreground">
+												{copy.labelContentFr}
+											</label>
+											<div className="inline-flex rounded-lg border border-border/70 bg-muted/40 p-0.5 md:hidden">
+												<button
+													type="button"
+													onClick={() => setEditorView("write")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "write" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.write}
+												</button>
+												<button
+													type="button"
+													onClick={() => setEditorView("preview")}
+													className={cn(
+														"rounded-md px-2.5 py-1 text-xs font-medium transition",
+														editorView === "preview" ? "bg-background text-foreground" : "text-muted-foreground",
+													)}
+												>
+													{copy.previewOnly}
+												</button>
+											</div>
+										</div>
+										<div className="grid gap-3 md:grid-cols-2">
+											<div className={cn("space-y-1.5", editorView === "preview" ? "hidden md:block" : undefined)}>
+												<Textarea
+													id="article-content-fr"
+													placeholder={copy.placeholderContent}
+													rows={12}
+													className="min-h-40 md:min-h-52"
+													value={markdownContentFr}
+													onChange={(event) => setMarkdownContentFr(event.target.value)}
+												/>
+											</div>
+											<div className={cn("space-y-1.5", editorView === "write" ? "hidden md:block" : undefined)}>
+												<p className="hidden text-xs font-medium text-muted-foreground md:block">{copy.preview}</p>
+												<div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border/70 bg-card/50 p-3">
+													<MarkdownRenderer
+														content={markdownContentFr}
+														emptyState="Aucun contenu pour le moment."
+														className="text-sm"
+													/>
+												</div>
+											</div>
+										</div>
+									</TabsContent>
+								</Tabs>
 							</div>
 						</div>
 					</div>

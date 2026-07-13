@@ -85,16 +85,6 @@ async function seedCore(options: SeedOptions) {
   console.log("DEBUG: DIRECT_DATABASE_URL =", process.env.DIRECT_DATABASE_URL);
   console.log("DEBUG: prisma client is initialized");
 
-  // Check if profile already exists
-  let brandProfileId: string;
-  const existingBrand = await prisma.brandProfile.findFirst();
-
-  if (existingBrand && !options.reset) {
-    console.log("✓ Brand profile already exists, skipping core data creation.");
-    brandProfileId = existingBrand.id;
-    return brandProfileId;
-  }
-
   // If reset is true, clear all data
   if (options.reset) {
     console.log("🔄 Resetting all data...");
@@ -125,27 +115,52 @@ async function seedCore(options: SeedOptions) {
     await prisma.targetSector.deleteMany();
   }
 
-  // Create brand profile
-  const createdBrand = await prisma.brandProfile.create({
-    data: {
-      ...brandProfile,
-    },
-  });
-  brandProfileId = createdBrand.id;
-  console.log("✓ Brand profile created");
+  // Check if profile already exists or needs creation/update
+  let brandProfileId: string;
+  const existingBrand = await prisma.brandProfile.findFirst();
 
-  // Create about summary
-  await prisma.aboutSummary.create({
-    data: {
+  if (existingBrand) {
+    brandProfileId = existingBrand.id;
+    await prisma.brandProfile.update({
+      where: { id: brandProfileId },
+      data: {
+        ...brandProfile,
+      },
+    });
+    console.log("✓ Brand profile updated");
+  } else {
+    const createdBrand = await prisma.brandProfile.create({
+      data: {
+        ...brandProfile,
+      },
+    });
+    brandProfileId = createdBrand.id;
+    console.log("✓ Brand profile created");
+  }
+
+  // Create or update about summary
+  await prisma.aboutSummary.upsert({
+    where: { brandProfileId },
+    update: {
+      ...aboutSummary,
+    },
+    create: {
       ...aboutSummary,
       brandProfileId,
     },
   });
-  console.log("✓ About summary created");
+  console.log("✓ About summary created/updated");
 
-  // Create contact details
-  const createdContact = await prisma.contactDetails.create({
-    data: {
+  // Create or update contact details
+  const createdContact = await prisma.contactDetails.upsert({
+    where: { brandProfileId },
+    update: {
+      email: contactDetails.email,
+      phone: contactDetails.phone,
+      location: contactDetails.location,
+      locationFr: contactDetails.locationFr,
+    },
+    create: {
       email: contactDetails.email,
       phone: contactDetails.phone,
       location: contactDetails.location,
@@ -154,7 +169,8 @@ async function seedCore(options: SeedOptions) {
     },
   });
 
-  // Create social links
+  // Recreate social links
+  await prisma.socialLink.deleteMany({ where: { contactDetailsId: createdContact.id } });
   await prisma.socialLink.createMany({
     data: contactDetails.socialLinks.map((item, index) => ({
       platform: mapSocialPlatform(item.platform),
@@ -166,7 +182,8 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Social links created");
 
-  // Create freelance platforms
+  // Recreate freelance platforms
+  await prisma.freelancePlatform.deleteMany({ where: { contactDetailsId: createdContact.id } });
   await prisma.freelancePlatform.createMany({
     data: contactDetails.freelancePlatforms.map((item, index) => ({
       name: mapFreelancePlatform(item.name),
@@ -178,7 +195,8 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Freelance platforms created");
 
-  // Create education records
+  // Recreate education records
+  await prisma.education.deleteMany();
   await prisma.education.createMany({
     data: education.map((item, index) => ({
       title: item.title,
@@ -193,7 +211,8 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Education records created");
 
-  // Create experience records
+  // Recreate experience records
+  await prisma.experience.deleteMany();
   await prisma.experience.createMany({
     data: experience.map((item, index) => ({
       role: item.role,
@@ -208,7 +227,8 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Experience records created");
 
-  // Create skills
+  // Recreate skills
+  await prisma.skill.deleteMany();
   await prisma.skill.createMany({
     data: skills.map((item) => ({
       name: item.name,
@@ -221,75 +241,134 @@ async function seedCore(options: SeedOptions) {
   });
   console.log("✓ Skills created");
 
-  // Create main work highlights
-  await prisma.mainWorkHighlight.createMany({
-    data: mainWorkHighlights.map((item) => ({
-      externalId: item.id,
-      title: item.title,
-      titleFr: item.titleFr,
-      kind: mapWorkKind(item.kind),
-      summary: item.summary,
-      summaryFr: item.summaryFr,
-      href: item.href,
-      featured: item.featured,
-      imageUrl: item.imageUrl,
-      brandProfileId,
-    })),
-  });
+  // Upsert main work highlights
+  for (const item of mainWorkHighlights) {
+    await prisma.mainWorkHighlight.upsert({
+      where: { externalId: item.id },
+      update: {
+        title: item.title,
+        titleFr: item.titleFr,
+        kind: mapWorkKind(item.kind),
+        summary: item.summary,
+        summaryFr: item.summaryFr,
+        href: item.href,
+        featured: item.featured,
+        imageUrl: item.imageUrl,
+        brandProfileId,
+      },
+      create: {
+        externalId: item.id,
+        title: item.title,
+        titleFr: item.titleFr,
+        kind: mapWorkKind(item.kind),
+        summary: item.summary,
+        summaryFr: item.summaryFr,
+        href: item.href,
+        featured: item.featured,
+        imageUrl: item.imageUrl,
+        brandProfileId,
+      },
+    });
+  }
   console.log("✓ Main work highlights created");
 
-  // Create offerings
-  await prisma.offering.createMany({
-    data: offerings.map((item) => ({
-      externalId: item.id,
-      title: item.title,
-      titleFr: item.titleFr,
-      description: item.description,
-      descriptionFr: item.descriptionFr,
-      features: item.features,
-      featuresFr: item.featuresFr,
-      ctaText: item.ctaText,
-      ctaTextFr: item.ctaTextFr,
-      ctaUrl: item.ctaUrl,
-      brandProfileId,
-    })),
-  });
+  // Upsert offerings
+  for (const item of offerings) {
+    await prisma.offering.upsert({
+      where: { externalId: item.id },
+      update: {
+        title: item.title,
+        titleFr: item.titleFr,
+        description: item.description,
+        descriptionFr: item.descriptionFr,
+        features: item.features,
+        featuresFr: item.featuresFr,
+        ctaText: item.ctaText,
+        ctaTextFr: item.ctaTextFr,
+        ctaUrl: item.ctaUrl,
+        brandProfileId,
+      },
+      create: {
+        externalId: item.id,
+        title: item.title,
+        titleFr: item.titleFr,
+        description: item.description,
+        descriptionFr: item.descriptionFr,
+        features: item.features,
+        featuresFr: item.featuresFr,
+        ctaText: item.ctaText,
+        ctaTextFr: item.ctaTextFr,
+        ctaUrl: item.ctaUrl,
+        brandProfileId,
+      },
+    });
+  }
   console.log("✓ Offerings created");
 
-  // Create target sectors
-  await prisma.targetSector.createMany({
-    data: targetSectors.map((item) => ({
-      slug: item.slug,
-      title: item.title,
-      titleFr: item.titleFr,
-      description: item.description,
-      descriptionFr: item.descriptionFr,
-      iconSlug: item.iconSlug,
-      challenges: item.challenges,
-      challengesFr: item.challengesFr || [],
-      solutions: item.solutions,
-      solutionsFr: item.solutionsFr || [],
-      benefits: item.benefits,
-      benefitsFr: item.benefitsFr || [],
-      displayOrder: item.displayOrder,
-      brandProfileId,
-    })),
-  });
+  // Upsert target sectors
+  for (const item of targetSectors) {
+    await prisma.targetSector.upsert({
+      where: { slug: item.slug },
+      update: {
+        title: item.title,
+        titleFr: item.titleFr,
+        description: item.description,
+        descriptionFr: item.descriptionFr,
+        iconSlug: item.iconSlug,
+        challenges: item.challenges,
+        challengesFr: item.challengesFr || [],
+        solutions: item.solutions,
+        solutionsFr: item.solutionsFr || [],
+        benefits: item.benefits,
+        benefitsFr: item.benefitsFr || [],
+        displayOrder: item.displayOrder,
+        brandProfileId,
+      },
+      create: {
+        slug: item.slug,
+        title: item.title,
+        titleFr: item.titleFr,
+        description: item.description,
+        descriptionFr: item.descriptionFr,
+        iconSlug: item.iconSlug,
+        challenges: item.challenges,
+        challengesFr: item.challengesFr || [],
+        solutions: item.solutions,
+        solutionsFr: item.solutionsFr || [],
+        benefits: item.benefits,
+        benefitsFr: item.benefitsFr || [],
+        displayOrder: item.displayOrder,
+        brandProfileId,
+      },
+    });
+  }
   console.log("✓ Target sectors created");
 
-  // Create workflow stages
-  await prisma.workflowStage.createMany({
-    data: workflowStages.map((item) => ({
-      step: item.step,
-      title: item.title,
-      titleFr: item.titleFr,
-      subtitle: item.subtitle,
-      subtitleFr: item.subtitleFr,
-      details: item.details,
-      detailsFr: item.detailsFr,
-      brandProfileId,
-    })),
-  });
+  // Upsert workflow stages
+  for (const item of workflowStages) {
+    await prisma.workflowStage.upsert({
+      where: { step: item.step },
+      update: {
+        title: item.title,
+        titleFr: item.titleFr,
+        subtitle: item.subtitle,
+        subtitleFr: item.subtitleFr,
+        details: item.details,
+        detailsFr: item.detailsFr,
+        brandProfileId,
+      },
+      create: {
+        step: item.step,
+        title: item.title,
+        titleFr: item.titleFr,
+        subtitle: item.subtitle,
+        subtitleFr: item.subtitleFr,
+        details: item.details,
+        detailsFr: item.detailsFr,
+        brandProfileId,
+      },
+    });
+  }
   console.log("✓ Workflow stages created");
 
   // Create or upsert booking CTA

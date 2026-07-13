@@ -8,15 +8,19 @@ import { prisma } from "@/lib/prisma";
 const TestimonialCreateSchema = z.object({
   clientName: z.string().min(1).max(200),
   clientRoleCompany: z.string().min(1).max(200),
+  clientRoleCompanyFr: z.string().max(200).optional().nullable(),
   text: z.string().min(1).max(3000),
+  textFr: z.string().min(1).max(3000).optional().nullable(),
   avatarUrl: z
     .string()
     .refine((value) => value.startsWith("/") || /^https?:\/\//.test(value), "Invalid avatar URL")
     .optional(),
   rating: z.coerce.number().int().min(1).max(5).default(5),
   projectReference: z.string().max(300).optional(),
+  projectReferenceFr: z.string().max(300).optional().nullable(),
   date: z.string().max(100).optional(),
   dateLabel: z.string().max(100).optional(),
+  dateLabelFr: z.string().max(100).optional().nullable(),
 });
 
 async function handleGet(request: NextRequest) {
@@ -44,11 +48,15 @@ async function handlePost(request: NextRequest) {
       externalId: `testimonial-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       clientName: parsed.clientName,
       clientRoleCompany: parsed.clientRoleCompany,
+      clientRoleCompanyFr: parsed.clientRoleCompanyFr ?? null,
       text: parsed.text,
+      textFr: parsed.textFr ?? null,
       avatarUrl: parsed.avatarUrl ?? null,
       rating: parsed.rating,
       projectReference: parsed.projectReference ?? "",
+      projectReferenceFr: parsed.projectReferenceFr ?? null,
       dateLabel: parsed.date ?? parsed.dateLabel ?? "",
+      dateLabelFr: parsed.dateLabelFr ?? null,
     },
   });
 

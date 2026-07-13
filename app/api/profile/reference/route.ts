@@ -12,9 +12,12 @@ const ReferencePatchSchema = z.object({
     .array(
       z.object({
         title: z.string().min(1),
+        titleFr: z.string().optional().nullable(),
         institution: z.string().min(1),
+        institutionFr: z.string().optional().nullable(),
         period: z.string().min(1),
         location: z.string().optional().nullable(),
+        locationFr: z.string().optional().nullable(),
       })
     )
     .optional(),
@@ -22,9 +25,12 @@ const ReferencePatchSchema = z.object({
     .array(
       z.object({
         role: z.string().min(1),
+        roleFr: z.string().optional().nullable(),
         company: z.string().min(1),
+        companyFr: z.string().optional().nullable(),
         period: z.string().min(1),
         summary: z.string().min(1),
+        summaryFr: z.string().optional().nullable(),
       })
     )
     .optional(),
@@ -32,6 +38,7 @@ const ReferencePatchSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1),
+        nameFr: z.string().optional().nullable(),
         category: z.nativeEnum(SkillCategory),
         proficiency: z.number().int().min(1).max(5),
         iconSlug: z.string().optional(),
@@ -124,9 +131,12 @@ async function handlePatch(request: NextRequest) {
         await tx.education.createMany({
           data: payload.education.map((entry, index) => ({
             title: entry.title,
+            titleFr: entry.titleFr ?? null,
             institution: entry.institution,
+            institutionFr: entry.institutionFr ?? null,
             period: entry.period,
             location: entry.location ?? null,
+            locationFr: entry.locationFr ?? null,
             displayOrder: index,
           })),
         });
@@ -139,9 +149,12 @@ async function handlePatch(request: NextRequest) {
         await tx.experience.createMany({
           data: payload.experience.map((entry, index) => ({
             role: entry.role,
+            roleFr: entry.roleFr ?? null,
             company: entry.company,
+            companyFr: entry.companyFr ?? null,
             period: entry.period,
             summary: entry.summary,
+            summaryFr: entry.summaryFr ?? null,
             displayOrder: index,
           })),
         });
@@ -154,6 +167,7 @@ async function handlePatch(request: NextRequest) {
         await tx.skill.createMany({
           data: payload.skills.map((entry, index) => ({
             name: entry.name,
+            nameFr: entry.nameFr ?? null,
             category: entry.category,
             proficiency: entry.proficiency,
             iconSlug: entry.iconSlug ?? entry.name.toLowerCase().replace(/\s+/g, "-"),

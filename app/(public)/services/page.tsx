@@ -6,6 +6,7 @@ import { OfferingsCards } from "@/components/services/offerings_cards";
 import { Testimonials } from "@/components/services/testimonials";
 import { Workflow } from "@/components/services/workflow";
 import { ServingSector } from "@/components/services/serving_sector";
+import { ReferralSection } from "@/components/services/referral_section";
 import { GsapSection } from "@/components/home/gsap-section";
 import { Tx } from "@/components/i18n/tx";
 
@@ -123,6 +124,7 @@ export default function ServicesPage() {
       {/* 6. Client Testimonials Section */}
       <GsapSection animation="fade-up" delay={0.1}>
         <Testimonials />
+			<ReferralSection />
       </GsapSection>
 
       {/* 7. Call to Action (BookingCta) Section */}

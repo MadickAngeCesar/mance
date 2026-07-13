@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { clientWork as fallbackClientWork } from "@/lib/placeholder-data";
+
+
 
 export async function ClientWork() {
 	let projects: any[] = [];
@@ -99,29 +100,18 @@ export async function ClientWork() {
 		projects = [];
 	}
 
-	const items = projects.length > 0
-		? projects.map((item) => ({
-				id: item.id,
-				title: item.title,
-				titleFr: item.titleFr,
-				description: item.summary,
-				descriptionFr: item.summaryFr,
-				imageUrl: item.coverImageUrl || "/images/Profile.jpg",
-				clientName: item.clientName,
-				clientNameFr: item.clientNameFr,
-				stack: item.stack,
-				projectUrl: `/lab/${item.slug}`,
-			}))
-		: fallbackClientWork.map((item) => ({
-				...item,
-				titleFr: item.titleFr || item.title,
-				description: item.description,
-				descriptionFr: item.descriptionFr || item.description,
-				clientName: item.clientName,
-				clientNameFr: item.clientNameFr || item.clientName,
-				imageUrl: item.imageUrl || "/images/Profile.jpg",
-				projectUrl: item.projectUrl,
-			}));
+	const items = projects.map((item) => ({
+		id: item.id,
+		title: item.title,
+		titleFr: item.titleFr,
+		description: item.summary,
+		descriptionFr: item.summaryFr,
+		imageUrl: item.coverImageUrl || "/images/Profile.jpg",
+		clientName: item.clientName,
+		clientNameFr: item.clientNameFr,
+		stack: item.stack,
+		projectUrl: `/lab/${item.slug}`,
+	}));
 
 	return (
 		<section className="space-y-6" id="client-work">

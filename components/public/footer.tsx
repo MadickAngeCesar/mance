@@ -140,7 +140,7 @@ export async function Footer() {
 					</p>
 					<div className="grid gap-2 text-sm text-muted-foreground">
 						<a
-							href={about?.cvDownloadUrl || "/MadickAngeCesar_FullStack_Resume_EN.pdf"}
+							href={about?.cvDownloadUrl || "#"}
 							download
 							className="transition-colors hover:text-foreground"
 						>

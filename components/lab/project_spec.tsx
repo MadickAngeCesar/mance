@@ -54,7 +54,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 			</header>
 
 			<div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
-				<aside className="space-y-5 lg:col-span-4">
+				<aside className="space-y-5 order-first lg:order-last lg:col-span-4 lg:sticky lg:top-24 self-start">
 					<div className="relative h-56 overflow-hidden rounded-xl border border-border/70 bg-muted/30 sm:h-72 lg:h-80">
 						<Image
 							src={project.coverImageUrl}
@@ -110,7 +110,7 @@ export function ProjectSpec({ project }: ProjectSpecProps) {
 					</Card>
 				</aside>
 
-				<section className="space-y-5 lg:col-span-8">
+				<section className="space-y-5 order-last lg:order-first lg:col-span-8">
 					{(project.problem || project.solution) ? (
 						<div className="grid gap-4 sm:grid-cols-2 rounded-xl border border-border/80 bg-card/10 p-5 leading-relaxed">
 							{project.problem && (

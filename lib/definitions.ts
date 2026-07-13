@@ -259,3 +259,13 @@ export type SubscriberPreview = {
 	source: string;
 	subscribedAt: string;
 };
+
+export type AcademyResourceExtended = AcademyResource & {
+	isFree: boolean;
+	likes: number;
+	difficulty: "Beginner" | "Intermediate" | "Advanced";
+	downloadUrl?: string;
+	price?: number;
+	buyUrl?: string;
+};
+

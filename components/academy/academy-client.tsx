@@ -25,7 +25,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { Tx } from "@/components/i18n/tx";
-import type { AcademyResourceExtended } from "@/lib/placeholder-data";
+import type { AcademyResourceExtended } from "@/lib/definitions";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const PAGE_SIZE = 9;

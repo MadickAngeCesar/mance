@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import {
-  academyResources as fallbackResources,
-  type AcademyResourceExtended,
-} from "@/lib/placeholder-data";
+import type { AcademyResourceExtended } from "@/lib/definitions";
+
 import { AcademyHero } from "@/components/academy/academy-hero";
 import { AcademyClient } from "@/components/academy/academy-client";
 import { AcademyNewsletter } from "@/components/academy/academy-newsletter";
@@ -77,9 +75,7 @@ export default async function AcademyPage() {
 
   let resourcesData = [...formattedResources, ...formattedArticles];
 
-  if (resourcesData.length === 0) {
-    resourcesData = fallbackResources;
-  }
+
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12 lg:px-8 overflow-hidden">

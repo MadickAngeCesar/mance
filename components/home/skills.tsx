@@ -2,7 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { skills as fallbackSkills } from "@/lib/placeholder-data";
+
+
 
 const categories = ["Frontend", "Backend", "DevOps", "IT Support", "Tools", "Languages"] as const;
 
@@ -26,10 +27,7 @@ export async function Skills() {
 		}
 	}
 
-    const skillsData = skills.length > 0 ? skills : fallbackSkills.map(s => ({
-        ...s,
-        category: categoryMap[s.category as keyof typeof categoryMap] || s.category.toUpperCase()
-    }));
+	const skillsData = skills;
 
 	return (
 		<section className="space-y-5">

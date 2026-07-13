@@ -30,7 +30,7 @@ import {
   academyResources,
   teamMembers,
   targetSectors,
-} from "../lib/placeholder-data";
+} from "./seed-data";
 
 // Parse CLI arguments to support partial seeding
 const args = process.argv.slice(2);

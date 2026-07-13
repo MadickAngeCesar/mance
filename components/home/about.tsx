@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { aboutSummary as fallbackAbout, education as fallbackEducation, experience as fallbackExperience } from "@/lib/placeholder-data";
+
+
 
 export async function About() {
 	let profile: any = null;
@@ -49,16 +50,16 @@ export async function About() {
 	}
 
 	const aboutSummary = {
-		biography: profile?.aboutSummary?.biography ?? fallbackAbout.biography,
-		biographyFr: profile?.aboutSummary?.biographyFr ?? fallbackAbout.biographyFr,
-		cvDownloadUrl: profile?.aboutSummary?.cvDownloadUrl ?? fallbackAbout.cvDownloadUrl,
-		linkedinResumeSource: profile?.aboutSummary?.linkedinResumeSource ?? fallbackAbout.linkedinResumeSource,
-		interests: (profile?.aboutSummary?.interests && profile.aboutSummary.interests.length > 0) ? profile.aboutSummary.interests : fallbackAbout.interests,
-		interestsFr: (profile?.aboutSummary?.interestsFr && profile.aboutSummary.interestsFr.length > 0) ? profile.aboutSummary.interestsFr : fallbackAbout.interestsFr,
+		biography: profile?.aboutSummary?.biography ?? "",
+		biographyFr: profile?.aboutSummary?.biographyFr ?? "",
+		cvDownloadUrl: profile?.aboutSummary?.cvDownloadUrl ?? "",
+		linkedinResumeSource: profile?.aboutSummary?.linkedinResumeSource ?? "",
+		interests: (profile?.aboutSummary?.interests && profile.aboutSummary.interests.length > 0) ? profile.aboutSummary.interests : [],
+		interestsFr: (profile?.aboutSummary?.interestsFr && profile.aboutSummary.interestsFr.length > 0) ? profile.aboutSummary.interestsFr : [],
 	};
 
-    const educationData = education.length > 0 ? education : fallbackEducation;
-    const experienceData = experience.length > 0 ? experience : fallbackExperience;
+    const educationData = education;
+    const experienceData = experience;
 
 	return (
 		<section className="space-y-5">

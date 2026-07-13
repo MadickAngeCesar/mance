@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { workflowStages as fallbackStages } from "@/lib/placeholder-data";
+
+
 
 export async function Workflow() {
 	let workflowStages: any[] = [];
@@ -18,7 +19,7 @@ export async function Workflow() {
 		}
 	}
 
-	const workflowData = workflowStages.length > 0 ? workflowStages : fallbackStages;
+	const workflowData = workflowStages;
 
 	return (
 		<section className="space-y-6" id="workflow">

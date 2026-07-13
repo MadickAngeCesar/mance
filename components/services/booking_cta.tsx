@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { bookingCta as fallbackCta } from "@/lib/placeholder-data";
+
+
 
 export async function BookingCta() {
 	let bookingCta: any = null;
@@ -21,7 +22,10 @@ export async function BookingCta() {
 		}
 	}
 
-	const ctaData = bookingCta || fallbackCta;
+	if (!bookingCta) {
+		return null;
+	}
+	const ctaData = bookingCta;
 
 	return (
 		<section id="booking" className="py-4">

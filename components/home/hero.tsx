@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { brandProfile as fallbackBrand } from "@/lib/placeholder-data";
 import { ThreeBackground } from "./three-background";
+
 
 function getFreelanceAvailabilityText(label: string, language: "EN" | "FR") {
 	const now = new Date();
@@ -56,18 +56,18 @@ export async function Hero() {
 	}
 
 	const brand = {
-		currentName: profile?.currentName ?? fallbackBrand.currentName,
-		ownerName: profile?.ownerName ?? fallbackBrand.ownerName,
-		roleTagline: profile?.roleTagline ?? fallbackBrand.roleTagline,
-		roleTaglineFr: profile?.roleTaglineFr ?? fallbackBrand.roleTaglineFr,
-		headline: profile?.headline ?? fallbackBrand.headline,
-		headlineFr: profile?.headlineFr ?? fallbackBrand.headlineFr,
-		subTagline: profile?.subTagline ?? fallbackBrand.subTagline,
-		subTaglineFr: profile?.subTaglineFr ?? fallbackBrand.subTaglineFr,
-		freelanceAvailabilityLabel: profile?.freelanceAvailabilityLabel ?? fallbackBrand.freelanceAvailabilityLabel,
-		freelanceAvailabilityLabelFr: profile?.freelanceAvailabilityLabelFr ?? fallbackBrand.freelanceAvailabilityLabelFr,
-		jobAvailabilityLabel: profile?.jobAvailabilityLabel ?? fallbackBrand.jobAvailabilityLabel,
-		jobAvailabilityLabelFr: profile?.jobAvailabilityLabelFr ?? fallbackBrand.jobAvailabilityLabelFr,
+		currentName: profile?.currentName ?? "",
+		ownerName: profile?.ownerName ?? "",
+		roleTagline: profile?.roleTagline ?? "",
+		roleTaglineFr: profile?.roleTaglineFr ?? "",
+		headline: profile?.headline ?? "",
+		headlineFr: profile?.headlineFr ?? "",
+		subTagline: profile?.subTagline ?? "",
+		subTaglineFr: profile?.subTaglineFr ?? "",
+		freelanceAvailabilityLabel: profile?.freelanceAvailabilityLabel ?? "",
+		freelanceAvailabilityLabelFr: profile?.freelanceAvailabilityLabelFr ?? "",
+		jobAvailabilityLabel: profile?.jobAvailabilityLabel ?? "",
+		jobAvailabilityLabelFr: profile?.jobAvailabilityLabelFr ?? "",
 	};
 
 	return (

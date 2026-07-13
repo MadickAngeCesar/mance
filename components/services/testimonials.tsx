@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { testimonials as fallbackTestimonials } from "@/lib/placeholder-data";
+
+
 
 export async function Testimonials() {
 	let testimonials: any[] = [];
@@ -20,14 +21,7 @@ export async function Testimonials() {
 		}
 	}
 
-	const testimonialsData = testimonials.length > 0 ? testimonials : fallbackTestimonials.map((t) => ({
-		...t,
-		clientRoleCompanyFr: t.clientRoleCompanyFr || t.clientRoleCompany,
-		textFr: t.textFr || t.text,
-		projectReferenceFr: t.projectReferenceFr || t.projectReference,
-		dateLabel: t.date,
-		dateLabelFr: t.dateFr || t.date,
-	}));
+	const testimonialsData = testimonials;
 
 	return (
 		<section className="space-y-6" id="testimonials">

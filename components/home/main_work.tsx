@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { labProjects as fallbackProjects, academyResources as fallbackResources, clientWork as fallbackClientWork } from "@/lib/placeholder-data";
+
+
 
 type MainWorkItem = {
 	id: string;
@@ -56,18 +57,6 @@ export async function MainWork() {
                 featured: labResult[0].featured,
                 imageUrl: labResult[0].coverImageUrl || "/images/Profile.jpg",
             });
-        } else if (fallbackProjects[0]) {
-            items.push({
-                id: fallbackProjects[0].id,
-                title: fallbackProjects[0].title,
-                titleFr: fallbackProjects[0].titleFr || null,
-                kind: "PROJECT",
-                summary: fallbackProjects[0].summary,
-                summaryFr: fallbackProjects[0].summaryFr || null,
-                href: `/lab/${fallbackProjects[0].slug}`,
-                featured: fallbackProjects[0].featured,
-                imageUrl: fallbackProjects[0].coverImageUrl || "/images/Profile.jpg",
-            });
         }
 
         if (clientWorkResult[0]) {
@@ -82,18 +71,6 @@ export async function MainWork() {
                 featured: false,
                 imageUrl: clientWorkResult[0].imageUrl || "/images/Profile.jpg",
             });
-        } else if (fallbackClientWork[0]) {
-            items.push({
-                id: fallbackClientWork[0].id,
-                title: fallbackClientWork[0].title,
-                titleFr: fallbackClientWork[0].titleFr || null,
-                kind: "CLIENT_WORK",
-                summary: fallbackClientWork[0].description,
-                summaryFr: fallbackClientWork[0].descriptionFr || null,
-                href: fallbackClientWork[0].slug ? `/lab/${fallbackClientWork[0].slug}` : `/services`,
-                featured: false,
-                imageUrl: fallbackClientWork[0].imageUrl || "/images/Profile.jpg",
-            });
         }
 
         if (academyResult[0]) {
@@ -107,18 +84,6 @@ export async function MainWork() {
                 href: `/academy`,
                 featured: false,
                 imageUrl: academyResult[0].coverImageUrl || "/images/Profile.jpg",
-            });
-        } else if (fallbackResources[0]) {
-            items.push({
-                id: fallbackResources[0].id,
-                title: fallbackResources[0].title,
-                titleFr: fallbackResources[0].titleFr || null,
-                kind: "ARTICLE",
-                summary: fallbackResources[0].description,
-                summaryFr: fallbackResources[0].descriptionFr || null,
-                href: `/academy`,
-                featured: false,
-                imageUrl: fallbackResources[0].coverImageUrl || "/images/Profile.jpg",
             });
         }
 	} catch (error) {

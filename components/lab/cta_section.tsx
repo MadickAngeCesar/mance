@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, HeartHandshake, Lightbulb, Users, X, Copy, Check, Send, Coffee } from "lucide-react";
+import { ArrowRight, HeartHandshake, Lightbulb, Users, Copy, Check, Send, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tx } from "@/components/i18n/tx";
 
-type ModalType = "none" | "participate" | "support" | "propose";
+type ActiveTabType = "participate" | "support" | "propose";
 
 export function CtaSection() {
-	const [activeModal, setActiveModal] = useState<ModalType>("none");
+	const [activeTab, setActiveTab] = useState<ActiveTabType>("participate");
 	const [copiedCrypto, setCopiedCrypto] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,14 +75,13 @@ ${participateForm.motivation}
 					email: participateForm.email,
 					subject: `[Lab Application] Participate in ${projectLabels[participateForm.project]}`,
 					message: messageBody,
-					source: "lab_participate_modal",
+					source: "lab_participate_section",
 				}),
 			});
 
 			const data = await res.json();
 			if (res.ok && data.ok) {
 				toast.success("Application submitted successfully!");
-				setActiveModal("none");
 				setParticipateForm({
 					name: "",
 					email: "",
@@ -131,14 +130,13 @@ ${proposeForm.solution}
 					email: proposeForm.email,
 					subject: `[Lab Proposal] New Project Idea: ${proposeForm.title}`,
 					message: messageBody,
-					source: "lab_propose_modal",
+					source: "lab_propose_section",
 				}),
 			});
 
 			const data = await res.json();
 			if (res.ok && data.ok) {
 				toast.success("Project proposal submitted successfully!");
-				setActiveModal("none");
 				setProposeForm({
 					name: "",
 					email: "",
@@ -158,222 +156,199 @@ ${proposeForm.solution}
 		}
 	};
 
-	const modalVariants = {
-		hidden: { opacity: 0, scale: 0.92, y: 20 },
-		visible: { 
-			opacity: 1, 
-			scale: 1, 
-			y: 0, 
-			transition: { 
-				type: "spring", 
-				stiffness: 280, 
-				damping: 24 
-			} 
-		},
-		exit: { 
-			opacity: 0, 
-			scale: 0.95, 
-			y: 15, 
-			transition: { 
-				duration: 0.18, 
-				ease: "easeInOut" 
-			} 
-		},
-	} as const;
-
-	const overlayVariants = {
-		hidden: { opacity: 0 },
-		visible: { opacity: 1, transition: { duration: 0.25 } },
-		exit: { opacity: 0, transition: { duration: 0.2 } },
+	const formContainerVariants = {
+		initial: { opacity: 0, x: 20 },
+		animate: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } },
+		exit: { opacity: 0, x: -20, transition: { duration: 0.2, ease: "easeIn" } }
 	} as const;
 
 	return (
-		<>
-			<section className="py-8">
-				<div className="grid gap-6 sm:grid-cols-3">
-					{/* Card 1: Participate */}
-					<Card className="flex flex-col border-border/70 bg-card/40 hover:border-primary/40 transition-colors duration-300 text-center">
-						<CardHeader>
-							<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary/10">
-								<Users className="size-6 text-primary" />
-							</div>
-							<CardTitle className="text-xl">
-								<Tx en="Participate" fr="Participer" />
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="flex flex-col flex-1 gap-6">
-							<p className="text-sm text-muted-foreground flex-1 leading-relaxed">
-								<Tx
-									en="Apply to participate in an ongoing open-source or lab project."
-									fr="Postulez pour participer à un projet open-source ou de laboratoire en cours."
-								/>
-							</p>
-							<Button onClick={() => setActiveModal("participate")} variant="outline" className="w-full group hover:border-primary/50 hover:bg-primary/5 text-foreground transition-all duration-200">
-								<Tx en="Apply Now" fr="Postuler" />
-								<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
-							</Button>
-						</CardContent>
-					</Card>
+		<section className="py-10 border-t border-border/60 mt-10">
+			<div className="text-center space-y-3 mb-10">
+				<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+					<Tx en="Partner with the Lab" fr="S'associer au Laboratoire" />
+				</h2>
+				<p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
+					<Tx
+						en="Whether you want to write code, sponsor research, or suggest software ideas, choose how you'd like to get involved below."
+						fr="Que vous souhaitiez écrire du code, parrainer des recherches ou suggérer des idées de logiciels, choisissez comment vous impliquer ci-dessous."
+					/>
+				</p>
+			</div>
 
-					{/* Card 2: Support */}
-					<Card className="flex flex-col border-border/70 bg-card/40 hover:border-primary/40 transition-colors duration-300 text-center">
-						<CardHeader>
-							<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary/10">
-								<HeartHandshake className="size-6 text-primary" />
-							</div>
-							<CardTitle className="text-xl">
-								<Tx en="Support" fr="Soutenir" />
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="flex flex-col flex-1 gap-6">
-							<p className="text-sm text-muted-foreground flex-1 leading-relaxed">
-								<Tx
-									en="Donate to support the development and hosting of these projects."
-									fr="Faites un don pour soutenir le développement et l'hébergement de ces projets."
-								/>
-							</p>
-							<Button onClick={() => setActiveModal("support")} variant="outline" className="w-full group hover:border-primary/50 hover:bg-primary/5 text-foreground transition-all duration-200">
-								<Tx en="Donate" fr="Faire un don" />
-								<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
-							</Button>
-						</CardContent>
-					</Card>
-
-					{/* Card 3: Propose */}
-					<Card className="flex flex-col border-border/70 bg-card/40 hover:border-primary/40 transition-colors duration-300 text-center">
-						<CardHeader>
-							<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary/10">
-								<Lightbulb className="size-6 text-primary" />
-							</div>
-							<CardTitle className="text-xl">
-								<Tx en="Propose" fr="Proposer" />
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="flex flex-col flex-1 gap-6">
-							<p className="text-sm text-muted-foreground flex-1 leading-relaxed">
-								<Tx
-									en="Have a great idea? Propose a project to work on together."
-									fr="Vous avez une excellente idée ? Proposez un projet sur lequel travailler ensemble."
-								/>
-							</p>
-							<Button onClick={() => setActiveModal("propose")} variant="outline" className="w-full group hover:border-primary/50 hover:bg-primary/5 text-foreground transition-all duration-200">
-								<Tx en="Propose Idea" fr="Proposer une idée" />
-								<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
-							</Button>
-						</CardContent>
-					</Card>
-				</div>
-			</section>
-
-			{/* Modal Overlay Manager */}
-			<AnimatePresence>
-				{activeModal !== "none" && (
-					<motion.div
-						initial="hidden"
-						animate="visible"
-						exit="exit"
-						variants={overlayVariants}
-						className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-						onClick={() => setActiveModal("none")}
+			<div className="grid gap-8 lg:grid-cols-12">
+				{/* Left Side: Option Cards */}
+				<div className="lg:col-span-5 flex flex-col gap-4">
+					{/* Participate Selector */}
+					<button
+						onClick={() => setActiveTab("participate")}
+						className={`group text-left flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 ${
+							activeTab === "participate"
+								? "border-primary/50 bg-primary/10 shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.15)] ring-1 ring-primary/20"
+								: "border-border/70 bg-card/30 hover:border-primary/30 hover:bg-card/50"
+						}`}
 					>
-						<motion.div
-							variants={modalVariants}
-							className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-3xl border border-white/10 dark:border-white/5 bg-card/90 backdrop-blur-xl p-8 shadow-2xl shadow-primary/10"
-							onClick={(e) => e.stopPropagation()}
-						>
-							{/* Top Accent Bar */}
-							<div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary" />
+						<div className="flex items-center gap-3">
+							<div className={`flex size-10 items-center justify-center rounded-xl transition-colors ${
+								activeTab === "participate" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+							}`}>
+								<Users className="size-5" />
+							</div>
+							<h3 className="text-base font-bold text-foreground">
+								<Tx en="Participate in Coding" fr="Participer au Codage" />
+							</h3>
+						</div>
+						<p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+							<Tx
+								en="Apply to collaborate on active portfolio and open-source systems to build real experience."
+								fr="Postulez pour collaborer sur des systèmes de portefeuille et open-source actifs pour acquérir une réelle expérience."
+							/>
+						</p>
+					</button>
 
-							{/* Close Button */}
-							<button
-								onClick={() => setActiveModal("none")}
-								type="button"
-								className="absolute top-6 right-6 rounded-full p-2 text-muted-foreground hover:bg-secondary/40 hover:text-foreground transition-all duration-200 active:scale-90"
-								aria-label="Close modal"
-							>
-								<X className="size-4" />
-							</button>
+					{/* Support Selector */}
+					<button
+						onClick={() => setActiveTab("support")}
+						className={`group text-left flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 ${
+							activeTab === "support"
+								? "border-primary/50 bg-primary/10 shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.15)] ring-1 ring-primary/20"
+								: "border-border/70 bg-card/30 hover:border-primary/30 hover:bg-card/50"
+						}`}
+					>
+						<div className="flex items-center gap-3">
+							<div className={`flex size-10 items-center justify-center rounded-xl transition-colors ${
+								activeTab === "support" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+							}`}>
+								<HeartHandshake className="size-5" />
+							</div>
+							<h3 className="text-base font-bold text-foreground">
+								<Tx en="Support & Funding" fr="Soutien & Financement" />
+							</h3>
+						</div>
+						<p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+							<Tx
+								en="Donate or fund development costs to help keep server deployment and tools free and open."
+								fr="Faites un don ou financez les coûts de développement pour maintenir l'hébergement et les outils gratuits et ouverts."
+							/>
+						</p>
+					</button>
 
-							{/* --- PARTICIPATE MODAL --- */}
-							{activeModal === "participate" && (
-								<form onSubmit={handleParticipateSubmit} className="space-y-6">
-									<div className="flex items-center gap-3 pr-8">
-										<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-											<Users className="size-5" />
-										</div>
-										<div>
-											<h2 className="text-xl font-bold tracking-tight text-foreground">
-												<Tx en="Apply to Participate" fr="Postuler pour Participer" />
-											</h2>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												<Tx
-													en="Collaborate with me on active projects to build your experience."
-													fr="Collaborer avec moi sur des projets actifs pour développer votre expérience."
-												/>
-											</p>
-										</div>
+					{/* Propose Selector */}
+					<button
+						onClick={() => setActiveTab("propose")}
+						className={`group text-left flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 ${
+							activeTab === "propose"
+								? "border-primary/50 bg-primary/10 shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.15)] ring-1 ring-primary/20"
+								: "border-border/70 bg-card/30 hover:border-primary/30 hover:bg-card/50"
+						}`}
+					>
+						<div className="flex items-center gap-3">
+							<div className={`flex size-10 items-center justify-center rounded-xl transition-colors ${
+								activeTab === "propose" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+							}`}>
+								<Lightbulb className="size-5" />
+							</div>
+							<h3 className="text-base font-bold text-foreground">
+								<Tx en="Propose an Idea" fr="Proposer une Idée" />
+							</h3>
+						</div>
+						<p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+							<Tx
+								en="Have a software challenge or product concept? Pitch a custom project to design and implement together."
+								fr="Vous avez un défi logiciel ou un concept de produit ? Présentez un projet sur lequel collaborer."
+							/>
+						</p>
+					</button>
+				</div>
+
+				{/* Right Side: Active Form Container */}
+				<div className="lg:col-span-7">
+					<Card className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card/40 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-primary/5 h-full flex flex-col justify-center min-h-[460px]">
+						{/* Accent background glows inside the card */}
+						<div className="absolute -right-20 -top-20 -z-10 size-48 rounded-full bg-primary/5 blur-[50px] pointer-events-none" />
+						<div className="absolute -left-20 -bottom-20 -z-10 size-48 rounded-full bg-violet-500/5 blur-[50px] pointer-events-none" />
+
+						<AnimatePresence mode="wait">
+							{activeTab === "participate" && (
+								<motion.div
+									key="participate"
+									variants={formContainerVariants}
+									initial="initial"
+									animate="animate"
+									exit="exit"
+									className="space-y-5"
+								>
+									<div className="border-b border-border/50 pb-3">
+										<h3 className="text-lg font-bold text-foreground">
+											<Tx en="Apply to Collaborate" fr="Postuler pour Collaborer" />
+										</h3>
+										<p className="text-xs text-muted-foreground mt-1">
+											<Tx en="Tell me about your experience and which lab project you want to build on." fr="Parlez-moi de votre expérience et du projet sur lequel vous souhaitez travailler." />
+										</p>
 									</div>
 
-									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="Full Name" fr="Nom Complet" /> *
-											</label>
-											<input
-												type="text"
-												value={participateForm.name}
-												onChange={(e) => setParticipateForm({ ...participateForm, name: e.target.value })}
-												required
-												placeholder="John Doe"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
-											/>
+									<form onSubmit={handleParticipateSubmit} className="space-y-4">
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="Full Name" fr="Nom Complet" /> *
+												</label>
+												<input
+													type="text"
+													value={participateForm.name}
+													onChange={(e) => setParticipateForm({ ...participateForm, name: e.target.value })}
+													required
+													placeholder="John Doe"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+												/>
+											</div>
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="Email Address" fr="Adresse E-mail" /> *
+												</label>
+												<input
+													type="email"
+													value={participateForm.email}
+													onChange={(e) => setParticipateForm({ ...participateForm, email: e.target.value })}
+													required
+													placeholder="john@example.com"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+												/>
+											</div>
+										</div>
+
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="GitHub / LinkedIn Link" fr="Lien GitHub / LinkedIn" />
+												</label>
+												<input
+													type="url"
+													value={participateForm.profileUrl}
+													onChange={(e) => setParticipateForm({ ...participateForm, profileUrl: e.target.value })}
+													placeholder="https://github.com/username"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+												/>
+											</div>
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="Select Lab Project" fr="Sélectionner le Projet" />
+												</label>
+												<select
+													value={participateForm.project}
+													onChange={(e) => setParticipateForm({ ...participateForm, project: e.target.value })}
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20"
+												>
+													<option value="portfolio-platform">Portfolio Platform</option>
+													<option value="clinic-operations-dashboard">Clinic Operations Dashboard</option>
+													<option value="finance-crm-modernization">Finance CRM Modernization</option>
+													<option value="general-collaboration">General Open Source</option>
+												</select>
+											</div>
 										</div>
 
 										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="Email Address" fr="Adresse E-mail" /> *
-											</label>
-											<input
-												type="email"
-												value={participateForm.email}
-												onChange={(e) => setParticipateForm({ ...participateForm, email: e.target.value })}
-												required
-												placeholder="john@example.com"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
-											/>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="GitHub / LinkedIn Link" fr="Lien GitHub / LinkedIn" />
-											</label>
-											<input
-												type="url"
-												value={participateForm.profileUrl}
-												onChange={(e) => setParticipateForm({ ...participateForm, profileUrl: e.target.value })}
-												placeholder="https://github.com/username"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
-											/>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="Select Lab Project" fr="Sélectionner le Projet" />
-											</label>
-											<select
-												value={participateForm.project}
-												onChange={(e) => setParticipateForm({ ...participateForm, project: e.target.value })}
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
-											>
-												<option value="portfolio-platform">Portfolio Platform</option>
-												<option value="clinic-operations-dashboard">Clinic Operations Dashboard</option>
-												<option value="finance-crm-modernization">Finance CRM Modernization</option>
-												<option value="general-collaboration">General Open Source</option>
-											</select>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
+											<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 												<Tx en="Motivation & Skills" fr="Motivation et Compétences" /> *
 											</label>
 											<textarea
@@ -381,56 +356,54 @@ ${proposeForm.solution}
 												value={participateForm.motivation}
 												onChange={(e) => setParticipateForm({ ...participateForm, motivation: e.target.value })}
 												required
-												placeholder="Why do you want to collaborate on this project and what is your tech experience?"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40 resize-none"
+												placeholder="Why do you want to collaborate and what is your current tech background?"
+												className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35 resize-none"
 											/>
 										</div>
-									</div>
 
-									<Button 
-										type="submit" 
-										disabled={isSubmitting} 
-										className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/75 text-primary-foreground font-bold shadow-lg shadow-primary/10 transition-all active:scale-[0.98] py-2.5 flex items-center justify-center"
-									>
-										{isSubmitting ? (
-											<Tx en="Submitting..." fr="Envoi..." />
-										) : (
-											<>
-												<Tx en="Submit Application" fr="Soumettre la Candidature" />
-												<Send className="ml-2 size-4" />
-											</>
-										)}
-									</Button>
-								</form>
+										<Button
+											type="submit"
+											disabled={isSubmitting}
+											className="w-full rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-5 shadow-lg shadow-primary/10 transition-all flex items-center justify-center text-xs tracking-wider uppercase"
+										>
+											{isSubmitting ? (
+												<Tx en="Submitting..." fr="Envoi..." />
+											) : (
+												<>
+													<Tx en="Submit Application" fr="Soumettre la Candidature" />
+													<Send className="ml-2 size-3.5" />
+												</>
+											)}
+										</Button>
+									</form>
+								</motion.div>
 							)}
 
-							{/* --- SUPPORT / DONATE MODAL --- */}
-							{activeModal === "support" && (
-								<div className="space-y-6">
-									<div className="flex items-center gap-3 pr-8">
-										<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-											<HeartHandshake className="size-5" />
-										</div>
-										<div>
-											<h2 className="text-xl font-bold tracking-tight text-foreground">
-												<Tx en="Support My Lab Work" fr="Soutenir mon Travail" />
-											</h2>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												<Tx
-													en="Contributions keep these projects hosted, open-source, and active."
-													fr="Vos contributions permettent d'héberger, de maintenir open-source et actifs ces projets."
-												/>
-											</p>
-										</div>
+							{activeTab === "support" && (
+								<motion.div
+									key="support"
+									variants={formContainerVariants}
+									initial="initial"
+									animate="animate"
+									exit="exit"
+									className="space-y-6"
+								>
+									<div className="border-b border-border/50 pb-3">
+										<h3 className="text-lg font-bold text-foreground">
+											<Tx en="Sponsor Research & Dev" fr="Parrainer la Recherche & le Dev" />
+										</h3>
+										<p className="text-xs text-muted-foreground mt-1">
+											<Tx en="Direct financial contributions keep servers running and software open-source." fr="Les contributions directes permettent de maintenir les serveurs actifs et le code ouvert." />
+										</p>
 									</div>
 
-									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
+									<div className="space-y-4">
 										{/* Ko-fi Direct Link */}
 										<a
 											href="https://ko-fi.com/angecesarmadick"
 											target="_blank"
 											rel="noopener noreferrer"
-											className="group flex items-center justify-between rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-500/40 hover:bg-rose-500/10 hover:shadow-lg hover:shadow-rose-500/5"
+											className="group flex items-center justify-between rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/10 hover:shadow-lg hover:shadow-rose-500/5"
 										>
 											<div className="flex items-center gap-3">
 												<div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-rose-600 text-white font-bold transition-transform duration-300 group-hover:scale-110">
@@ -440,8 +413,8 @@ ${proposeForm.solution}
 													<p className="text-sm font-semibold text-rose-200">
 														<Tx en="Support on Ko-fi" fr="Soutenir sur Ko-fi" />
 													</p>
-													<p className="text-xs text-muted-foreground">
-														<Tx en="Support via standard card, PayPal, Apple Pay" fr="Soutenir par carte, PayPal, Apple Pay" />
+													<p className="text-[10px] text-muted-foreground mt-0.5">
+														<Tx en="Donate via standard card, PayPal, Apple Pay" fr="Soutenir par carte bancaire, PayPal, Apple Pay" />
 													</p>
 												</div>
 											</div>
@@ -449,27 +422,27 @@ ${proposeForm.solution}
 										</a>
 
 										{/* Ethereum / USDT Crypto Address */}
-										<div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-2">
+										<div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-2.5">
 											<div className="flex items-center justify-between">
 												<div className="text-left">
-													<p className="text-xs font-semibold text-violet-300 uppercase tracking-wide">USDT / Ethereum Address</p>
-													<p className="text-[10px] text-muted-foreground">Supports ERC20 network tokens</p>
+													<p className="text-xs font-semibold text-violet-300 uppercase tracking-wider">USDT / Ethereum Address</p>
+													<p className="text-[10px] text-muted-foreground">Supports ERC20 network tokens only</p>
 												</div>
 												<button
 													type="button"
 													onClick={() => handleCopyAddress("0x71C7656EC7ab88b098defB751B7401B5f6d8976F")}
-													className="rounded-lg border border-border bg-card p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 active:scale-95"
+													className="rounded-lg border border-border bg-card/60 p-1.5 hover:bg-secondary/40 text-muted-foreground hover:text-foreground transition-all active:scale-95"
 												>
 													{copiedCrypto ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}
 												</button>
 											</div>
-											<p className="font-mono text-xs select-all break-all bg-background/50 rounded-lg p-2 border border-border/50 text-foreground/80">
+											<p className="font-mono text-xs select-all break-all bg-background/50 rounded-lg p-2.5 border border-border/50 text-foreground/80">
 												0x71C7656EC7ab88b098defB751B7401B5f6d8976F
 											</p>
 										</div>
 
 										{/* General Support Note */}
-										<div className="text-xs text-muted-foreground text-center py-2">
+										<div className="text-xs text-muted-foreground text-center py-2 border-t border-border/40">
 											<p>
 												<Tx
 													en="Want to setup custom project funding or corporate sponsorships?"
@@ -477,40 +450,39 @@ ${proposeForm.solution}
 												/>
 											</p>
 											<button
-												onClick={() => setActiveModal("propose")}
-												className="text-primary underline mt-1 hover:text-primary/80 transition-colors font-medium"
+												type="button"
+												onClick={() => setActiveTab("propose")}
+												className="text-primary underline mt-1 hover:text-primary/80 transition-colors font-semibold"
 											>
-												<Tx en="Get in touch" fr="Prendre contact" />
+												<Tx en="Get in touch / Propose Idea" fr="Prendre contact / Proposer l'Idée" />
 											</button>
 										</div>
 									</div>
-								</div>
+								</motion.div>
 							)}
 
-							{/* --- PROPOSE MODAL --- */}
-							{activeModal === "propose" && (
-								<form onSubmit={handleProposeSubmit} className="space-y-6">
-									<div className="flex items-center gap-3 pr-8">
-										<div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-											<Lightbulb className="size-5" />
-										</div>
-										<div>
-											<h2 className="text-xl font-bold tracking-tight text-foreground">
-												<Tx en="Propose a Project" fr="Proposer un Projet" />
-											</h2>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												<Tx
-													en="Share your digital application idea. Let's design and ship it together."
-													fr="Partagez votre idée d'application numérique. Concevons et publions-la ensemble."
-												/>
-											</p>
-										</div>
+							{activeTab === "propose" && (
+								<motion.div
+									key="propose"
+									variants={formContainerVariants}
+									initial="initial"
+									animate="animate"
+									exit="exit"
+									className="space-y-5"
+								>
+									<div className="border-b border-border/50 pb-3">
+										<h3 className="text-lg font-bold text-foreground">
+											<Tx en="Propose a Project" fr="Proposer un Projet" />
+										</h3>
+										<p className="text-xs text-muted-foreground mt-1">
+											<Tx en="Share your digital application idea. Let's design and build it together." fr="Partagez votre idée d'application numérique. Concevons et publions-la ensemble." />
+										</p>
 									</div>
 
-									<div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
-										<div className="grid gap-3 sm:grid-cols-2">
+									<form onSubmit={handleProposeSubmit} className="space-y-4">
+										<div className="grid gap-4 sm:grid-cols-2">
 											<div className="space-y-1.5">
-												<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 													<Tx en="Your Name" fr="Votre Nom" /> *
 												</label>
 												<input
@@ -519,11 +491,11 @@ ${proposeForm.solution}
 													onChange={(e) => setProposeForm({ ...proposeForm, name: e.target.value })}
 													required
 													placeholder="Jane Doe"
-													className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
 												/>
 											</div>
 											<div className="space-y-1.5">
-												<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
 													<Tx en="Your Email" fr="Votre E-mail" /> *
 												</label>
 												<input
@@ -532,87 +504,89 @@ ${proposeForm.solution}
 													onChange={(e) => setProposeForm({ ...proposeForm, email: e.target.value })}
 													required
 													placeholder="jane@example.com"
-													className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
 												/>
 											</div>
 										</div>
 
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="Project Title" fr="Titre du Projet" /> *
-											</label>
-											<input
-												type="text"
-												value={proposeForm.title}
-												onChange={(e) => setProposeForm({ ...proposeForm, title: e.target.value })}
-												required
-												placeholder="e.g. Smart IoT Dashboard"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
-											/>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="Project Title" fr="Titre du Projet" /> *
+												</label>
+												<input
+													type="text"
+													value={proposeForm.title}
+													onChange={(e) => setProposeForm({ ...proposeForm, title: e.target.value })}
+													required
+													placeholder="e.g. Smart IoT Dashboard"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+												/>
+											</div>
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="Suggested Stack" fr="Stack Suggérée" />
+												</label>
+												<input
+													type="text"
+													value={proposeForm.stack}
+													onChange={(e) => setProposeForm({ ...proposeForm, stack: e.target.value })}
+													placeholder="e.g. Next.js, FastAPI, Docker"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+												/>
+											</div>
 										</div>
 
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="Suggested Stack" fr="Stack Suggérée" />
-											</label>
-											<input
-												type="text"
-												value={proposeForm.stack}
-												onChange={(e) => setProposeForm({ ...proposeForm, stack: e.target.value })}
-												placeholder="e.g. Next.js, FastAPI, Docker"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40"
-											/>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="What problem does this solve?" fr="Quel problème cela résout-il ?" /> *
+												</label>
+												<textarea
+													rows={2}
+													value={proposeForm.problem}
+													onChange={(e) => setProposeForm({ ...proposeForm, problem: e.target.value })}
+													required
+													placeholder="Describe the challenge..."
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35 resize-none"
+												/>
+											</div>
+											<div className="space-y-1.5">
+												<label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+													<Tx en="What is your proposed solution?" fr="Quelle est la solution ?" /> *
+												</label>
+												<textarea
+													rows={2}
+													value={proposeForm.solution}
+													onChange={(e) => setProposeForm({ ...proposeForm, solution: e.target.value })}
+													required
+													placeholder="How will software solve this problem?"
+													className="w-full rounded-xl border border-border/70 bg-background/50 hover:bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35 resize-none"
+												/>
+											</div>
 										</div>
 
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="What problem does this solve?" fr="Quel problème cela résout-il ?" /> *
-											</label>
-											<textarea
-												rows={2}
-												value={proposeForm.problem}
-												onChange={(e) => setProposeForm({ ...proposeForm, problem: e.target.value })}
-												required
-												placeholder="Describe the challenge or pain point..."
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40 resize-none"
-											/>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold tracking-wider text-muted-foreground/90 uppercase">
-												<Tx en="What is your proposed solution?" fr="Quelle est la solution proposée ?" /> *
-											</label>
-											<textarea
-												rows={2}
-												value={proposeForm.solution}
-												onChange={(e) => setProposeForm({ ...proposeForm, solution: e.target.value })}
-												required
-												placeholder="How should the software solve this problem?"
-												className="w-full rounded-xl border border-border/70 bg-background/40 hover:bg-background/60 px-4 py-2.5 text-sm text-foreground outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/40 resize-none"
-											/>
-										</div>
-									</div>
-
-									<Button 
-										type="submit" 
-										disabled={isSubmitting} 
-										className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/75 text-primary-foreground font-bold shadow-lg shadow-primary/10 transition-all active:scale-[0.98] py-2.5 flex items-center justify-center"
-									>
-										{isSubmitting ? (
-											<Tx en="Submitting..." fr="Envoi..." />
-										) : (
-											<>
-												<Tx en="Propose Project Idea" fr="Proposer l'Idée de Projet" />
-												<Send className="ml-2 size-4" />
-											</>
-										)}
-									</Button>
-								</form>
+										<Button
+											type="submit"
+											disabled={isSubmitting}
+											className="w-full rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-5 shadow-lg shadow-primary/10 transition-all flex items-center justify-center text-xs tracking-wider uppercase"
+										>
+											{isSubmitting ? (
+												<Tx en="Submitting..." fr="Envoi..." />
+											) : (
+												<>
+													<Tx en="Propose Project Idea" fr="Proposer l'Idée de Projet" />
+													<Send className="ml-2 size-3.5" />
+												</>
+											)}
+										</Button>
+									</form>
+								</motion.div>
 							)}
-						</motion.div>
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</>
+						</AnimatePresence>
+					</Card>
+				</div>
+			</div>
+		</section>
 	);
 }

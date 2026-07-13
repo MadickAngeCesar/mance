@@ -7,7 +7,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { Tx } from "@/components/i18n/tx";
-import { offerings as fallbackOfferings } from "@/lib/placeholder-data";
+
+
 
 export async function OfferingsCards() {
 	let offerings: any[] = [];
@@ -22,7 +23,7 @@ export async function OfferingsCards() {
 		}
 	}
 
-	const offeringsData = offerings.length > 0 ? offerings : fallbackOfferings;
+	const offeringsData = offerings;
 
 	return (
 		<section className="space-y-6" id="offerings">

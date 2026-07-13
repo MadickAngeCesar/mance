@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Tx } from "@/components/i18n/tx";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseUnavailableError } from "@/lib/api-utils";
-import { teamMembers as fallbackTeam } from "@/lib/placeholder-data";
+
+
 
 export async function TeamSection() {
   let teamMembers: any[] = [];
@@ -18,7 +19,7 @@ export async function TeamSection() {
     }
   }
 
-  const teamData = teamMembers.length > 0 ? teamMembers : fallbackTeam;
+  const teamData = teamMembers;
 
   if (teamData.length === 0) return null;
 

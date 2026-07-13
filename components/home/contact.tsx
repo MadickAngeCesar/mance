@@ -86,14 +86,8 @@ type ContactInfo = {
   freelancePlatforms: Array<{ name: "Upwork" | "Freelancer" | "Fiverr"; url: string; handle?: string }>;
 };
 
-const fallbackContact: ContactInfo = {
-  email: "hello@mance.dev",
-  phone: "+237687635233",
-  location: "Yaounde, Cameroon",
-  locationFr: "Yaoundé, Cameroun",
-  socialLinks: [],
-  freelancePlatforms: [],
-};
+
+
 
 function normalizePlatform(value: string): ContactInfo["socialLinks"][number]["platform"] | null {
   const normalized = value.toUpperCase();
@@ -114,7 +108,14 @@ function normalizeFreelanceName(value: string): ContactInfo["freelancePlatforms"
 
 export function Contact() {
   const { language } = useLanguage();
-  const [contact, setContact] = useState<ContactInfo>(fallbackContact);
+  const [contact, setContact] = useState<ContactInfo>({
+    email: "",
+    phone: "",
+    location: "",
+    locationFr: "",
+    socialLinks: [],
+    freelancePlatforms: [],
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -159,10 +160,10 @@ export function Contact() {
           .filter(Boolean) as ContactInfo["freelancePlatforms"];
 
         setContact({
-          email: String(details.email ?? fallbackContact.email),
-          phone: String(details.phone ?? fallbackContact.phone),
-          location: String(details.location ?? fallbackContact.location),
-          locationFr: String(details.locationFr ?? details.location ?? fallbackContact.locationFr),
+          email: String(details.email ?? ""),
+          phone: String(details.phone ?? ""),
+          location: String(details.location ?? ""),
+          locationFr: String(details.locationFr ?? details.location ?? ""),
           socialLinks,
           freelancePlatforms,
         });

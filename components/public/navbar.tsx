@@ -25,7 +25,7 @@ const navLinks = [
 	{ label: { EN: "Services", FR: "Services" }, href: "/services", icon: Briefcase },
 	{ label: { EN: "Lab", FR: "Lab" }, href: "/lab", icon: Cpu },
 	{ label: { EN: "Academy", FR: "Académie" }, href: "/academy", icon: GraduationCap },
-	{ label: { EN: "Contact", FR: "Contact" }, href: "/#contact", icon: Mail },
+	//{ label: { EN: "Contact", FR: "Contact" }, href: "/#contact", icon: Mail },
 ];
 
 export function Navbar() {

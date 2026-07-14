@@ -1,4 +1,4 @@
-import "dotenv/config";
+/*import "dotenv/config";
 import bcrypt from "bcryptjs";
 import {
   SkillCategory,
@@ -73,13 +73,13 @@ function mapFreelancePlatform(value: string): FreelancePlatformName {
     default:
       return FreelancePlatformName.UPWORK;
   }
-}
+}*/
 
 /**
  * Seed core profile data (idempotent).
  * Creates or updates the main brand profile with contact details, skills, and workflow.
  */
-async function seedCore(options: SeedOptions) {
+/*async function seedCore(options: SeedOptions) {
   console.log("🌱 Seeding core profile data...");
   console.log("DEBUG: DATABASE_URL =", process.env.DATABASE_URL);
   console.log("DEBUG: DIRECT_DATABASE_URL =", process.env.DIRECT_DATABASE_URL);
@@ -400,11 +400,11 @@ async function seedCore(options: SeedOptions) {
 
   return brandProfileId;
 }
-
+*/
 /**
  * Seed portfolio content (client work, lab projects, lab articles, testimonials).
  */
-async function seedPortfolioContent(options: SeedOptions) {
+/*async function seedPortfolioContent(options: SeedOptions) {
   console.log("📚 Seeding portfolio content...");
 
   // Check if content already exists
@@ -652,12 +652,12 @@ async function seedPortfolioContent(options: SeedOptions) {
     })),
   });
   console.log("✓ Team members created");
-}
+}*/
 
 /**
  * Seed inbox and subscriber data (messages, subscribers, campaigns).
  */
-async function seedInboxData(options: SeedOptions) {
+/*async function seedInboxData(options: SeedOptions) {
   console.log("📧 Seeding inbox and subscriber data...");
 
   // Check if inbox data already exists
@@ -797,7 +797,7 @@ function mapWorkKind(value: string): WorkKind {
  * - pnpm prisma:seed --reset            (full reset + seed all)
  * - pnpm prisma:seed --only core --reset (reset + seed only core)
  */
-async function main() {
+/*async function main() {
   const options: SeedOptions = {
     onlyCore,
     reset,
@@ -825,3 +825,4 @@ async function main() {
 }
 
 main();
+*/
